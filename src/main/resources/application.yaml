@@ -3,3 +3,6 @@ spring:
     active: dev
   application:
     name: qldt
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8

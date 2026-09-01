@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" lang="vi" data-theme="light">
 
 <head>
     <title>Master Layout</title>
@@ -10,10 +10,18 @@
 </head>
 
 <body>
-    <main>
-        <section layout:fragment="content">
-        </section>
-    </main>
+    <aside layout:insert="~{layout/ui/sidebar}">
+        <header layout:fragment="navbar">
+            <div layout:insert="~{layout/ui/nav}"></div>
+        </header>
+
+        <main>
+            <section layout:fragment="side-content">
+                <section layout:fragment="content">
+                </section>
+            </section>
+        </main>
+    </aside>
 </body>
 
 </html>
