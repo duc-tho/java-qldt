@@ -19,7 +19,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class Permission extends SoftDeleteEntity {
+final public class Permission extends SoftDeleteEntity {
     @Column(nullable = false, unique = true, length = 50)
     String name;
 

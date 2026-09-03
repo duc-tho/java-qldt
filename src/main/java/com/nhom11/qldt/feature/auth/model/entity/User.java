@@ -21,7 +21,7 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class User extends SoftDeleteEntity {
+final public class User extends SoftDeleteEntity {
     @Column(nullable = false, unique = true, length = 50)
     String username;
 

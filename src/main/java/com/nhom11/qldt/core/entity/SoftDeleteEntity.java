@@ -1,6 +1,8 @@
 package com.nhom11.qldt.core.entity;
 
 import java.time.Instant;
+
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.data.annotation.LastModifiedDate;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
@@ -14,6 +16,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
+@SQLRestriction("deleted_at IS NULL")
 abstract public class SoftDeleteEntity extends AuditableEntity {
     @LastModifiedDate
     @Column(name = "deleted_at")
