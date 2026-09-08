@@ -6,9 +6,35 @@
 </head>
 
 <body>
-    <div layout:fragment="body" class="flex flex-col items-center justify-center min-h-screen gap-4">
-        <p class="text-lg">Please log in to your account.</p>
-        <div layout:replace="~{layout/form/login-form.html}"></div>
+    <div layout:fragment="body" class="flex items-center justify-center h-screen">
+        <!-- Đã sửa lại phần class before: để hiển thị cả màu đè 50% và ảnh texture -->
+        <div
+            class="w-1/2 overflow-hidden relative h-full 
+                before:absolute before:inset-0 before:content-[''] before:z-10 before:bg-black/60
+                before:bg-[url('https://www.transparenttextures.com/patterns/batthern.png')] before:bg-size-[15px] before:bg-repeat">
+
+            <img th:src="@{/images/app/auth-bg.webp}" class="h-full w-full object-right object-cover relative z-0"
+                alt="Page Background">
+            <div class="absolute top-0 w-full text-white z-20 p-20">
+                <p class="font-bold text-5xl">Hệ thống Quản Lý Đề Tài</p>
+                <br />
+                <p class="text-xl text-slate-300">
+                    Quản lý các đề tài về Nghiên cứu khoa học (NCKH),
+                    Tiểu luận chuyên ngành (TLCN), Khóa luận tốt nghiệp (KLTN) của môn học
+                </p>
+            </div>
+            <div class="absolute bottom-0 w-full text-slate-300 z-20 p-20">
+                <p class="text-xl">Đồ án môn lập trình web do Nhóm 11 thực hiện.</p>
+            </div>
+        </div>
+        <div class="w-1/2 flex justify-center items-center flex-col gap-4 box-content h-full"
+            style="background-image: linear-gradient(339deg, rgba(47, 47, 47,0.02) 0%, rgba(47, 47, 47,0.02) 42%,transparent 42%, transparent 99%,rgba(17, 17, 17,0.02) 99%, rgba(17, 17, 17,0.02) 100%),linear-gradient(257deg, rgba(65, 65, 65,0.02) 0%, rgba(65, 65, 65,0.02) 11%,transparent 11%, transparent 92%,rgba(53, 53, 53,0.02) 92%, rgba(53, 53, 53,0.02) 100%),linear-gradient(191deg, rgba(5, 5, 5,0.02) 0%, rgba(5, 5, 5,0.02) 1%,transparent 1%, transparent 45%,rgba(19, 19, 19,0.02) 45%, rgba(19, 19, 19,0.02) 100%),linear-gradient(29deg, rgba(28, 28, 28,0.02) 0%, rgba(28, 28, 28,0.02) 33%,transparent 33%, transparent 40%,rgba(220, 220, 220,0.02) 40%, rgba(220, 220, 220,0.02) 100%),linear-gradient(90deg, rgb(255,255,255),rgb(255,255,255));">
+            <p class="text-4xl font-bold">Chào mừng!</p>
+            <p class="text-slate-400 mb-5">Hãy đăng nhập vào tài khoản của bạn trước</p>
+            <div layout:replace="~{layout/form/login-form.html}"></div>
+            <p class="text-slate-400 mt-5">Chưa có tài khoản? <a href="/dang-ky" class="text-secondary font-bold">Đăng
+                    ký ngay</a> </p>
+        </div>
     </div>
 </body>
 

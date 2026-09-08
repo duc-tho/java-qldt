@@ -1,27 +1,25 @@
 <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" hx-trigger="validated-submit"
     class="flex flex-col items-center gap-4" id="login-form" th:fragment="login-form" th:object="${data}"
     x-data="formValidation" @submit.prevent="submit" novalidate>
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-        <legend class="fieldset-legend">Login</legend>
-
-        <div th:if="${formError}" role="alert" class="alert alert-error alert-soft">
-            <span th:text="${formError}"></span>
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-lg border p-6 shadow-lg">
+        <div th:if="${#fields.hasAnyErrors()}" role="alert" class="alert alert-error alert-soft flex gap-2 flex-col">
+            <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
         </div>
 
-        <div class="form-control">
-            <label class="label" for="login-email">Email</label>
-            <input id="login-email" type="email" name="email" class="input" placeholder="Email" th:value="*{email}"
-                th:attr="validate-data=${validationRules.email}" />
-            <div id="login-email-error"></div>
+        <div class="flex flex-col gap-1.5 my-1.5">
+            <label class="label ml-3 font-bold" for="login-email">Email</label>
+            <input id="login-email" type="email" name="email" class="input w-full" placeholder="Email"
+                th:value="*{email}" th:attr="validate-data=${validationRules.email}" />
+            <div id="login-email-error" class="ml-3"></div>
         </div>
 
-        <div class="form-control">
-            <label class="label" for="login-password">Password</label>
-            <input id="login-password" type="password" name="password" class="input" placeholder="Password"
+        <div class="flex flex-col gap-1.5 my-1.5">
+            <label class="label ml-3 font-bold" for="login-password">Mật khẩu</label>
+            <input id="login-password" type="password" name="password" class="input w-full" placeholder="Password"
                 th:value="*{password}" th:attr="validate-data=${validationRules.password}" />
-            <div id="login-password-error"></div>
+            <div id="login-password-error" class="ml-3"></div>
         </div>
 
-        <button type="submit" class="btn btn-neutral mt-4">Login</button>
+        <button type="submit" class="btn btn-neutral mt-3">Đăng nhập</button>
     </fieldset>
 </form>

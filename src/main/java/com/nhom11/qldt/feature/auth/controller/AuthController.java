@@ -42,8 +42,6 @@ public class AuthController {
             Model model, HttpServletResponse response) {
 
         if (bindingResult.hasErrors()) {
-            model.addAttribute("formError", "Thông tin đăng nhập không hợp lệ");
-
             return "layout/form/login-form :: login-form";
         }
 
