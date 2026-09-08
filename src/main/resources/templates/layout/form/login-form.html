@@ -1,0 +1,27 @@
+<form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" hx-trigger="validated-submit"
+    class="flex flex-col items-center gap-4" id="login-form" th:fragment="login-form" th:object="${data}"
+    x-data="formValidation" @submit.prevent="submit" novalidate>
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
+        <legend class="fieldset-legend">Login</legend>
+
+        <div th:if="${formError}" role="alert" class="alert alert-error alert-soft">
+            <span th:text="${formError}"></span>
+        </div>
+
+        <div class="form-control">
+            <label class="label" for="login-email">Email</label>
+            <input id="login-email" type="email" name="email" class="input" placeholder="Email" th:value="*{email}"
+                th:attr="validate-data=${validationRules.email}" />
+            <div id="login-email-error"></div>
+        </div>
+
+        <div class="form-control">
+            <label class="label" for="login-password">Password</label>
+            <input id="login-password" type="password" name="password" class="input" placeholder="Password"
+                th:value="*{password}" th:attr="validate-data=${validationRules.password}" />
+            <div id="login-password-error"></div>
+        </div>
+
+        <button type="submit" class="btn btn-neutral mt-4">Login</button>
+    </fieldset>
+</form>

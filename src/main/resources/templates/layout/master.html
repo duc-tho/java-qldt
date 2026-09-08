@@ -3,25 +3,19 @@
 
 <head>
     <title>Master Layout</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf.token}" />
+    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+
     <link rel="stylesheet" type="text/css" th:href="@{/assets/app.css}" />
+    <script defer th:src="@{/assets/app.js}"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.10/dist/htmx.min.js"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <script defer th:src="@{/assets/app.js}"></script>
 </head>
 
 <body>
-    <aside layout:insert="~{layout/ui/sidebar}">
-        <header layout:fragment="navbar">
-            <div layout:insert="~{layout/ui/nav}"></div>
-        </header>
-
-        <main>
-            <section layout:fragment="side-content">
-                <section layout:fragment="content">
-                </section>
-            </section>
-        </main>
-    </aside>
+    <div layout:fragment="body"></div>
 </body>
 
 </html>

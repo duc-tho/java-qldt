@@ -1,12 +1,17 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/master}">
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
 
 <head>
 
 </head>
 
 <body>
-    ...
+    <th:block layout:fragment="header">
+        <h1>My App</h1>
+    </th:block>
+    <th:block layout:fragment="main">
+        <p>Welcome to my app!</p>
+    </th:block>
 </body>
 
 </html>

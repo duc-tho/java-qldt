@@ -1,4 +1,6 @@
 import '../style/app.css';
 
-console.log("hello world");
+import './htmx-csrf.js';
+import './form-controller.js';
+import './form-validation.js';
 

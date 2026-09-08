@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/master.html}">
+
+<head>
+    <title>App Layout</title>
+</head>
+
+<body>
+    <th:block layout:fragment="body">
+        <div class="w-screen flex flex-col">
+            <div layout:replace="~{layout/ui/header.html}"></div>
+
+            <main class="flex-1 max-w-(--breakpoint-2xl) w-full mx-auto px-3 py-4 sm:px-4 xl:px-8">
+                <th:block layout:fragment="main">
+                </th:block>
+            </main>
+
+            <div layout:replace="~{layout/ui/footer.html}"></div>
+        </div>
+    </th:block>
+</body>
+
+</html>

@@ -6,19 +6,9 @@
 </head>
 
 <body>
-    <div layout:fragment="content">
+    <div layout:fragment="body" class="flex flex-col items-center justify-center min-h-screen gap-4">
         <p class="text-lg">Please log in to your account.</p>
-        <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-xs border p-4">
-            <legend class="fieldset-legend">Login</legend>
-
-            <label class="label">Email</label>
-            <input type="email" class="input" placeholder="Email" />
-
-            <label class="label">Password</label>
-            <input type="password" class="input" placeholder="Password" />
-
-            <button class="btn btn-neutral mt-4">Login</button>
-        </fieldset>
+        <div layout:replace="~{layout/form/login-form.html}"></div>
     </div>
 </body>
 

@@ -37,3 +37,7 @@ application-dev.yaml
 
 # Node modules
 node_modules
+superpowers
+
+static/assets/app.js
+static/assets/app.css
