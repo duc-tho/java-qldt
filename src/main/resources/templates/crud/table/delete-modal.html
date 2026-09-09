@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="delete-modal">
+    <dialog id="crud-delete-modal" class="modal">
+        <div class="modal-box">
+            <h3 class="text-lg font-bold">Xác nhận xóa</h3>
+            <p class="py-4">
+                Bạn có chắc muốn xóa
+                <span id="crud-delete-name" class="font-semibold"></span>?
+            </p>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">Hủy</button>
+                </form>
+                <button
+                    id="crud-delete-confirm"
+                    type="button"
+                    class="btn btn-error"
+                    hx-target="#crud-table"
+                    hx-swap="outerHTML"
+                    hx-include="[name='search'], [name='sort'], [name='dir']"
+                    hx-on::after-request="if (event.detail.successful) this.closest('dialog').close()"
+                >
+                    Xóa
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>đóng</button>
+        </form>
+    </dialog>
+
+    <script>
+        document.addEventListener('click', (event) => {
+            const trigger = event.target.closest('[data-delete-url]');
+            if (!trigger) {
+                return;
+            }
+            const dialog = document.getElementById('crud-delete-modal');
+            if (!dialog) {
+                return;
+            }
+            document.getElementById('crud-delete-name').textContent = trigger.dataset.deleteName || '';
+            const confirmButton = document.getElementById('crud-delete-confirm');
+            confirmButton.setAttribute('hx-delete', trigger.dataset.deleteUrl);
+            htmx.process(confirmButton);
+            dialog.showModal();
+        });
+    </script>
+</th:block>
+</html>

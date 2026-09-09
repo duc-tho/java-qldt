@@ -1,6 +1,10 @@
 package com.nhom11.qldt.core.service;
 
 import java.io.Serializable;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import com.nhom11.qldt.core.repository.BaseRepository;
 
 public abstract class BaseServiceImpl<T, ID extends Serializable> implements BaseService<T, ID> {
@@ -8,30 +12,30 @@ public abstract class BaseServiceImpl<T, ID extends Serializable> implements Bas
     public abstract BaseRepository<T, ID> getRepository();
 
     public T findById(ID id) {
-        // Implementation for finding entity by ID
-        return null;
+        return getRepository().findById(id).orElse(null);
     }
 
     public Iterable<T> findAll() {
-        // Implementation for finding all entities
-        return null;
+        return getRepository().findAll();
+    }
+
+    public Page<T> findAll(Pageable pageable) {
+        return getRepository().findAll(pageable);
     }
 
     public T create(T entity) {
-        // Implementation for creating entity
-        return null;
+        return getRepository().save(entity);
     }
 
     public T update(T entity) {
-        // Implementation for updating entity
-        return null;
+        return getRepository().save(entity);
     }
 
     public void delete(ID id) {
-        // Implementation for deleting entity
+        getRepository().deleteById(id);
     }
 
     public void softDelete(T entity) {
-        // Implementation for soft deleting entity
+        getRepository().softDelete(entity);
     }
 }

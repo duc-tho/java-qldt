@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
+
+<head>
+    <title th:text="${pageTitle}">CRUD</title>
+</head>
+
+<body>
+    <th:block layout:fragment="main">
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <h1 class="text-2xl font-bold" th:text="${pageTitle}"></h1>
+                <th:block layout:fragment="actions"></th:block>
+            </div>
+
+            <th:block layout:fragment="content"></th:block>
+        </div>
+
+        <div th:replace="~{crud/table/delete-modal :: delete-modal}"></div>
+    </th:block>
+</body>
+
+</html>

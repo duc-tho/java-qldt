@@ -1,0 +1,14 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{crud/layout/crud-layout.html}">
+
+<head>
+    <title th:text="${pageTitle}">Chi tiết người dùng</title>
+</head>
+
+<body>
+    <th:block layout:fragment="content">
+        <div th:replace="~{crud/detail/form :: crud-form(${data}, ${actionUrl}, ${isReadonly}, 'auth/user/fields')}"></div>
+    </th:block>
+</body>
+
+</html>

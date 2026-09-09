@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="crud-pagination(data, baseUrl)">
+    <div class="flex justify-center mt-4" th:if="${data.totalPages > 1}">
+        <div class="join">
+            <button
+                class="join-item btn btn-sm"
+                th:disabled="${data.first}"
+                th:attr='hx-get=|${baseUrl}|, hx-vals=|{"page": "0"}|'
+                hx-target="#crud-table"
+                hx-include="[name='search']"
+            >
+                «
+            </button>
+
+            <th:block th:each="i : ${#numbers.sequence(0, data.totalPages - 1)}">
+                <button
+                    class="join-item btn btn-sm"
+                    th:classappend="${i == data.number} ? 'btn-active'"
+                    th:attr='hx-get=|${baseUrl}|, hx-vals=|{"page": "${i}"}|'
+                    hx-target="#crud-table"
+                    hx-include="[name='search']"
+                    th:text="${i + 1}"
+                ></button>
+            </th:block>
+
+            <button
+                class="join-item btn btn-sm"
+                th:disabled="${data.last}"
+                th:attr='hx-get=|${baseUrl}|, hx-vals=|{"page": "${data.number + 1}"}|'
+                hx-target="#crud-table"
+                hx-include="[name='search']"
+            >
+                »
+            </button>
+        </div>
+    </div>
+</th:block>
+</html>
