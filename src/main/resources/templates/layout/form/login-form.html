@@ -1,7 +1,7 @@
 <form hx-post="/login" hx-target="#login-form" hx-swap="outerHTML" hx-trigger="validated-submit"
     class="flex flex-col items-center gap-4" id="login-form" th:fragment="login-form" th:object="${data}"
     x-data="formValidation" @submit.prevent="submit" novalidate>
-    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-lg border p-6 shadow-lg">
+    <fieldset class="fieldset bg-base-200 border-base-300 rounded-box w-sm md:w-md lg:w-lg border p-6 shadow-lg">
         <div th:if="${#fields.hasAnyErrors()}" role="alert" class="alert alert-error alert-soft flex gap-2 flex-col">
             <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
         </div>
