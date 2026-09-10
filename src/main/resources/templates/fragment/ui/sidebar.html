@@ -1,0 +1,26 @@
+<ul th:fragment="sidebar-menu" class="menu w-full grow">
+    <li>
+        <a href="/" class="btn btn-ghost text-left justify-start is-drawer-close:tooltip is-drawer-close:tooltip-right"
+            data-tip="Homepage">
+            <span class="iconify inline" data-icon="bi:house" data-width="18"></span>
+            <span class="is-drawer-close:hidden">Homepage</span>
+        </a>
+    </li>
+
+    <li>
+        <button class="btn btn-ghost text-left justify-start is-drawer-close:tooltip is-drawer-close:tooltip-right"
+            data-tip="Settings">
+            <span class="iconify inline" data-icon="bi:gear" data-width="18"></span>
+            <span class="is-drawer-close:hidden">Settings</span>
+        </button>
+    </li>
+
+    <li>
+        <a href="/users"
+            class="btn btn-ghost text-left justify-start is-drawer-close:tooltip is-drawer-close:tooltip-right"
+            data-tip="Users">
+            <span class="iconify inline" data-icon="bi:people" data-width="18"></span>
+            <span class="is-drawer-close:hidden">Users</span>
+        </a>
+    </li>
+</ul>

@@ -29,21 +29,33 @@ public class ClientValidationRuleRenderer {
     }
 
     public Map<String, String> render(Class<?> formType) {
+        return render(formType, Map.of());
+    }
+
+    public Map<String, String> render(Class<?> formType, Map<String, List<Map<String, Object>>> extraRules) {
         Map<String, String> validationRules = new LinkedHashMap<>();
 
         for (Field field : formType.getDeclaredFields()) {
-            validationRules.put(field.getName(), serializeRules(field));
+            List<Map<String, Object>> rules = new ArrayList<>(extraRules.getOrDefault(field.getName(), List.of()));
+            rules.addAll(createRules(field));
+            validationRules.put(field.getName(), serializeRules(rules));
         }
 
         return validationRules;
     }
 
-    private String serializeRules(Field field) {
+    public static List<Map<String, Object>> createPasswordRule(String message) {
+        List<Map<String, Object>> rules = new ArrayList<>();
+        rules.add(rule("password", message));
+
+        return rules;
+    }
+
+    private String serializeRules(List<Map<String, Object>> rules) {
         try {
-            return objectMapper.writeValueAsString(createRules(field));
+            return objectMapper.writeValueAsString(rules);
         } catch (JacksonException exception) {
-            throw new IllegalStateException("Cannot serialize validation rules for field: " + field.getName(),
-                    exception);
+            throw new IllegalStateException("Cannot serialize validation rules", exception);
         }
     }
 
@@ -77,7 +89,7 @@ public class ClientValidationRuleRenderer {
         return rules;
     }
 
-    private Map<String, Object> rule(String rule, String errorMessage) {
+    private static Map<String, Object> rule(String rule, String errorMessage) {
         Map<String, Object> values = new LinkedHashMap<>();
 
         values.put("rule", rule);
@@ -86,7 +98,7 @@ public class ClientValidationRuleRenderer {
         return values;
     }
 
-    private Map<String, Object> rule(String rule, Object value, String errorMessage) {
+    private static Map<String, Object> rule(String rule, Object value, String errorMessage) {
         Map<String, Object> values = rule(rule, errorMessage);
 
         values.put("value", value);

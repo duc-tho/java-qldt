@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
+
+<head>
+    <title th:text="${pageTitle}">Page</title>
+</head>
+
+<body>
+    <th:block layout:fragment="main">
+        <div class="flex flex-col gap-4">
+            <div class="flex flex-wrap items-start justify-between gap-4 gap-y-3">
+                <div class="flex items-start gap-3">
+                    <div th:if="${pageIcon}"
+                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        <span class="iconify" th:attr="data-icon=${pageIcon}" data-width="22"></span>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <h1 class="text-2xl font-bold" th:text="${pageTitle}"></h1>
+                            <span th:if="${totalCount != null}" class="badge badge-primary badge-soft"
+                                th:text="${totalCount}"></span>
+                        </div>
+                        <p th:if="${pageDesc}" class="mt-1 text-sm text-base-content/60" th:text="${pageDesc}"></p>
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <th:block layout:fragment="actions"></th:block>
+                </div>
+            </div>
+
+            <th:block layout:fragment="page-content"></th:block>
+        </div>
+
+        <div th:replace="~{fragment/table/delete-modal :: delete-modal}"></div>
+    </th:block>
+</body>
+
+</html>

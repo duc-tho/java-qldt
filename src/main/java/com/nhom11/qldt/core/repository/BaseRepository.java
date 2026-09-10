@@ -7,4 +7,8 @@ import org.springframework.data.repository.NoRepositoryBean;
 @NoRepositoryBean
 public interface BaseRepository<T, ID extends Serializable> extends JpaRepository<T, ID> {
     void softDelete(T entity);
+
+    void softDeleteAll(Iterable<T> entities);
+
+    boolean deleteByIdIncludingDeleted(ID id);
 }

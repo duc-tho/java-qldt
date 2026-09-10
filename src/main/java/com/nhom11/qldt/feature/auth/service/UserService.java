@@ -1,5 +1,7 @@
 package com.nhom11.qldt.feature.auth.service;
 
+import java.util.Map;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -25,5 +27,9 @@ public class UserService extends BaseCrudService<User, Long> {
     @Override
     public Page<User> search(String search, Pageable pageable) {
         return userRepository.search(search, pageable);
+    }
+
+    public Page<User> searchByColumns(Map<String, String> params, Pageable pageable) {
+        return userRepository.searchByColumns(params, pageable);
     }
 }

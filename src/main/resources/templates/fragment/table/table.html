@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="crud-table(data, columns, actions, baseUrl)"
+    th:with="listUrl=|${baseUrl}/list|">
+    <div id="crud-table">
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="crud-select-all" class="checkbox checkbox-sm" title="Chọn tất cả" />
+                <button type="button" class="btn btn-ghost btn-sm btn-square" title="Tải lại"
+                    th:attr="hx-post=${listUrl}, hx-vals=|{'page': '${data.number}', 'sort': '${sortField}', 'dir': '${sortDir}'}|"
+                    hx-target="#crud-table" hx-swap="outerHTML" hx-include="[name='search'], [name='size']">
+                    <span class="iconify" data-icon="bi:arrow-clockwise" data-width="16"></span>
+                </button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                <input type="search" name="search" th:value="${search}" placeholder="Tìm kiếm..."
+                    class="input input-sm w-56" th:attr="hx-post=${listUrl}"
+                    hx-vals='{"page": "0"}' hx-trigger="input changed delay:300ms"
+                    hx-target="#crud-table" hx-swap="outerHTML"
+                    hx-include="[name='sort'], [name='dir'], [name='size']" />
+                <button type="button" class="btn btn-error btn-outline btn-sm" th:attr="data-batch-delete-url=${listUrl}"
+                    disabled>
+                    <span class="iconify" data-icon="bi:trash" data-width="16"></span>
+                    Xóa đã chọn
+                </button>
+                <a th:href="${baseUrl + '/new'}" class="btn btn-primary btn-sm">
+                    <span class="iconify" data-icon="bi:plus-lg" data-width="16"></span>
+                    Thêm mới
+                </a>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="table table-zebra w-full">
+                <thead>
+                    <tr>
+                        <th class="w-10"></th>
+                        <th:block th:each="col : ${columns}">
+                            <th th:with="isSorted=${col.field == sortField},
+                                    isAsc=${col.field == sortField && sortDir == 'asc'},
+                                    isDesc=${col.field == sortField && sortDir == 'desc'}">
+                                <button type="button" class="btn btn-ghost btn-xs gap-1 -ml-2"
+                                    th:attr="hx-post=${listUrl}, hx-vals=|{'page': '0', 'sort': '${isDesc ? '' : col.field}', 'dir': '${isAsc ? 'desc' : 'asc'}'}|"
+                                    hx-target="#crud-table" hx-swap="outerHTML"
+                                    hx-include="[name='search'], [name='size']">
+                                    <span th:text="${col.label}"></span>
+                                    <span th:if="${!isSorted}" class="iconify text-base-content/40"
+                                        data-icon="bi:arrow-down-up" data-width="12"></span>
+                                    <span th:if="${isAsc}" class="iconify" data-icon="bi:sort-down"
+                                        data-width="12"></span>
+                                    <span th:if="${isDesc}" class="iconify" data-icon="bi:sort-up"
+                                        data-width="12"></span>
+                                </button>
+                            </th>
+                        </th:block>
+                        <th class="text-right">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody th:if="${!data.empty}">
+                    <tr th:each="item : ${data.content}">
+                        <td>
+                            <input type="checkbox" name="ids" class="checkbox checkbox-sm" th:value="${item.id}" />
+                        </td>
+                        <th:block th:each="col : ${columns}">
+                            <td th:text="${col.getValue(item)}"></td>
+                        </th:block>
+                        <td>
+                            <div class="flex items-center justify-end gap-1">
+                                <th:block th:each="action, actionStat : ${actions}">
+                                    <th:block th:if="${actionStat.count <= 3}">
+                                        <a th:if="${!action.isDelete()}" th:href="${action.getUrl(item)}"
+                                            class="btn btn-ghost btn-xs">
+                                            <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                                            <span th:text="${action.label()}"></span>
+                                        </a>
+                                        <button th:unless="${!action.isDelete()}" type="button"
+                                            class="btn btn-ghost btn-xs text-error"
+                                            th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}">
+                                            <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                                            <span th:text="${action.label()}"></span>
+                                        </button>
+                                    </th:block>
+                                </th:block>
+
+                                <details th:if="${#lists.size(actions) > 3}" class="dropdown dropdown-end">
+                                    <summary class="btn btn-ghost btn-xs btn-square">
+                                        <span class="iconify" data-icon="bi:three-dots" data-width="14"></span>
+                                    </summary>
+                                    <ul class="menu dropdown-content bg-base-100 rounded-box z-10 w-40 p-2 shadow">
+                                        <li th:each="action, actionStat : ${actions}" th:if="${actionStat.count > 3}">
+                                            <a th:if="${!action.isDelete()}" th:href="${action.getUrl(item)}">
+                                                <span class="iconify" th:attr="data-icon=${action.icon()}"
+                                                    data-width="14"></span>
+                                                <span th:text="${action.label()}"></span>
+                                            </a>
+                                            <button th:unless="${!action.isDelete()}" type="button" class="text-error"
+                                                th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}">
+                                                <span class="iconify" th:attr="data-icon=${action.icon()}"
+                                                    data-width="14"></span>
+                                                <span th:text="${action.label()}"></span>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </details>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+                <tbody th:if="${data.empty}">
+                    <tr>
+                        <td th:attr="colspan=${#lists.size(columns) + 2}"
+                            class="text-center text-base-content/50 py-6">
+                            Không có dữ liệu
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+            <div class="flex items-center gap-2 text-sm text-base-content/70">
+                <span th:text="|Trang ${data.totalPages == 0 ? 0 : data.number + 1} / ${data.totalPages}|"></span>
+
+                <select name="size" class="select select-sm w-20" th:attr="hx-post=${listUrl}"
+                    hx-vals='{"page": "0"}' hx-trigger="change" hx-target="#crud-table" hx-swap="outerHTML"
+                    hx-include="[name='search'], [name='sort'], [name='dir']">
+                    <option th:each="pageSize : ${pageSizeOptions}" th:value="${pageSize}"
+                        th:selected="${pageSize == data.size}" th:text="${pageSize}"></option>
+                </select>
+
+                <span>bản ghi/trang</span>
+            </div>
+
+            <div th:replace="~{fragment/table/pagination :: crud-pagination(${data}, ${baseUrl})}"></div>
+        </div>
+    </div>
+</th:block>
+
+</html>

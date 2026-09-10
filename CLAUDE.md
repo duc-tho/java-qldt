@@ -90,6 +90,13 @@ Follow existing Java style: four-space indentation, one public type per file, Pa
 
 No standalone formatter or linter is configured. Preserve the surrounding style, keep imports organized, and run both Maven tests and the Vite build after changes that span backend and UI code.
 
+For Icon use iconify with bootstrap package, example: 
+```html
+<span class="iconify inline"data-icon="bi:sort-numeric-down"></span>
+```
+
+For any UI component you need load skill daisyui to ref daisyui component before implement 
+
 ## Commit & Pull Request Guidelines
 
 Recent commits use concise Conventional Commit-style prefixes: `feat: partial implement Auth` and `init: create, add deps, dev container`. Use imperative summaries such as `fix: validate login form` or `refactor: extract role lookup`. Keep commits narrowly scoped. Pull requests should describe the behavioral change, list validation commands run, link the related issue when available, and include screenshots for template or styling changes.

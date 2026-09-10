@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="crud-pagination(data, baseUrl)"
+    th:with="listUrl=|${baseUrl}/list|, currentPage=${data.number}, totalPages=${data.totalPages},
+        startPage=${currentPage < 4 ? 0 : (currentPage - 3)},
+        endPage=${currentPage > totalPages - 5 ? totalPages - 1 : currentPage + 3}">
+    <div class="join" th:if="${totalPages > 1}">
+        <button type="button" class="join-item btn btn-sm" th:disabled="${data.first}"
+            th:attr="hx-post=${listUrl}, hx-vals=|{'page': '${currentPage - 1}'}|" hx-target="#crud-table"
+            hx-swap="outerHTML" hx-include="[name='search'], [name='sort'], [name='dir'], [name='size']">
+            «
+        </button>
+
+        <button type="button" class="join-item btn btn-sm" th:if="${startPage > 0}"
+            th:attr="hx-post=${listUrl}, hx-vals=|{'page': '0'}|" hx-target="#crud-table" hx-swap="outerHTML"
+            hx-include="[name='search'], [name='sort'], [name='dir'], [name='size']">1</button>
+
+        <button type="button" class="join-item btn btn-sm btn-disabled" th:if="${startPage > 1}">...</button>
+
+        <button type="button" class="join-item btn btn-sm" th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
+            th:classappend="${pageNumber == currentPage} ? 'btn-active'"
+            th:attr="hx-post=${listUrl}, hx-vals=|{'page': '${pageNumber}'}|" hx-target="#crud-table"
+            hx-swap="outerHTML" hx-include="[name='search'], [name='sort'], [name='dir'], [name='size']"
+            th:text="${pageNumber + 1}"></button>
+
+        <button type="button" class="join-item btn btn-sm btn-disabled" th:if="${endPage < totalPages - 2}">...</button>
+
+        <button type="button" class="join-item btn btn-sm" th:if="${endPage < totalPages - 1}"
+            th:attr="hx-post=${listUrl}, hx-vals=|{'page': '${totalPages - 1}'}|" hx-target="#crud-table"
+            hx-swap="outerHTML" hx-include="[name='search'], [name='sort'], [name='dir'], [name='size']"
+            th:text="${totalPages}"></button>
+
+        <button type="button" class="join-item btn btn-sm" th:disabled="${data.last}"
+            th:attr="hx-post=${listUrl}, hx-vals=|{'page': '${currentPage + 1}'}|" hx-target="#crud-table"
+            hx-swap="outerHTML" hx-include="[name='search'], [name='sort'], [name='dir'], [name='size']">
+            »
+        </button>
+    </div>
+</th:block>
+
+</html>

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+
+<head>
+    <title th:text="${pageTitle}">Chi tiết người dùng</title>
+</head>
+
+<body>
+    <th:block layout:fragment="actions">
+        <a th:if="${isReadonly}" th:href="${actionUrl + '/edit'}" class="btn btn-primary btn-sm">
+            <span class="iconify inline" data-icon="bi:pencil-square" data-width="16"></span>
+            Sửa
+        </a>
+        <button th:if="${isReadonly}" type="button" class="btn btn-error btn-outline btn-sm"
+            th:attr="data-delete-url=${actionUrl}, data-delete-name=${data.fullName}">
+            <span class="iconify inline" data-icon="bi:trash" data-width="16"></span>
+            Xóa
+        </button>
+    </th:block>
+
+    <th:block layout:fragment="page-content">
+        <div
+            th:replace="~{fragment/form/crud-form :: crud-form(${data}, ${actionUrl}, ${method}, ${isReadonly}, ${baseUrl}, 'fragment/page/user/fields')}">
+        </div>
+    </th:block>
+</body>
+
+</html>

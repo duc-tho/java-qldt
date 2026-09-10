@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="crud-form(data, actionUrl, method, isReadonly, backUrl, fieldsTemplate)">
+    <form th:unless="${isReadonly}" method="post" th:object="${data}" novalidate x-data="formValidation"
+        @submit.prevent="submit" th:attr="hx-trigger='validated-submit', hx-post=${method == 'post' ? actionUrl : null}, hx-put=${method == 'put' ? actionUrl : null}"
+        hx-target="this" hx-swap="outerHTML">
+
+        <div class="flex flex-col gap-5">
+            <div th:if="${#fields.hasAnyErrors()}" role="alert"
+                class="alert alert-error alert-soft flex gap-2 flex-col">
+                <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+            </div>
+
+            <th:block th:replace="~{${fieldsTemplate} :: form-fields(${data}, ${isReadonly})}"></th:block>
+
+            <div class="flex items-center justify-end gap-3 pt-2 border-t border-base-300">
+                <a th:href="${backUrl}" class="btn btn-ghost btn-sm">Hủy</a>
+                <button type="submit" class="btn btn-primary btn-sm">
+                    <span class="iconify inline" data-icon="bi:check-lg" data-width="16"></span>
+                    Lưu
+                </button>
+            </div>
+        </div>
+    </form>
+
+    <div th:if="${isReadonly}" class="flex flex-col gap-5" th:object="${data}">
+        <th:block th:replace="~{${fieldsTemplate} :: form-fields(${data}, ${isReadonly})}"></th:block>
+    </div>
+</th:block>
+
+</html>

@@ -42,7 +42,7 @@ public class AuthController {
             Model model, HttpServletResponse response) {
 
         if (bindingResult.hasErrors()) {
-            return "layout/form/login-form :: login-form";
+            return "fragment/form/login-form :: login-form";
         }
 
         response.setHeader("HX-Redirect", "/");
