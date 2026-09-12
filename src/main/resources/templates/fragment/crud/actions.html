@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="crud-actions(actions, item)">
+    <div class="flex items-center justify-end gap-1">
+        <th:block th:each="action, actionStat : ${actions}">
+            <th:block th:if="${actionStat.count <= 3}">
+                <a th:if="${!action.isDelete()}" th:href="${action.getUrl(item)}" class="btn btn-ghost btn-xs">
+                    <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                    <span th:text="${#messages.msg(action.label())}"></span>
+                </a>
+                <button th:unless="${!action.isDelete()}" type="button" class="btn btn-ghost btn-xs text-error"
+                    th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}"
+                    x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
+                    <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                    <span th:text="${#messages.msg(action.label())}"></span>
+                </button>
+            </th:block>
+        </th:block>
+
+        <details th:if="${#lists.size(actions) > 3}" class="dropdown dropdown-end">
+            <summary class="btn btn-ghost btn-xs btn-square">
+                <span class="iconify" data-icon="bi:three-dots" data-width="14"></span>
+            </summary>
+            <ul class="menu dropdown-content bg-base-100 rounded-box z-10 w-40 p-2 shadow">
+                <li th:each="action, actionStat : ${actions}" th:if="${actionStat.count > 3}">
+                    <a th:if="${!action.isDelete()}" th:href="${action.getUrl(item)}">
+                        <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                        <span th:text="${#messages.msg(action.label())}"></span>
+                    </a>
+                    <button th:unless="${!action.isDelete()}" type="button" class="text-error"
+                        th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}"
+                        x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
+                        <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                        <span th:text="${#messages.msg(action.label())}"></span>
+                    </button>
+                </li>
+            </ul>
+        </details>
+    </div>
+</th:block>
+
+</html>

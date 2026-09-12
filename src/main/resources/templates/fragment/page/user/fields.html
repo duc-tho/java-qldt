@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
-<th:block th:fragment="form-fields(data, isReadonly)">
+<th:block th:fragment="form-fields(data, isReadonly, validationRules)">
     <div class="flex flex-col gap-3">
         <div class="form-control">
             <label class="label" for="fullName">
-                <span class="label-text font-bold">Họ tên</span>
+                <span class="label-text font-bold" th:text="#{users.field.full_name}"></span>
             </label>
             <input id="fullName" type="text" name="fullName" class="input w-full"
                 th:classappend="${#fields.hasErrors('fullName')} ? ' input-error'" th:value="*{fullName}"
@@ -17,7 +17,7 @@
 
         <div class="form-control">
             <label class="label" for="email">
-                <span class="label-text font-bold">Email</span>
+                <span class="label-text font-bold" th:text="#{users.field.email}"></span>
             </label>
             <input id="email" type="email" name="email" class="input w-full"
                 th:classappend="${#fields.hasErrors('email')} ? ' input-error'" th:value="*{email}"
@@ -30,7 +30,7 @@
 
         <div class="form-control">
             <label class="label" for="username">
-                <span class="label-text font-bold">Tên đăng nhập</span>
+                <span class="label-text font-bold" th:text="#{users.field.username}"></span>
             </label>
             <input id="username" type="text" name="username" class="input w-full"
                 th:classappend="${#fields.hasErrors('username')} ? ' input-error'" th:value="*{username}"
@@ -43,11 +43,11 @@
 
         <div class="form-control" th:unless="${isReadonly}">
             <label class="label" for="password">
-                <span class="label-text font-bold">Mật khẩu</span>
+                <span class="label-text font-bold" th:text="#{users.field.password}"></span>
             </label>
             <input id="password" type="password" name="password" class="input w-full"
                 th:classappend="${#fields.hasErrors('password')} ? ' input-error'"
-                th:placeholder="${data.id != null ? 'Để trống nếu không đổi' : ''}"
+                th:placeholder="${data.id != null ? #messages.msg('users.field.password.placeholder') : ''}"
                 th:attr="validate-data=${validationRules.password}" />
             <div id="password-error" class="ml-3">
                 <span class="label-text-alt text-error" th:if="${#fields.hasErrors('password')}"
@@ -57,7 +57,7 @@
 
         <div class="form-control">
             <label class="label" for="phone">
-                <span class="label-text font-bold">Số điện thoại</span>
+                <span class="label-text font-bold" th:text="#{users.field.phone}"></span>
             </label>
             <input id="phone" type="text" name="phone" class="input w-full"
                 th:classappend="${#fields.hasErrors('phone')} ? ' input-error'" th:value="*{phone}"

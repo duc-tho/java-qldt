@@ -1,32 +1,25 @@
-document.addEventListener("change", (event) => {
-    const table = document.getElementById("crud-table");
-    if (!table || !table.contains(event.target)) {
-        return;
-    }
+function registerCrudTable() {
+    Alpine.data("crudTable", () => ({
+        selectedIds: [],
 
-    const selectAll = event.target.closest("#crud-select-all");
-    if (selectAll) {
-        getRowCheckboxes(table).forEach((checkbox) => {
-            checkbox.checked = selectAll.checked;
-        });
-    }
+        get rowIds() {
+            return Array.from(this.$root.querySelectorAll('tbody [name="ids"]'))
+                .map((checkbox) => checkbox.value);
+        },
 
-    if (selectAll || event.target.matches('[name="ids"]')) {
-        syncBatchDeleteButton(table);
-    }
-});
+        get allSelected() {
+            return this.rowIds.length > 0
+                && this.rowIds.every((id) => this.selectedIds.includes(id));
+        },
 
-document.addEventListener("htmx:afterSwap", (event) => {
-    syncBatchDeleteButton(event.target);
-});
-
-function getRowCheckboxes(table) {
-    return Array.from(table.querySelectorAll('tbody [name="ids"]'));
+        toggleAll(event) {
+            this.selectedIds = event.target.checked ? this.rowIds : [];
+        },
+    }));
 }
 
-function syncBatchDeleteButton(table) {
-    const batchDeleteButton = table.querySelector("[data-batch-delete-url]");
-    if (batchDeleteButton) {
-        batchDeleteButton.disabled = !getRowCheckboxes(table).some((checkbox) => checkbox.checked);
-    }
+if (window.Alpine) {
+    registerCrudTable();
+} else {
+    document.addEventListener("alpine:init", registerCrudTable);
 }

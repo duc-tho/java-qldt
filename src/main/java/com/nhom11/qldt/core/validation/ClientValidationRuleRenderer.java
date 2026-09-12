@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 import jakarta.validation.constraints.DecimalMax;
 import jakarta.validation.constraints.DecimalMin;
@@ -23,9 +25,11 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 public class ClientValidationRuleRenderer {
     private final ObjectMapper objectMapper;
+    private final MessageSource messageSource;
 
-    public ClientValidationRuleRenderer(ObjectMapper objectMapper) {
+    public ClientValidationRuleRenderer(ObjectMapper objectMapper, MessageSource messageSource) {
         this.objectMapper = objectMapper;
+        this.messageSource = messageSource;
     }
 
     public Map<String, String> render(Class<?> formType) {
@@ -51,6 +55,15 @@ public class ClientValidationRuleRenderer {
         return rules;
     }
 
+    private String resolveMessage(String messageTemplate) {
+        if (!messageTemplate.startsWith("{") || !messageTemplate.endsWith("}")) {
+            return messageTemplate;
+        }
+
+        String messageCode = messageTemplate.substring(1, messageTemplate.length() - 1);
+        return messageSource.getMessage(messageCode, null, messageTemplate, LocaleContextHolder.getLocale());
+    }
+
     private String serializeRules(List<Map<String, Object>> rules) {
         try {
             return objectMapper.writeValueAsString(rules);
@@ -64,22 +77,22 @@ public class ClientValidationRuleRenderer {
 
         for (Annotation annotation : field.getAnnotations()) {
             switch (annotation) {
-                case NotBlank c -> rules.add(rule("required", c.message()));
-                case NotEmpty c -> rules.add(rule("required", c.message()));
-                case NotNull c -> rules.add(rule("required", c.message()));
-                case Email c -> rules.add(rule("email", c.message()));
-                case Min c -> rules.add(rule("minNumber", c.value(), c.message()));
-                case Max c -> rules.add(rule("maxNumber", c.value(), c.message()));
-                case Pattern c -> rules.add(rule("customRegexp", c.regexp(), c.message()));
+                case NotBlank c -> rules.add(rule("required", resolveMessage(c.message())));
+                case NotEmpty c -> rules.add(rule("required", resolveMessage(c.message())));
+                case NotNull c -> rules.add(rule("required", resolveMessage(c.message())));
+                case Email c -> rules.add(rule("email", resolveMessage(c.message())));
+                case Min c -> rules.add(rule("minNumber", c.value(), resolveMessage(c.message())));
+                case Max c -> rules.add(rule("maxNumber", c.value(), resolveMessage(c.message())));
+                case Pattern c -> rules.add(rule("customRegexp", c.regexp(), resolveMessage(c.message())));
 
-                case DecimalMin c when c.inclusive() -> rules.add(rule("minNumber", c.value(), c.message()));
-                case DecimalMax c when c.inclusive() -> rules.add(rule("maxNumber", c.value(), c.message()));
+                case DecimalMin c when c.inclusive() -> rules.add(rule("minNumber", c.value(), resolveMessage(c.message())));
+                case DecimalMax c when c.inclusive() -> rules.add(rule("maxNumber", c.value(), resolveMessage(c.message())));
 
                 case Size c -> {
                     if (c.min() > 0)
-                        rules.add(rule("minLength", c.min(), c.message()));
+                        rules.add(rule("minLength", c.min(), resolveMessage(c.message())));
                     if (c.max() < Integer.MAX_VALUE)
-                        rules.add(rule("maxLength", c.max(), c.message()));
+                        rules.add(rule("maxLength", c.max(), resolveMessage(c.message())));
                 }
                 default -> {
                 }

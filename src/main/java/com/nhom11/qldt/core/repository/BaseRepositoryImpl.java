@@ -2,9 +2,15 @@ package com.nhom11.qldt.core.repository;
 
 import java.io.Serializable;
 import java.time.Instant;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
@@ -14,12 +20,23 @@ public abstract class BaseRepositoryImpl<T, ID extends Serializable> extends Sim
 
     private final Class<T> domainClass;
     private final EntityManager entityManager;
+    protected final FilterQueryBuilder<T> filterQueryBuilder;
 
     public BaseRepositoryImpl(Class<T> domainClass, EntityManager entityManager) {
         super(domainClass, entityManager);
 
         this.domainClass = domainClass;
         this.entityManager = entityManager;
+        this.filterQueryBuilder = new FilterQueryBuilder<>(domainClass, entityManager);
+    }
+
+    @Override
+    public Page<T> findAll(
+            Pageable pageable,
+            String search,
+            List<String> searchableFields,
+            Map<String, String> filters) {
+        return filterQueryBuilder.findAll(pageable, search, searchableFields, filters);
     }
 
     @Override

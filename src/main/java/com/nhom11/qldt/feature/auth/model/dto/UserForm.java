@@ -5,6 +5,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
@@ -15,22 +16,22 @@ public class UserForm implements CrudForm<User> {
 
     private Long id;
 
-    @NotBlank(message = "Tên đăng nhập không được để trống")
-    @Size(max = 50, message = "Tên đăng nhập tối đa 50 ký tự")
+    @NotBlank(message = "{users.validation.username.required}")
+    @Size(max = 50, message = "{users.validation.username.max}")
     private String username;
 
-    @Size(min = 6, message = "Mật khẩu tối thiểu 6 ký tự")
+    @Pattern(regexp = "^$|^.{6,}$", message = "{users.validation.password.min}")
     private String password;
 
-    @NotBlank(message = "Email không được để trống")
-    @Email(message = "Email không hợp lệ")
+    @NotBlank(message = "{users.validation.email.required}")
+    @Email(message = "{users.validation.email.invalid}")
     private String email;
 
-    @Size(max = 20, message = "Số điện thoại tối đa 20 ký tự")
+    @Size(max = 20, message = "{users.validation.phone.max}")
     private String phone;
 
-    @NotBlank(message = "Họ tên không được để trống")
-    @Size(max = 50, message = "Họ tên tối đa 50 ký tự")
+    @NotBlank(message = "{users.validation.full_name.required}")
+    @Size(max = 50, message = "{users.validation.full_name.max}")
     private String fullName;
 
     @Override

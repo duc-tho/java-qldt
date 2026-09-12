@@ -2,13 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
 
 <head>
-    <title th:text="${pageTitle}">Thêm người dùng</title>
+    <title th:text="${#messages.msg(pageTitle)}"></title>
 </head>
 
 <body>
     <th:block layout:fragment="page-content">
-        <div
-            th:replace="~{fragment/form/crud-form :: crud-form(${data}, ${actionUrl}, ${method}, ${isReadonly}, ${baseUrl}, 'fragment/page/user/fields')}">
+        <div th:replace="~{fragment/crud/form :: crud-form(${form})}">
         </div>
     </th:block>
 </body>

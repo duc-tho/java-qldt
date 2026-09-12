@@ -2,12 +2,12 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
 
 <head>
-    <title th:text="${pageTitle}">Quản lý người dùng</title>
+    <title th:text="${#messages.msg(pageTitle)}"></title>
 </head>
 
 <body>
     <th:block layout:fragment="page-content">
-        <div th:replace="~{fragment/table/table :: crud-table(${data}, ${columns}, ${actions}, ${baseUrl})}"></div>
+        <div th:replace="~{fragment/crud/table :: crud-table(${table})}"></div>
     </th:block>
 </body>
 

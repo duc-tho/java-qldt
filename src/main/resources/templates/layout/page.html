@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
 
 <head>
-    <title th:text="${pageTitle}">Page</title>
+    <title th:text="${#messages.msg(pageTitle)}"></title>
 </head>
 
 <body>
@@ -16,11 +16,12 @@
                     </div>
                     <div>
                         <div class="flex items-center gap-2">
-                            <h1 class="text-2xl font-bold" th:text="${pageTitle}"></h1>
-                            <span th:if="${totalCount != null}" class="badge badge-primary badge-soft"
-                                th:text="${totalCount}"></span>
+                            <h1 class="text-2xl font-bold" th:text="${#messages.msg(pageTitle)}"></h1>
+                            <span th:if="${table != null}" class="badge badge-primary badge-soft"
+                                th:text="${table.data.totalElements}"></span>
                         </div>
-                        <p th:if="${pageDesc}" class="mt-1 text-sm text-base-content/60" th:text="${pageDesc}"></p>
+                        <p th:if="${pageDesc}" class="mt-1 text-sm text-base-content/60"
+                            th:text="${#messages.msg(pageDesc)}"></p>
                     </div>
                 </div>
 
@@ -32,7 +33,7 @@
             <th:block layout:fragment="page-content"></th:block>
         </div>
 
-        <div th:replace="~{fragment/table/delete-modal :: delete-modal}"></div>
+        <div th:replace="~{fragment/crud/delete-modal :: delete-modal}"></div>
     </th:block>
 </body>
 

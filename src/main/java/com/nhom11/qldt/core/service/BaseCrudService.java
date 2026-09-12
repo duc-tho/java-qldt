@@ -3,24 +3,29 @@ package com.nhom11.qldt.core.service;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.nhom11.qldt.core.repository.BaseRepository;
+import com.nhom11.qldt.core.table.BaseTableDefinition;
+import com.nhom11.qldt.core.table.TableQuery;
 
 public abstract class BaseCrudService<T, ID extends Serializable> extends BaseServiceImpl<T, ID> {
 
     public abstract BaseRepository<T, ID> getRepository();
 
-    public abstract Page<T> search(String search, Pageable pageable);
+    public Page<T> findAll(TableQuery query, BaseTableDefinition<T> definition) {
+        Pageable pageable = query.pageable(definition);
+        List<String> searchableFields = definition.columns().stream()
+                .filter(column -> column.searchable)
+                .map(column -> column.field)
+                .toList();
+        Map<String, String> filters = query.filterValues(definition);
 
-    public Page<T> findAll(String search, Pageable pageable) {
-        if (search == null || search.isBlank()) {
-            return getRepository().findAll(pageable);
-        }
-        return search(search.trim(), pageable);
+        return getRepository().findAll(pageable, query.getSearch(), searchableFields, filters);
     }
 
     protected void beforeCreate(T entity) {}
