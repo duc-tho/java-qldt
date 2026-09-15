@@ -1,0 +1,32 @@
+Q25: mình nghĩ nên áp dụng cơ chế Phản biện/hội đồng cho tất cả loại môn, tuy nhiên các môn không phải KLTN (bắt buộc có hội đồng) thì sẽ là optional, tuỳ người dùng có muốn tổ chức hay không
+Q19: hội đồng 3 - 5 người trong đó đã có 2 người là chủ tịch và thư ký rồi, nên còn 3 người còn lại là GVPB. trường hợp không có hội đồng thì có ít nhất 1 gv chấm
+Q-29: Điểm sẽ lấy trung bình của tất cả thành viên trong hội đồng/giáo viên
+Q-09: mỗi loại sẽ có 1 nhóm, khi đã bắt đầu quá trình thực hiện thì không đc thay đổi
+Q-05: Optional cho phép chọn số lượng nhóm trùng đề tài tối đa, mặc định 1
+Q-14  GVHD sẽ phê duyệt đề tài và đăng ký của nhóm chọn, người duyệt là đề tài mà GV đề xuất Trưởng khoa. 
+
+Q-01 Giữa lúc đóng đăng ký GV và mở đăng ký SV có khoảng duyệt/công bố riêng  
+Q-02 có thể mở nhiều đợt 1 lúc, kể cả cùng loại. Sau khi gửi có thể xem lại chỉnh sửa đơn nếu còn hạn vì sau khi hết hạn mới bắt đầu quy trình duyệt mà
+Q-03 Sau khi đợt có đăng ký, có thể sửa các trường, gia hạn hay mở lại nha. 
+Q-04 Trưởng khoa duyệt toàn bộ, công bố sẽ đc set ngày cụ thể, tự động công bố khi đến ngày
+Q-42  Nhập thời gian theo ngày giờ, múi giờ Asia/Ho_Chi_Minh, có tính thời điểm kết thúc,
+Q-43 Hạn GVPB có bắt buộc với TLCN/KLTN, ngày hội đồng có bắt buộc với KLTN ngay lúc tạo đợt, bắt buộc hạn điểm trước ngày hội đồng
+Q-44 tên đợt + loại
+Q-06 Đề tài có thể tái sử dụng, không trùng
+Q-07 Không cần phân chính phụ, không có hạn mức
+Q-08 Tối đa 3 SV/nhóm, 1 nhóm có thể trùng bao nhiêu đề tài do user quyết mặc định 1 tức ko trùng
+Q-10 không giới hạn
+Q-11 Nhóm trưởng invite hoặc SV có thể request join, Bất kỳ SV có thể tạo nhóm, mặc định người tạo là nhóm Trưởng
+Q-12 Nếu trong thời gian đăng ký thì có thể đổi nhóm trưởng, thêm bớt rời, ...
+Q-13 được rút đơn/đổi đề tài khi đang chờ? Sau từ chối có đưthể đăng ký lại hoặc chuyển nhóm? miễn trong thời gian đăng ký
+Q-15 Bắt buộc lý do từ chối; không bổ sung thu hồi sau khi bắt đầu thực hiện nếu không được yêu cầu.
+Q-16 Khóa thay đổi nội dung sau khi nhóm được nhận; nếu sửa cần yêu cầu phê duyệt lại
+Q-17 Mỗi nhóm chọn đề tài, nếu đến giới hạn đề tài khi gửi thì thông báo thôi
+Q-18 Trưởng khoa phân công; GV đề xuất là GVHD ban đầu
+Q-20 GVHD có thể ở hội đồng và có thể làm chủ tịch/thư ký
+Q-21 Không được thay người chấm khi đã có điểm? nếu đc thay đổi thì Điểm cũ huỷ
+Q-22 Có hạn nộp bài ko chỉ riêng báo cáo, không gia hạn, nộp trễ ghi nhận là trễ
+Q-23 Bài nộp dạng nén nếu nhiều file zip/rar max 50mb, tối đa 10 file nếu các file đơn lẻ ko giới hạn định dạng hoặc giới hạn phổ biến
+Q-24 Cho thay thế trước hạn, theo mốc được chọn; chỉ người liên quan được truy cập. Không tự bổ sung bước duyệt báo cáo.
+Q-26 Cho quan hệ nhiều đề tài/hội đồng; chỉ thêm lịch chi tiết nếu cần.
+Q-27 Hai người khác nhau; các thành viên đều chấm
