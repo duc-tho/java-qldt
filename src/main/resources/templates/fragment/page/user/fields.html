@@ -16,6 +16,27 @@
         </div>
 
         <div class="form-control">
+            <label class="label" for="userCode"><span class="label-text font-bold" th:text="#{users.field.user_code}"></span></label>
+            <input id="userCode" type="text" name="userCode" class="input w-full" th:value="*{userCode}" th:readonly="${isReadonly}" />
+        </div>
+
+        <div class="form-control">
+            <label class="label" for="departmentId"><span class="label-text font-bold" th:text="#{users.field.department}"></span></label>
+            <select id="departmentId" name="departmentId" class="select w-full" th:disabled="${isReadonly}">
+                <option value=""></option>
+                <option th:each="department : ${departments}" th:value="${department.id}" th:text="${department.name}" th:selected="${department.id == data.departmentId}"></option>
+            </select>
+        </div>
+
+        <div class="form-control" th:unless="${isReadonly}">
+            <span class="label-text font-bold" th:text="#{users.field.roles}"></span>
+            <label class="label justify-start gap-3" th:each="role : ${roles}">
+                <input type="checkbox" name="roleIds" class="checkbox" th:value="${role.id}" th:checked="${data.roleIds != null and data.roleIds.contains(role.id)}" />
+                <span class="label-text" th:text="${role.name}"></span>
+            </label>
+        </div>
+
+        <div class="form-control">
             <label class="label" for="email">
                 <span class="label-text font-bold" th:text="#{users.field.email}"></span>
             </label>

@@ -8,16 +8,25 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import com.nhom11.qldt.core.service.BaseCrudService;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
+import com.nhom11.qldt.feature.auth.repository.RoleRepository;
+import com.nhom11.qldt.feature.department.repository.DepartmentRepository;
+import com.nhom11.qldt.feature.department.model.entity.Department;
+import com.nhom11.qldt.feature.auth.model.entity.Role;
+import java.util.Set;
 
 @Service
 public class UserService extends BaseCrudService<User, Long> {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final DepartmentRepository departmentRepository;
+    private final RoleRepository roleRepository;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, DepartmentRepository departmentRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.departmentRepository = departmentRepository;
+        this.roleRepository = roleRepository;
     }
 
     @Override
@@ -42,8 +51,27 @@ public class UserService extends BaseCrudService<User, Long> {
             } else {
                 updates.setPassword(passwordEncoder.encode(updates.getPassword()));
             }
-
-            updates.setRoles(existingUser.getRoles());
         });
+    }
+
+    public User create(User user, Long departmentId, Set<Long> roleIds) {
+        assignRelations(user, departmentId, roleIds);
+        return super.create(user);
+    }
+
+    public User update(User user, Long departmentId, Set<Long> roleIds) {
+        assignRelations(user, departmentId, roleIds);
+        return super.update(user);
+    }
+
+    private void assignRelations(User user, Long departmentId, Set<Long> roleIds) {
+        Department department = departmentId == null ? null : departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new IllegalArgumentException("Department not found"));
+        user.setDepartment(department);
+        Set<Role> roles = roleIds == null ? Set.of() : Set.copyOf(roleRepository.findAllById(roleIds));
+        if (roles.size() != (roleIds == null ? 0 : roleIds.size())) {
+            throw new IllegalArgumentException("Role not found");
+        }
+        user.setRoles(roles);
     }
 }

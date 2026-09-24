@@ -23,6 +23,8 @@ public class WebSecurityConfig {
         http.securityMatcher("/**")
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/login", "/assets/**", "/images/**").permitAll()
+                        .requestMatchers("/users/**").hasRole("ADMIN")
+                        .requestMatchers("/departments/**", "/registration-periods/**", "/topics/**", "/announcements/**").hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                         .anyRequest().authenticated())
                 .formLogin(form -> form
                         .loginPage("/login")

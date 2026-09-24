@@ -22,6 +22,8 @@ import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.model.dto.UserForm;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.auth.repository.RoleRepository;
+import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.auth.view.UserTableDefinition;
 
 import jakarta.validation.Valid;
@@ -43,18 +45,24 @@ public class UserController {
     private final CrudViewSupport crudView;
     private final UserTableDefinition userTableDefinition;
     private final MessageSource messageSource;
+    private final DepartmentService departmentService;
+    private final RoleRepository roleRepository;
 
     public UserController(
             UserService userService,
             ClientValidationRuleRenderer validationRuleRenderer,
             CrudViewSupport crudView,
             UserTableDefinition userTableDefinition,
-            MessageSource messageSource) {
+            MessageSource messageSource,
+            DepartmentService departmentService,
+            RoleRepository roleRepository) {
         this.userService = userService;
         this.validationRuleRenderer = validationRuleRenderer;
         this.crudView = crudView;
         this.userTableDefinition = userTableDefinition;
         this.messageSource = messageSource;
+        this.departmentService = departmentService;
+        this.roleRepository = roleRepository;
     }
 
     @GetMapping
@@ -146,7 +154,7 @@ public class UserController {
             return VIEW_USER_CREATE;
         }
 
-        userService.create(form.toEntity());
+        userService.create(form.toEntity(), form.getDepartmentId(), form.getRoleIds());
 
         return "redirect:" + BASE_URL;
     }
@@ -237,7 +245,7 @@ public class UserController {
 
         User updates = form.toEntity();
         updates.setId(id);
-        userService.update(updates);
+        userService.update(updates, form.getDepartmentId(), form.getRoleIds());
         return "redirect:" + BASE_URL + "/" + id;
     }
 
@@ -262,5 +270,11 @@ public class UserController {
         userService.softDeleteAll(ids);
 
         return "redirect:" + BASE_URL;
+    }
+
+    @ModelAttribute
+    public void selectionData(Model model) {
+        model.addAttribute("departments", departmentService.findAll());
+        model.addAttribute("roles", roleRepository.findAll());
     }
 }

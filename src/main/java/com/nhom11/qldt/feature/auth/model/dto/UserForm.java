@@ -10,6 +10,8 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
+
 @Getter
 @Setter
 public class UserForm implements CrudForm<User> {
@@ -34,6 +36,13 @@ public class UserForm implements CrudForm<User> {
     @Size(max = 50, message = "{users.validation.full_name.max}")
     private String fullName;
 
+    @Size(max = 30, message = "{users.validation.user_code.max}")
+    private String userCode;
+
+    private Long departmentId;
+
+    private Set<Long> roleIds;
+
     @Override
     public User toEntity() {
         User user = new User();
@@ -45,6 +54,7 @@ public class UserForm implements CrudForm<User> {
         user.setEmail(email);
         user.setPhone(phone);
         user.setFullName(fullName);
+        user.setUserCode(userCode);
         return user;
     }
 
@@ -55,5 +65,8 @@ public class UserForm implements CrudForm<User> {
         this.email = entity.getEmail();
         this.phone = entity.getPhone();
         this.fullName = entity.getFullName();
+        this.userCode = entity.getUserCode();
+        this.departmentId = entity.getDepartment() == null ? null : entity.getDepartment().getId();
+        this.roleIds = entity.getRoles().stream().map(role -> role.getId()).collect(java.util.stream.Collectors.toSet());
     }
 }

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<th:block th:fragment="form-fields(data, isReadonly, validationRules)">
+    <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+        <div class="form-control"><label class="label" for="title"><span class="label-text font-bold"
+                    th:text="#{topics.field.title}"></span></label><input id="title" name="title" class="input w-full"
+                th:value="*{title}" th:readonly="${isReadonly}" /></div>
+        <div class="form-control"><label class="label" for="departmentId"><span class="label-text font-bold"
+                    th:text="#{topics.field.department}"></span></label><select id="departmentId" name="departmentId"
+                class="select w-full" th:disabled="${isReadonly}">
+                <option th:each="department : ${departments}" th:value="${department.id}" th:text="${department.name}"
+                    th:selected="${department.id == data.departmentId}"></option>
+            </select></div>
+    </div>
+    <div class="form-control mt-3"><label class="label" for="description"><span class="label-text font-bold"
+                th:text="#{topics.field.description}"></span></label><textarea id="description" name="description"
+            class="textarea w-full" rows="6" th:text="*{description}" th:readonly="${isReadonly}"></textarea></div>
+</th:block>
+
+</html>

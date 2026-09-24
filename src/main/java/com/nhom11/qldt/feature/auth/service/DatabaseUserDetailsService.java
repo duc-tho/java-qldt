@@ -1,6 +1,6 @@
 package com.nhom11.qldt.feature.auth.service;
 
-import java.util.List;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,7 +25,9 @@ public class DatabaseUserDetailsService implements UserDetailsService {
         return org.springframework.security.core.userdetails.User
                 .withUsername(user.getEmail())
                 .password(user.getPassword())
-                .authorities(List.of())
+                .authorities(user.getRoles().stream()
+                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role.getName()))
+                        .toList())
                 .build();
     }
 }

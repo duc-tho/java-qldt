@@ -4,7 +4,7 @@
 
 **Goal:** Protect the application with Spring Security form login backed by existing users and BCrypt password storage.
 
-**Architecture:** Spring Security owns form login, CSRF, HTTP sessions, and logout. `DatabaseUserDetailsService` loads a non-deleted user by email for the security layer, while `UserService` retains CRUD responsibility and encodes passwords before persistence.
+**Architecture:** Spring Security owns form login, CSRF, HTTP sessions, and logout. `DatabaseUserDetailsService` calls `UserService` to load a non-deleted user by email for the security layer; `UserService` owns CRUD, email lookup, and password encoding before persistence.
 
 **Tech Stack:** Java 25, Spring Boot 4.1.1, Spring Security, Spring Data JPA, Thymeleaf, Flyway, BCrypt.
 
@@ -12,11 +12,12 @@
 
 ## Global Constraints
 
-- Authenticate by `email`; the bootstrap account is `admin@qldt.local` with initial password `admin`.
+- Authenticate by `email`; the bootstrap account is `admin@qldt.local` with initial password `admin123`.
 - Configure server-side session authentication with Spring Security `formLogin`; do not add JWT or registration.
 - Keep CSRF protection enabled and make logout a `POST /logout` form carrying the CSRF token.
 - Do not add role or permission authorization; every authenticated user may access the same routes.
 - Persist only BCrypt hashes for passwords created or changed through user CRUD and in the seed migration.
+- Configure all feature repositories as Spring Data interfaces with `BaseRepositoryImpl` as their common base; prefer Derived Query Methods, then `@Query` when a derived name is unclear.
 - Do not add automated tests, per the user's explicit request; verify by compile/build and the listed manual checks.
 
 ## Review Focus
@@ -33,10 +34,13 @@
 
 | File | Responsibility |
 | --- | --- |
+| `src/main/java/com/nhom11/qldt/QldtApplication.java` | Enable Spring Data repository scanning with the custom base class. |
 | `src/main/java/com/nhom11/qldt/config/WebSecurityConfig.java` | Supply BCrypt and configure protected routes, form login, and logout. |
-| `src/main/java/com/nhom11/qldt/core/repository/BaseRepositoryImpl.java` | Expose its `EntityManager` to focused concrete repository queries. |
-| `src/main/java/com/nhom11/qldt/feature/auth/repository/UserRepository.java` | Load an active user by email via JPQL. |
-| `src/main/java/com/nhom11/qldt/feature/auth/service/DatabaseUserDetailsService.java` | Adapt a stored user to Spring Security `UserDetails`. |
+| `src/main/java/com/nhom11/qldt/core/repository/BaseRepositoryImpl.java` | Serve as Spring Data's common repository base class. |
+| `src/main/java/com/nhom11/qldt/feature/auth/repository/UserRepository.java` | Declare `findByEmail` as a Derived Query Method. |
+| `src/main/java/com/nhom11/qldt/feature/auth/repository/RoleRepository.java` | Declare the role Spring Data repository interface. |
+| `src/main/java/com/nhom11/qldt/feature/auth/repository/PermissionRepository.java` | Declare the permission Spring Data repository interface. |
+| `src/main/java/com/nhom11/qldt/feature/auth/service/DatabaseUserDetailsService.java` | Adapt a user provided by `UserService` to Spring Security `UserDetails`. |
 | `src/main/java/com/nhom11/qldt/feature/auth/service/UserService.java` | BCrypt-encode passwords on create and password-changing update. |
 | `src/main/java/com/nhom11/qldt/feature/auth/controller/AuthController.java` | Render only `GET /login`. |
 | `src/main/resources/templates/fragment/form/login-form.html` | Submit the expected credentials and render error/logout notices. |
@@ -44,51 +48,97 @@
 | `src/main/resources/templates/fragment/ui/nav.html` | Render a CSRF-protected logout form for authenticated users. |
 | `src/main/resources/db/migration/V1_2__seed_admin_user.sql` | Insert the initial account with a generated BCrypt hash. |
 
-### Task 1: Load users for authentication and secure passwords
+### Task 1: Standardize Spring Data repositories
 
 **Files:**
+- Modify: `src/main/java/com/nhom11/qldt/QldtApplication.java`
 - Modify: `src/main/java/com/nhom11/qldt/core/repository/BaseRepositoryImpl.java`
 - Modify: `src/main/java/com/nhom11/qldt/feature/auth/repository/UserRepository.java`
+- Modify: `src/main/java/com/nhom11/qldt/feature/auth/repository/RoleRepository.java`
+- Modify: `src/main/java/com/nhom11/qldt/feature/auth/repository/PermissionRepository.java`
+
+**Interfaces:**
+- Consumes: `BaseRepository<T, ID>` and Spring Data's `JpaEntityInformation<T, ?>`.
+- Produces: Spring Data proxies for all three feature repositories and `Optional<User> UserRepository.findByEmail(String email)`.
+
+- [ ] **Step 1: Enable the common repository base implementation**
+
+  Add `@EnableJpaRepositories(repositoryBaseClass = BaseRepositoryImpl.class)` to `QldtApplication`, alongside its existing `@EnableJpaAuditing`. Import `org.springframework.data.jpa.repository.config.EnableJpaRepositories` and `BaseRepositoryImpl`.
+
+- [ ] **Step 2: Supply Spring Data's repository-base constructor**
+
+  Replace the constructor in `BaseRepositoryImpl` with the constructor Spring Data uses to instantiate a custom base class. Keep the existing fields and initialize `domainClass` and `filterQueryBuilder` from `entityInformation`:
+
+  ```java
+  public BaseRepositoryImpl(
+          JpaEntityInformation<T, ?> entityInformation,
+          EntityManager entityManager) {
+      super(entityInformation, entityManager);
+
+      this.domainClass = entityInformation.getJavaType();
+      this.entityManager = entityManager;
+      this.filterQueryBuilder = new FilterQueryBuilder<>(domainClass, entityManager);
+  }
+  ```
+
+  Replace the `Class<T>` import with `org.springframework.data.jpa.repository.support.JpaEntityInformation`.
+
+- [ ] **Step 3: Convert each feature repository to an interface**
+
+  Replace the class bodies, `@Repository`, `EntityManager`, and constructor imports in all three repositories. Their complete declarations are:
+
+  ```java
+  public interface UserRepository extends BaseRepository<User, Long> {
+      Optional<User> findByEmail(String email);
+  }
+  ```
+
+  ```java
+  public interface RoleRepository extends BaseRepository<Role, Long> {
+  }
+  ```
+
+  ```java
+  public interface PermissionRepository extends BaseRepository<Permission, Long> {
+  }
+  ```
+
+  `UserRepository` imports `java.util.Optional`; all three import `BaseRepository` and their own entity class. Do not use `@Repository`, because Spring Data registers the interface proxies.
+
+- [ ] **Step 4: Compile the repository refactor**
+
+  Run: `./mvnw compile`
+
+  Expected: `BUILD SUCCESS`; the existing `UserService` constructor can receive the generated `UserRepository` proxy.
+
+### Task 2: Load users for authentication and secure passwords
+
+**Files:**
 - Create: `src/main/java/com/nhom11/qldt/feature/auth/service/DatabaseUserDetailsService.java`
 - Modify: `src/main/java/com/nhom11/qldt/feature/auth/service/UserService.java`
 
 **Interfaces:**
-- Consumes: `UserRepository.findByEmail(String email)` and Spring Security's `UserDetailsService` / `UserDetails`.
-- Produces: `DatabaseUserDetailsService.loadUserByUsername(String email)` for Spring Security and BCrypt-backed `UserService.create(User)` / `UserService.update(User)`.
+- Consumes: Spring Security's `UserDetailsService` / `UserDetails` and `UserService.findByEmail(String email)`.
+- Produces: `UserService.findByEmail(String email)`, `DatabaseUserDetailsService.loadUserByUsername(String email)`, and BCrypt-backed `UserService.create(User)` / `UserService.update(User)`.
 
-- [ ] **Step 1: Add a repository lookup for an active email**
 
-  Add `Optional<User> findByEmail(String email)` to `UserRepository`. Use the inherited `EntityManager` supplied by `BaseRepositoryImpl` by changing its visibility from `private` to `protected`, then run this JPQL query and return the first result:
 
-  ```java
-  public Optional<User> findByEmail(String email) {
-      return entityManager.createQuery(
-                      "SELECT u FROM User u WHERE u.email = :email",
-                      User.class)
-              .setParameter("email", email)
-              .getResultStream()
-              .findFirst();
-  }
-  ```
+- [ ] **Step 1: Add the security-only user-details adapter**
 
-  `User` already has `@SQLRestriction("deleted_at IS NULL")`, so the query excludes soft-deleted rows without duplicating that predicate.
-
-- [ ] **Step 2: Add the security-only user-details adapter**
-
-  Create `DatabaseUserDetailsService` in `feature.auth.service`. Inject `UserRepository` through the constructor. Implement `UserDetailsService` and map the matched user to a no-authority principal:
+  Create `DatabaseUserDetailsService` in `feature.auth.service`. Inject `UserService` through the constructor. Implement `UserDetailsService` and map the user returned by `UserService.findByEmail(email)` to a no-authority principal:
 
   ```java
   @Service
   public class DatabaseUserDetailsService implements UserDetailsService {
-      private final UserRepository userRepository;
+      private final UserService userService;
 
-      public DatabaseUserDetailsService(UserRepository userRepository) {
-          this.userRepository = userRepository;
+      public DatabaseUserDetailsService(UserService userService) {
+          this.userService = userService;
       }
 
       @Override
       public UserDetails loadUserByUsername(String email) {
-          User user = userRepository.findByEmail(email)
+          User user = userService.findByEmail(email)
                   .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
           return org.springframework.security.core.userdetails.User
@@ -102,11 +152,17 @@
 
   Import `java.util.List`, `UserDetails`, `UserDetailsService`, and `UsernameNotFoundException`. Do not add role or permission mapping.
 
-- [ ] **Step 3: Encode password values in `UserService`**
 
-  Inject `PasswordEncoder` alongside `UserRepository`. Implement `beforeCreate` to encode the incoming password. Extend `beforeUpdate` so it first loads the existing user, preserves the existing hash for blank input, otherwise encodes the submitted new password, then preserves the existing roles:
+
+- [ ] **Step 2: Expose email lookup and encode password values in `UserService`**
+
+  Inject `PasswordEncoder` alongside `UserRepository`. Add `public Optional<User> findByEmail(String email)` that returns `userRepository.findByEmail(email)`. Implement `beforeCreate` to encode the incoming password. Extend `beforeUpdate` so it first loads the existing user, preserves the existing hash for blank input, otherwise encodes the submitted new password, then preserves the existing roles:
 
   ```java
+  public Optional<User> findByEmail(String email) {
+      return userRepository.findByEmail(email);
+  }
+
   @Override
   protected void beforeCreate(User user) {
       user.setPassword(passwordEncoder.encode(user.getPassword()));
@@ -126,20 +182,14 @@
   }
   ```
 
-- [ ] **Step 4: Compile the backend**
+
+- [ ] **Step 3: Compile the backend**
 
   Run: `./mvnw compile`
 
   Expected: `BUILD SUCCESS`; no new test source is created.
 
-- [ ] **Step 5: Commit the persistence and service layer**
-
-  ```bash
-  git add src/main/java/com/nhom11/qldt/core/repository/BaseRepositoryImpl.java src/main/java/com/nhom11/qldt/feature/auth/repository/UserRepository.java src/main/java/com/nhom11/qldt/feature/auth/service/DatabaseUserDetailsService.java src/main/java/com/nhom11/qldt/feature/auth/service/UserService.java
-  git commit -m "feat: load users for authentication"
-  ```
-
-### Task 2: Configure Spring Security and seed the initial account
+### Task 3: Configure Spring Security and seed the initial account
 
 **Files:**
 - Modify: `src/main/java/com/nhom11/qldt/config/WebSecurityConfig.java`
@@ -180,7 +230,7 @@
 
   ```java
   import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-  System.out.println(new BCryptPasswordEncoder().encode("admin"));
+  System.out.println(new BCryptPasswordEncoder().encode("admin123"));
   ```
 
   Copy the printed hash once. Do not commit the plaintext command output or a Java helper file.
@@ -195,14 +245,7 @@
 
   Expected: the application starts without a Flyway checksum or migration error. Stop it after the migration completes.
 
-- [ ] **Step 5: Commit security configuration and seed data**
-
-  ```bash
-  git add src/main/java/com/nhom11/qldt/config/WebSecurityConfig.java src/main/resources/db/migration/V1_2__seed_admin_user.sql
-  git commit -m "feat: secure application login"
-  ```
-
-### Task 3: Connect the login and logout UI
+### Task 4: Connect the login and logout UI
 
 **Files:**
 - Modify: `src/main/java/com/nhom11/qldt/feature/auth/controller/AuthController.java`
@@ -245,15 +288,8 @@
   Start the app and verify, without creating automated tests:
 
   1. Open `/users` while anonymous; the browser redirects to `/login`.
-  2. Submit `admin@qldt.local` / `admin`; the browser reaches `/` and can open `/users`.
+  2. Submit `admin@qldt.local` / `admin123`; the browser reaches `/` and can open `/users`.
   3. Submit the correct email with a wrong password; `/login?error` shows only the generic credentials error.
   4. Use logout; a following `/users` request redirects to `/login`.
   5. Create a user, then inspect the database `users.password`: it is BCrypt, not plaintext.
   6. Edit that user without a password and confirm the stored hash is unchanged; edit with a new password and confirm the hash changes and authenticates the new password.
-
-- [ ] **Step 7: Commit the authentication UI**
-
-  ```bash
-  git add src/main/java/com/nhom11/qldt/feature/auth/controller/AuthController.java src/main/resources/templates/fragment/form/login-form.html src/main/resources/templates/auth/login.html src/main/resources/templates/fragment/ui/nav.html
-  git commit -m "feat: add login and logout ui"
-  ```

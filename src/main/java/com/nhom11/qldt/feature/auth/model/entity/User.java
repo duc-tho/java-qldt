@@ -4,11 +4,13 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
+import com.nhom11.qldt.feature.department.model.entity.Department;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -36,6 +38,13 @@ final public class User extends SoftDeleteEntity {
 
     @Column(name = "full_name", nullable = false, length = 50)
     String fullName;
+
+    @Column(name = "user_code", unique = true, length = 30)
+    String userCode;
+
+    @ManyToOne
+    @JoinColumn(name = "department_id")
+    private Department department;
 
     @ManyToMany
     @JoinTable(name = "user_roles", joinColumns = @JoinColumn(name = "user_id"), inverseJoinColumns = @JoinColumn(name = "role_id"))
