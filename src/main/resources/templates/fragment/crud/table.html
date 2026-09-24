@@ -9,9 +9,6 @@
 
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                 <div class="flex items-center gap-2">
-                    <input type="checkbox" id="crud-select-all" class="checkbox checkbox-sm"
-                        th:title="#{crud.table.select_all}"
-                        x-bind:checked="allSelected" x-on:change="toggleAll($event)" />
                     <button type="button" class="btn btn-ghost btn-sm btn-square" th:title="#{crud.table.reload}"
                         x-on:click="submitQuery()">
                         <span class="iconify" data-icon="bi:arrow-clockwise" data-width="16"></span>
@@ -36,36 +33,45 @@
                 </div>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto rounded-box border-2 border-base-300">
                 <table class="table table-zebra w-full">
-                    <thead>
+                    <thead class="bg-base-200">
                         <tr>
-                            <th class="w-10"></th>
+                            <th class="w-10">
+                                <input type="checkbox" id="crud-select-all" class="checkbox checkbox-sm"
+                                    th:title="#{crud.table.select_all}"
+                                    x-bind:checked="allSelected" x-on:change="toggleAll($event)" />
+                            </th>
                             <th:block th:each="col : ${table.columns}">
                                 <th th:with="isSorted=${col.field == table.sortField},
                                         isAsc=${col.field == table.sortField && table.sortDir == 'asc'},
                                         isDesc=${col.field == table.sortField && table.sortDir == 'desc'}">
-                                    <button th:if="${col.sortable}" type="button" class="btn btn-ghost btn-xs gap-1 -ml-2"
+                                    <button th:if="${col.sortable}" type="button" class="btn btn-ghost btn-sm gap-1 -ml-1"
                                         th:attr="data-sort=${isDesc ? '' : col.field}, data-dir=${isAsc ? 'desc' : 'asc'}"
                                         x-on:click="submitQuery(0, $el.dataset.sort, $el.dataset.dir)">
                                         <span th:text="${#messages.msg(col.label)}"></span>
                                         <span th:if="${!isSorted}" class="iconify text-base-content/40"
-                                            data-icon="bi:arrow-down-up" data-width="12"></span>
+                                            data-icon="bi:arrow-down-up" data-width="14"></span>
                                         <span th:if="${isAsc}" class="iconify" data-icon="bi:sort-down"
-                                            data-width="12"></span>
+                                            data-width="14"></span>
                                         <span th:if="${isDesc}" class="iconify" data-icon="bi:sort-up"
-                                            data-width="12"></span>
+                                            data-width="14"></span>
                                     </button>
-                                    <span th:unless="${col.sortable}" th:text="${#messages.msg(col.label)}"></span>
+                                    <span th:unless="${col.sortable}" class="text-sm" th:text="${#messages.msg(col.label)}"></span>
                                 </th>
                             </th:block>
                             <th class="text-right" th:text="#{crud.table.actions}"></th>
                         </tr>
                         <tr th:if="${!#lists.isEmpty(table.filterableColumns)}">
-                            <th></th>
+                            <th>
+                                <button type="button" class="btn btn-primary btn-sm btn-square" th:title="#{crud.table.search}"
+                                    aria-label="Search" x-on:click="submitQuery(0)">
+                                    <span class="iconify" data-icon="bi:search" data-width="16"></span>
+                                </button>
+                            </th>
                             <th:block th:each="col : ${table.columns}">
                                 <th>
-                                    <input th:if="${col.filterable}" type="search" class="input input-xs w-full"
+                                    <input th:if="${col.filterable}" type="search" class="input input-sm w-full"
                                         th:name="|filters[${col.field}]|" th:value="${table.filters[col.field]}"
                                         th:placeholder="${#messages.msg(col.label)}" x-on:change="submitQuery(0)" />
                                 </th>
@@ -74,13 +80,15 @@
                         </tr>
                     </thead>
                     <tbody th:if="${!table.data.empty}">
-                        <tr th:each="item : ${table.data.content}">
+                        <tr th:each="item : ${table.data.content}" class="cursor-pointer transition-colors hover:bg-base-200">
                             <td>
                                 <input type="checkbox" name="ids" class="checkbox checkbox-sm"
                                     th:value="${item.id}" x-model="selectedIds" />
                             </td>
                             <th:block th:each="col : ${table.columns}">
-                                <td th:text="${col.getValue(item)}"></td>
+                                <td>
+                                    <a th:href="${table.baseUrl + '/' + item.id}" class="block" th:text="${col.getValue(item)}"></a>
+                                </td>
                             </th:block>
                             <td>
                                 <th:block th:replace="~{fragment/crud/actions :: crud-actions(${table.actions}, ${item})}"></th:block>

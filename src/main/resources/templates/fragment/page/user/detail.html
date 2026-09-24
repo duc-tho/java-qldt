@@ -11,7 +11,7 @@
             <span class="iconify inline" data-icon="bi:pencil-square" data-width="16"></span>
             <span th:text="#{users.action.edit}"></span>
         </a>
-        <button th:if="${form.readonly}" type="button" class="btn btn-error btn-outline btn-sm"
+        <button th:if="${form.readonly}" type="button" class="btn btn-error btn-outline btn-sm" x-data
             th:attr="data-delete-url=${form.actionUrl + '/delete'}, data-delete-name=${form.data.fullName}"
             x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
             <span class="iconify inline" data-icon="bi:trash" data-width="16"></span>

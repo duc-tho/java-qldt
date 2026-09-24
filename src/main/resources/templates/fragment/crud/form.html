@@ -2,10 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <th:block th:fragment="crud-form(form)">
     <form th:unless="${form.readonly}" method="post" th:action="${form.actionUrl}" th:object="${form.data}"
-        novalidate x-data="formValidation" @submit.prevent="submit">
+        class="w-full lg:w-1/2" novalidate x-data="formValidation" @submit.prevent="submit">
 
         <div class="flex flex-col gap-5">
-            <div th:if="${#fields.hasAnyErrors()}" role="alert"
+            <div th:if="${#fields.hasAnyErrors()}" role="alert" aria-live="assertive"
                 class="alert alert-error alert-soft flex gap-2 flex-col">
                 <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
             </div>
@@ -22,7 +22,7 @@
         </div>
     </form>
 
-    <div th:if="${form.readonly}" class="flex flex-col gap-5" th:object="${form.data}">
+    <div th:if="${form.readonly}" class="flex w-full flex-col gap-5 lg:w-1/2" th:object="${form.data}">
         <th:block th:replace="~{${form.fieldsTemplate} :: form-fields(${form.data}, ${form.readonly}, ${form.validationRules})}"></th:block>
     </div>
 </th:block>

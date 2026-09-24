@@ -50,7 +50,7 @@ public class ClientValidationRuleRenderer {
 
     public static List<Map<String, Object>> createPasswordRule(String message) {
         List<Map<String, Object>> rules = new ArrayList<>();
-        rules.add(rule("password", message));
+        rules.add(rule("required", message));
 
         return rules;
     }

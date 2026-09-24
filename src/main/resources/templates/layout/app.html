@@ -10,10 +10,10 @@
         <div class="drawer lg:drawer-open">
             <input id="my-drawer-4" type="checkbox" class="drawer-toggle inline" checked />
 
-            <div class="drawer-content flex min-h-svh flex-col">
+            <div class="drawer-content flex min-h-svh flex-col bg-base-200">
                 <div th:replace="~{fragment/ui/nav.html}"></div>
 
-                <main class="flex-1 max-w-(--breakpoint-2xl) w-full mx-auto px-3 py-4 sm:px-4 xl:px-8">
+                <main class="flex-1 max-w-(--breakpoint-2xl) w-full mx-auto bg-base-100 shadow-md rounded-l-lg px-3 py-4 sm:px-4 xl:px-8">
                     <th:block layout:fragment="main">
                     </th:block>
                 </main>

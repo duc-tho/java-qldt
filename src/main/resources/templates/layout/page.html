@@ -8,10 +8,10 @@
 <body>
     <th:block layout:fragment="main">
         <div class="flex flex-col gap-4">
-            <div class="flex flex-wrap items-start justify-between gap-4 gap-y-3">
-                <div class="flex items-start gap-3">
+            <div class="flex flex-wrap items-center justify-between gap-4 gap-y-3">
+                <div class="flex items-center gap-3">
                     <div th:if="${pageIcon}"
-                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md">
                         <span class="iconify" th:attr="data-icon=${pageIcon}" data-width="22"></span>
                     </div>
                     <div>
@@ -29,6 +29,8 @@
                     <th:block layout:fragment="actions"></th:block>
                 </div>
             </div>
+
+            <div class="border-t-2 border-dashed border-base-300"></div>
 
             <th:block layout:fragment="page-content"></th:block>
         </div>
