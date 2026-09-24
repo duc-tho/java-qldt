@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 <th:block th:fragment="crud-form(form)">
-    <form th:unless="${form.readonly}" method="post" th:object="${form.data}" novalidate x-data="formValidation"
-        @submit.prevent="submit" th:attr="hx-trigger='validated-submit', hx-post=${form.method == 'post' ? form.actionUrl : null}, hx-put=${form.method == 'put' ? form.actionUrl : null}"
-        hx-target="this" hx-swap="outerHTML">
+    <form th:unless="${form.readonly}" method="post" th:action="${form.actionUrl}" th:object="${form.data}"
+        novalidate x-data="formValidation" @submit.prevent="submit">
 
         <div class="flex flex-col gap-5">
             <div th:if="${#fields.hasAnyErrors()}" role="alert"

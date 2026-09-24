@@ -6,21 +6,17 @@ import java.util.Map;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhom11.qldt.core.table.TableQuery;
-import com.nhom11.qldt.core.utils.HtmxRequestUtils;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.model.dto.UserForm;
@@ -28,8 +24,6 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.auth.view.UserTableDefinition;
 
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Controller
@@ -37,15 +31,11 @@ import jakarta.validation.Valid;
 public class UserController {
 
     private static final String BASE_URL = "/users";
-    private static final String VIEW_FORM_FRAGMENT = "fragment/crud/form :: crud-form";
     private static final String TEMPLATE_USER_FIELDS = "fragment/page/user/fields";
     private static final String VIEW_USER_LIST = "fragment/page/user/list";
     private static final String VIEW_USER_DETAIL = "fragment/page/user/detail";
     private static final String VIEW_USER_CREATE = "fragment/page/user/create";
-    private static final String TABLE_TARGET = "#crud-table";
-    private static final String HX_REDIRECT_HEADER = "HX-Redirect";
     private static final String FORM_METHOD_POST = "post";
-    private static final String FORM_METHOD_PUT = "put";
     private static final int FORCE_DELETE_PERMANENTLY = 1;
 
     private final UserService userService;
@@ -70,20 +60,15 @@ public class UserController {
     @GetMapping
     public String list(
             @ModelAttribute TableQuery query,
-            HttpServletRequest request,
             Model model) {
 
         Page<User> users = userService.findAll(query, userTableDefinition);
-        String tableView = crudView.table(
+        crudView.table(
                 model,
                 users,
                 BASE_URL,
                 query,
                 userTableDefinition);
-
-        if (HtmxRequestUtils.isHtmxRequest(request)) {
-            return tableView;
-        }
 
         model.addAttribute("pageTitle", "users.page.list.title");
         model.addAttribute("pageIcon", "bi:people");
@@ -123,7 +108,6 @@ public class UserController {
     public String create(
             @Valid @ModelAttribute("data") UserForm form,
             BindingResult bindingResult,
-            HttpServletResponse response,
             Model model) {
 
         if (form.getPassword() == null || form.getPassword().isBlank()) {
@@ -137,8 +121,6 @@ public class UserController {
         }
 
         if (bindingResult.hasErrors()) {
-            response.setStatus(HttpStatus.UNPROCESSABLE_CONTENT.value());
-
             Map<String, String> validationRules = validationRuleRenderer.render(
                     UserForm.class,
                     Map.of(
@@ -158,13 +140,15 @@ public class UserController {
                     TEMPLATE_USER_FIELDS,
                     validationRules);
 
-            return VIEW_FORM_FRAGMENT;
+            model.addAttribute("pageTitle", "users.page.create.title");
+            model.addAttribute("pageIcon", "bi:person-plus");
+
+            return VIEW_USER_CREATE;
         }
 
         userService.create(form.toEntity());
-        response.setHeader(HX_REDIRECT_HEADER, BASE_URL);
 
-        return null;
+        return "redirect:" + BASE_URL;
     }
 
     @GetMapping("/{id}")
@@ -185,7 +169,7 @@ public class UserController {
                 model,
                 form,
                 BASE_URL + "/" + id,
-                FORM_METHOD_PUT,
+                FORM_METHOD_POST,
                 BASE_URL,
                 true,
                 TEMPLATE_USER_FIELDS,
@@ -212,7 +196,7 @@ public class UserController {
                 model,
                 form,
                 BASE_URL + "/" + id,
-                FORM_METHOD_PUT,
+                FORM_METHOD_POST,
                 BASE_URL,
                 false,
                 TEMPLATE_USER_FIELDS,
@@ -221,12 +205,11 @@ public class UserController {
         return VIEW_USER_DETAIL;
     }
 
-    @PutMapping("/{id}")
+    @PostMapping("/{id}")
     public String update(
             @PathVariable Long id,
             @Valid @ModelAttribute("data") UserForm form,
             BindingResult bindingResult,
-            HttpServletResponse response,
             Model model) {
 
         User existingUser = userService.findById(id);
@@ -235,38 +218,33 @@ public class UserController {
         }
 
         if (bindingResult.hasErrors()) {
-            response.setStatus(HttpStatus.UNPROCESSABLE_ENTITY.value());
-
             Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
             crudView.form(
                     model,
                     form,
                     BASE_URL + "/" + id,
-                    FORM_METHOD_PUT,
+                    FORM_METHOD_POST,
                     BASE_URL,
                     false,
                     TEMPLATE_USER_FIELDS,
                     validationRules);
 
-            return VIEW_FORM_FRAGMENT;
+            model.addAttribute("pageTitle", "users.page.edit.title");
+            model.addAttribute("pageIcon", "bi:person");
+
+            return VIEW_USER_DETAIL;
         }
 
         User updates = form.toEntity();
         updates.setId(id);
         userService.update(updates);
-        response.setHeader(HX_REDIRECT_HEADER, BASE_URL + "/" + id);
-
-        return null;
+        return "redirect:" + BASE_URL + "/" + id;
     }
 
-    @DeleteMapping("/{id}")
+    @PostMapping("/{id}/delete")
     public String delete(
             @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int force,
-            @ModelAttribute TableQuery query,
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Model model) {
+            @RequestParam(defaultValue = "0") int force) {
 
         if (force == FORCE_DELETE_PERMANENTLY) {
             userService.deletePermanently(id);
@@ -274,37 +252,15 @@ public class UserController {
             userService.delete(id);
         }
 
-        if (TABLE_TARGET.equals(request.getHeader("HX-Target"))) {
-            Page<User> users = userService.findAll(query, userTableDefinition);
-
-            return crudView.table(
-                    model,
-                    users,
-                    BASE_URL,
-                    query,
-                    userTableDefinition);
-        }
-
-        response.setHeader(HX_REDIRECT_HEADER, BASE_URL);
-
-        return null;
+        return "redirect:" + BASE_URL;
     }
 
-    @DeleteMapping
+    @PostMapping("/delete")
     public String batchDelete(
-            @RequestParam("ids") List<Long> ids,
-            @ModelAttribute TableQuery query,
-            Model model) {
+            @RequestParam("ids") List<Long> ids) {
 
         userService.softDeleteAll(ids);
 
-        Page<User> users = userService.findAll(query, userTableDefinition);
-
-        return crudView.table(
-                model,
-                users,
-                BASE_URL,
-                query,
-                userTableDefinition);
+        return "redirect:" + BASE_URL;
     }
 }

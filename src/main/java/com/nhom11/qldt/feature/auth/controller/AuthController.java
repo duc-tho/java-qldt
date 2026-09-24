@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.feature.auth.model.dto.LoginForm;
 
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
 @Controller
@@ -38,15 +37,12 @@ public class AuthController {
     @PostMapping("/login")
     public String login(
             @Valid @ModelAttribute("data") LoginForm loginForm,
-            BindingResult bindingResult,
-            Model model, HttpServletResponse response) {
+            BindingResult bindingResult) {
 
         if (bindingResult.hasErrors()) {
-            return "fragment/form/login-form :: login-form";
+            return "auth/login";
         }
 
-        response.setHeader("HX-Redirect", "/");
-
-        return null;
+        return "redirect:/";
     }
 }

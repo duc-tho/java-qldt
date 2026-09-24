@@ -10,7 +10,7 @@ function registerFormValidation() {
 
         async submit() {
             if (await this.validator.revalidate()) {
-                this.$el.dispatchEvent(new CustomEvent("validated-submit", { bubbles: true }));
+                HTMLFormElement.prototype.submit.call(this.$el);
             }
         },
 

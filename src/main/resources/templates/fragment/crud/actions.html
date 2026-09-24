@@ -9,7 +9,7 @@
                     <span th:text="${#messages.msg(action.label())}"></span>
                 </a>
                 <button th:unless="${!action.isDelete()}" type="button" class="btn btn-ghost btn-xs text-error"
-                    th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}"
+                    th:attr="data-delete-url=${action.getUrl(item) + '/delete'}, data-delete-name=${action.getName(item)}"
                     x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
                     <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
                     <span th:text="${#messages.msg(action.label())}"></span>
@@ -28,7 +28,7 @@
                         <span th:text="${#messages.msg(action.label())}"></span>
                     </a>
                     <button th:unless="${!action.isDelete()}" type="button" class="text-error"
-                        th:attr="data-delete-url=${action.getUrl(item)}, data-delete-name=${action.getName(item)}"
+                        th:attr="data-delete-url=${action.getUrl(item) + '/delete'}, data-delete-name=${action.getName(item)}"
                         x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
                         <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
                         <span th:text="${#messages.msg(action.label())}"></span>

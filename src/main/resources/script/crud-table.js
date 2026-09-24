@@ -15,6 +15,22 @@ function registerCrudTable() {
         toggleAll(event) {
             this.selectedIds = event.target.checked ? this.rowIds : [];
         },
+
+        submitQuery(page, sort, dir) {
+            const form = this.$refs.queryForm;
+
+            if (page !== undefined) {
+                form.elements.page.value = page;
+            }
+            if (sort !== undefined) {
+                form.elements.sort.value = sort;
+            }
+            if (dir !== undefined) {
+                form.elements.dir.value = dir;
+            }
+
+            form.submit();
+        },
     }));
 }
 

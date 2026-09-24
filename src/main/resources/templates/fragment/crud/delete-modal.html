@@ -3,29 +3,30 @@
 <th:block th:fragment="delete-modal">
     <dialog id="crud-delete-modal" class="modal" x-data="crudDeleteModal"
         x-on:crud-delete-request.window="open($event.detail)" x-ref="dialog">
-        <div class="modal-box">
+        <form method="post" x-ref="form" class="modal-box">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <template x-for="id in ids" :key="id">
+                <input type="hidden" name="ids" :value="id" />
+            </template>
             <h3 class="text-lg font-bold">
                 <span class="iconify inline text-error" data-icon="bi:exclamation-triangle" data-width="20"></span>
                 <span th:text="#{crud.delete.title}"></span>
             </h3>
             <p class="py-4">
                 <span th:text="#{crud.delete.confirm}"></span>
-                <span id="crud-delete-name" class="font-semibold" x-text="name"></span>?
+                <span class="font-semibold" x-text="name"></span>?
             </p>
-            <span class="hidden" x-ref="batchDeleteTemplate" th:text="#{crud.delete.batch}"></span>
             <div class="modal-action">
-                <form method="dialog">
-                    <button class="btn btn-ghost">
-                        <span class="iconify inline" data-icon="bi:x-lg" data-width="14"></span>
-                        <span th:text="#{crud.delete.cancel}"></span>
-                    </button>
-                </form>
-                <button id="crud-delete-confirm" x-ref="confirm" type="button" class="btn btn-error">
+                <button type="button" class="btn btn-ghost" x-on:click="$refs.dialog.close()">
+                    <span class="iconify inline" data-icon="bi:x-lg" data-width="14"></span>
+                    <span th:text="#{crud.delete.cancel}"></span>
+                </button>
+                <button type="submit" class="btn btn-error">
                     <span class="iconify inline" data-icon="bi:trash" data-width="14"></span>
                     <span th:text="#{crud.delete.submit}"></span>
                 </button>
             </div>
-        </div>
+        </form>
         <form method="dialog" class="modal-backdrop">
             <button th:aria-label="#{crud.delete.close}"></button>
         </form>
