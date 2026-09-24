@@ -7,7 +7,6 @@
 
 <body>
     <div layout:fragment="body" class="flex items-center justify-center h-screen flex-col lg:flex-row">
-        <!-- Đã sửa lại phần class before: để hiển thị cả màu đè 50% và ảnh texture -->
         <div
             class="hidden lg:block lg:w-1/2 overflow-hidden relative h-full 
                 before:absolute before:inset-0 before:content-[''] before:z-10 before:bg-black/60
@@ -32,8 +31,6 @@
             <p class="text-4xl font-bold">Chào mừng!</p>
             <p class="text-slate-400 mb-5">Hãy đăng nhập vào tài khoản của bạn trước</p>
             <div layout:replace="~{fragment/form/login-form.html}"></div>
-            <p class="text-slate-400 mt-5">Chưa có tài khoản? <a href="/dang-ky" class="text-secondary font-bold">Đăng
-                    ký ngay</a> </p>
         </div>
     </div>
 </body>

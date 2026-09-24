@@ -9,6 +9,8 @@ import lombok.Setter;
 @Getter
 @Setter
 public class LoginForm {
+    public static final String SESSION_EMAIL_ATTRIBUTE = LoginForm.class.getName() + ".email";
+
     @NotBlank(message = "Email không được để trống")
     @Email(message = "Email không đúng định dạng")
     private String email;

@@ -2,17 +2,15 @@ package com.nhom11.qldt.feature.auth.controller;
 
 import java.util.Map;
 
+import jakarta.servlet.http.HttpSession;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.feature.auth.model.dto.LoginForm;
-
-import jakarta.validation.Valid;
 
 @Controller
 public class AuthController {
@@ -28,21 +26,25 @@ public class AuthController {
     }
 
     @GetMapping("/login")
-    public String loginView(Model model) {
-        model.addAttribute("data", new LoginForm());
+    public String loginView(
+            @RequestParam(required = false) String error,
+            HttpSession session,
+            Model model
+    ) {
+        LoginForm loginForm = new LoginForm();
+        
+        if (error != null) {
+            Object email = session.getAttribute(LoginForm.SESSION_EMAIL_ATTRIBUTE);
+            session.removeAttribute(LoginForm.SESSION_EMAIL_ATTRIBUTE);
+
+            if (email instanceof String loginEmail) {
+                loginForm.setEmail(loginEmail);
+            }
+        }
+
+        model.addAttribute("data", loginForm);
 
         return "auth/login";
     }
 
-    @PostMapping("/login")
-    public String login(
-            @Valid @ModelAttribute("data") LoginForm loginForm,
-            BindingResult bindingResult) {
-
-        if (bindingResult.hasErrors()) {
-            return "auth/login";
-        }
-
-        return "redirect:/";
-    }
 }

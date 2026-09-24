@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
@@ -15,17 +16,17 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.Table;
 
-public abstract class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
+public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
         implements BaseRepository<T, ID> {
 
     private final Class<T> domainClass;
     private final EntityManager entityManager;
     protected final FilterQueryBuilder<T> filterQueryBuilder;
 
-    public BaseRepositoryImpl(Class<T> domainClass, EntityManager entityManager) {
-        super(domainClass, entityManager);
+    public BaseRepositoryImpl(JpaEntityInformation<T, ?> entityInformation, EntityManager entityManager) {
+        super(entityInformation, entityManager);
 
-        this.domainClass = domainClass;
+        this.domainClass = entityInformation.getJavaType();
         this.entityManager = entityManager;
         this.filterQueryBuilder = new FilterQueryBuilder<>(domainClass, entityManager);
     }

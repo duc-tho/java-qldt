@@ -17,5 +17,11 @@
                 <span class="badge badge-xs badge-primary indicator-item"></span>
             </div>
         </button>
+        <form method="post" th:action="@{/logout}">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+            <button type="submit" class="btn btn-ghost btn-circle" aria-label="Đăng xuất">
+                <span class="iconify inline" data-icon="bi:box-arrow-right" data-width="20"></span>
+            </button>
+        </form>
     </div>
 </div>
