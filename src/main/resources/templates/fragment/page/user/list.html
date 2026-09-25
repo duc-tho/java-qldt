@@ -1,14 +1,12 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
 
-<head>
-    <title th:text="${#messages.msg(pageTitle)}"></title>
-</head>
-
-<body>
-    <th:block layout:fragment="page-content">
-        <div th:replace="~{fragment/crud/table :: crud-table(${table})}"></div>
-    </th:block>
-</body>
-
+   <body>
+      <th:block layout:fragment="page-content">
+         <div th:replace="~{fragment/crud/table :: crud-table(${table})}"></div>
+      </th:block>
+   </body>
 </html>

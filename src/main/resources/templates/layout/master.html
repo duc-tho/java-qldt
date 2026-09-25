@@ -1,20 +1,21 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi" data-theme="light">
+   <head>
+      <title th:text="#{application.title}"></title>
 
-<head>
-    <title>Master Layout</title>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="_csrf" th:content="${_csrf.token}" />
+      <meta name="_csrf_header" th:content="${_csrf.headerName}" />
 
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="_csrf" th:content="${_csrf.token}" />
-    <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+      <link rel="stylesheet" type="text/css" th:href="@{/assets/app.css}" />
+      <script defer th:src="@{/assets/app.js}"></script>
+      <script
+         defer
+         src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      ></script>
+   </head>
 
-    <link rel="stylesheet" type="text/css" th:href="@{/assets/app.css}" />
-    <script defer th:src="@{/assets/app.js}"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-</head>
-
-<body>
-    <div layout:fragment="body"></div>
-</body>
-
+   <body>
+      <div layout:fragment="body"></div>
+   </body>
 </html>

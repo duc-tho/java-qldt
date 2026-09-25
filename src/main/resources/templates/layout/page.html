@@ -1,42 +1,57 @@
-<!DOCTYPE html>
+<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
 
-<head>
-    <title th:text="${#messages.msg(pageTitle)}"></title>
-</head>
+   <body>
+      <th:block layout:fragment="main">
+         <div class="flex flex-col gap-4">
+            <div
+               class="flex flex-wrap items-center justify-between gap-4 gap-y-3"
+            >
+               <div class="flex items-center gap-3">
+                  <div
+                     th:if="${pageIcon}"
+                     class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
+                  >
+                     <span
+                        class="iconify"
+                        th:attr="data-icon=${pageIcon}"
+                        data-width="22"
+                     ></span>
+                  </div>
+                  <div>
+                     <div class="flex items-center gap-2">
+                        <h1
+                           class="text-2xl font-bold"
+                           th:text="${#messages.msg(pageTitle)}"
+                        ></h1>
+                        <span
+                           th:if="${table != null}"
+                           class="badge badge-primary badge-soft"
+                           th:text="${table.data.totalElements}"
+                        ></span>
+                     </div>
+                     <p
+                        th:if="${pageDesc}"
+                        class="mt-1 text-sm text-base-content/60"
+                        th:text="${#messages.msg(pageDesc)}"
+                     ></p>
+                  </div>
+               </div>
 
-<body>
-    <th:block layout:fragment="main">
-        <div class="flex flex-col gap-4">
-            <div class="flex flex-wrap items-center justify-between gap-4 gap-y-3">
-                <div class="flex items-center gap-3">
-                    <div th:if="${pageIcon}"
-                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md">
-                        <span class="iconify" th:attr="data-icon=${pageIcon}" data-width="22"></span>
-                    </div>
-                    <div>
-                        <div class="flex items-center gap-2">
-                            <h1 class="text-2xl font-bold" th:text="${#messages.msg(pageTitle)}"></h1>
-                            <span th:if="${table != null}" class="badge badge-primary badge-soft"
-                                th:text="${table.data.totalElements}"></span>
-                        </div>
-                        <p th:if="${pageDesc}" class="mt-1 text-sm text-base-content/60"
-                            th:text="${#messages.msg(pageDesc)}"></p>
-                    </div>
-                </div>
-
-                <div class="flex items-center gap-2">
-                    <th:block layout:fragment="actions"></th:block>
-                </div>
+               <div class="flex items-center gap-2">
+                  <th:block layout:fragment="actions"></th:block>
+               </div>
             </div>
 
             <div class="border-t-2 border-dashed border-base-300"></div>
 
             <th:block layout:fragment="page-content"></th:block>
-        </div>
+         </div>
 
-        <div th:replace="~{fragment/crud/delete-modal :: delete-modal}"></div>
-    </th:block>
-</body>
-
+         <div th:replace="~{fragment/crud/delete-modal :: delete-modal}"></div>
+      </th:block>
+   </body>
 </html>
