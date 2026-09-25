@@ -4,17 +4,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BaseService<T, ID> {
-    T findById(ID id);
+  T findById(ID id);
 
-    Iterable<T> findAll();
+  Iterable<T> findAll();
 
-    Page<T> findAll(Pageable pageable);
+  Page<T> findAll(Pageable pageable);
 
-    T create(T entity);
+  T create(T entity);
 
-    T update(T entity);
+  T update(T entity);
 
-    void delete(ID id);
+  void delete(ID id);
 
-    void softDelete(T entity);
+  void softDelete(T entity);
 }

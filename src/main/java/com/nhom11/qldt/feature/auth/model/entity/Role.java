@@ -1,8 +1,5 @@
 package com.nhom11.qldt.feature.auth.model.entity;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -10,6 +7,8 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
+import java.util.HashSet;
+import java.util.Set;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,14 +20,17 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-final public class Role extends SoftDeleteEntity {
-    @Column(nullable = false, unique = true, length = 50)
-    String name;
+public final class Role extends SoftDeleteEntity {
+  @Column(nullable = false, unique = true, length = 50)
+  String name;
 
-    @ManyToMany(mappedBy = "roles")
-    private Set<User> users = new HashSet<>();
+  @ManyToMany(mappedBy = "roles")
+  private Set<User> users = new HashSet<>();
 
-    @ManyToMany
-    @JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_id"))
-    private Set<Permission> permissions = new HashSet<>();
+  @ManyToMany
+  @JoinTable(
+      name = "role_permissions",
+      joinColumns = @JoinColumn(name = "role_id"),
+      inverseJoinColumns = @JoinColumn(name = "permission_id"))
+  private Set<Permission> permissions = new HashSet<>();
 }

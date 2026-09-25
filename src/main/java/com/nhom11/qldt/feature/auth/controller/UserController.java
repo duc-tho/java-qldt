@@ -1,8 +1,16 @@
 package com.nhom11.qldt.feature.auth.controller;
 
+import com.nhom11.qldt.core.table.TableQuery;
+import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
+import com.nhom11.qldt.core.view.CrudViewSupport;
+import com.nhom11.qldt.feature.auth.model.dto.UserForm;
+import com.nhom11.qldt.feature.auth.model.entity.User;
+import com.nhom11.qldt.feature.auth.repository.RoleRepository;
+import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.auth.view.UserTableDefinition;
+import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
-
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -16,265 +24,237 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.nhom11.qldt.core.table.TableQuery;
-import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
-import com.nhom11.qldt.core.view.CrudViewSupport;
-import com.nhom11.qldt.feature.auth.model.dto.UserForm;
-import com.nhom11.qldt.feature.auth.model.entity.User;
-import com.nhom11.qldt.feature.auth.service.UserService;
-import com.nhom11.qldt.feature.auth.repository.RoleRepository;
-import com.nhom11.qldt.feature.department.service.DepartmentService;
-import com.nhom11.qldt.feature.auth.view.UserTableDefinition;
-
-import jakarta.validation.Valid;
-
 @Controller
 @RequestMapping("/users")
 public class UserController {
 
-    private static final String BASE_URL = "/users";
-    private static final String TEMPLATE_USER_FIELDS = "fragment/page/user/fields";
-    private static final String VIEW_USER_LIST = "fragment/page/user/list";
-    private static final String VIEW_USER_DETAIL = "fragment/page/user/detail";
-    private static final String VIEW_USER_CREATE = "fragment/page/user/create";
-    private static final String FORM_METHOD_POST = "post";
-    private static final int FORCE_DELETE_PERMANENTLY = 1;
+  private static final String BASE_URL = "/users";
+  private static final String TEMPLATE_USER_FIELDS = "fragment/page/user/fields";
+  private static final String VIEW_USER_LIST = "fragment/page/user/list";
+  private static final String VIEW_USER_DETAIL = "fragment/page/user/detail";
+  private static final String VIEW_USER_CREATE = "fragment/page/user/create";
+  private static final String FORM_METHOD_POST = "post";
+  private static final int FORCE_DELETE_PERMANENTLY = 1;
 
-    private final UserService userService;
-    private final ClientValidationRuleRenderer validationRuleRenderer;
-    private final CrudViewSupport crudView;
-    private final UserTableDefinition userTableDefinition;
-    private final MessageSource messageSource;
-    private final DepartmentService departmentService;
-    private final RoleRepository roleRepository;
+  private final UserService userService;
+  private final ClientValidationRuleRenderer validationRuleRenderer;
+  private final CrudViewSupport crudView;
+  private final UserTableDefinition userTableDefinition;
+  private final MessageSource messageSource;
+  private final RoleRepository roleRepository;
 
-    public UserController(
-            UserService userService,
-            ClientValidationRuleRenderer validationRuleRenderer,
-            CrudViewSupport crudView,
-            UserTableDefinition userTableDefinition,
-            MessageSource messageSource,
-            DepartmentService departmentService,
-            RoleRepository roleRepository) {
-        this.userService = userService;
-        this.validationRuleRenderer = validationRuleRenderer;
-        this.crudView = crudView;
-        this.userTableDefinition = userTableDefinition;
-        this.messageSource = messageSource;
-        this.departmentService = departmentService;
-        this.roleRepository = roleRepository;
-    }
+  public UserController(
+      UserService userService,
+      ClientValidationRuleRenderer validationRuleRenderer,
+      CrudViewSupport crudView,
+      UserTableDefinition userTableDefinition,
+      MessageSource messageSource,
+      RoleRepository roleRepository) {
+    this.userService = userService;
+    this.validationRuleRenderer = validationRuleRenderer;
+    this.crudView = crudView;
+    this.userTableDefinition = userTableDefinition;
+    this.messageSource = messageSource;
+    this.roleRepository = roleRepository;
+  }
 
-    @GetMapping
-    public String list(
-            @ModelAttribute TableQuery query,
-            Model model) {
+  @GetMapping
+  public String list(@ModelAttribute TableQuery query, Model model) {
 
-        Page<User> users = userService.findAll(query, userTableDefinition);
-        crudView.table(
-                model,
-                users,
-                BASE_URL,
-                query,
-                userTableDefinition);
+    Page<User> users = userService.findAll(query, userTableDefinition);
+    crudView.table(model, users, BASE_URL, query, userTableDefinition);
 
-        model.addAttribute("pageTitle", "users.page.list.title");
-        model.addAttribute("pageIcon", "bi:people");
-        model.addAttribute("pageDesc", "users.page.list.description");
+    model.addAttribute("pageTitle", "users.page.list.title");
+    model.addAttribute("pageIcon", "bi:people");
+    model.addAttribute("pageDesc", "users.page.list.description");
 
-        return VIEW_USER_LIST;
-    }
+    return VIEW_USER_LIST;
+  }
 
-    @GetMapping("/new")
-    public String createForm(Model model) {
-        model.addAttribute("pageTitle", "users.page.create.title");
-        model.addAttribute("pageIcon", "bi:person-plus");
+  @GetMapping("/new")
+  public String createForm(Model model) {
+    model.addAttribute("pageTitle", "users.page.create.title");
+    model.addAttribute("pageIcon", "bi:person-plus");
 
-        Map<String, String> validationRules = validationRuleRenderer.render(
-                UserForm.class,
-                Map.of(
-                        "password",
-                        ClientValidationRuleRenderer.createPasswordRule(
-                                messageSource.getMessage(
-                                        "users.validation.password.required",
-                                        null,
-                                        LocaleContextHolder.getLocale()))));
-        crudView.form(
-                model,
-                new UserForm(),
-                BASE_URL,
-                FORM_METHOD_POST,
-                BASE_URL,
-                false,
-                TEMPLATE_USER_FIELDS,
-                validationRules);
-
-        return VIEW_USER_CREATE;
-    }
-
-    @PostMapping
-    public String create(
-            @Valid @ModelAttribute("data") UserForm form,
-            BindingResult bindingResult,
-            Model model) {
-
-        if (form.getPassword() == null || form.getPassword().isBlank()) {
-            bindingResult.rejectValue(
-                    "password",
-                    "NotBlank",
+    Map<String, String> validationRules =
+        validationRuleRenderer.render(
+            UserForm.class,
+            Map.of(
+                "password",
+                ClientValidationRuleRenderer.createPasswordRule(
                     messageSource.getMessage(
-                            "users.validation.password.required",
-                            null,
-                            LocaleContextHolder.getLocale()));
-        }
+                        "users.validation.password.required",
+                        null,
+                        LocaleContextHolder.getLocale()))));
+    crudView.form(
+        model,
+        new UserForm(),
+        BASE_URL,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
 
-        if (bindingResult.hasErrors()) {
-            Map<String, String> validationRules = validationRuleRenderer.render(
-                    UserForm.class,
-                    Map.of(
-                            "password",
-                            ClientValidationRuleRenderer.createPasswordRule(
-                                    messageSource.getMessage(
-                                            "users.validation.password.required",
-                                            null,
-                                            LocaleContextHolder.getLocale()))));
-            crudView.form(
-                    model,
-                    form,
-                    BASE_URL,
-                    FORM_METHOD_POST,
-                    BASE_URL,
-                    false,
-                    TEMPLATE_USER_FIELDS,
-                    validationRules);
+    return VIEW_USER_CREATE;
+  }
 
-            model.addAttribute("pageTitle", "users.page.create.title");
-            model.addAttribute("pageIcon", "bi:person-plus");
+  @PostMapping
+  public String create(
+      @Valid @ModelAttribute("data") UserForm form, BindingResult bindingResult, Model model) {
 
-            return VIEW_USER_CREATE;
-        }
-
-        userService.create(form.toEntity(), form.getDepartmentId(), form.getRoleIds());
-
-        return "redirect:" + BASE_URL;
+    if (form.getPassword() == null || form.getPassword().isBlank()) {
+      bindingResult.rejectValue(
+          "password",
+          "NotBlank",
+          messageSource.getMessage(
+              "users.validation.password.required", null, LocaleContextHolder.getLocale()));
     }
 
-    @GetMapping("/{id}")
-    public String detail(@PathVariable Long id, Model model) {
-        User user = userService.findById(id);
-        if (user == null) {
-            return "redirect:" + BASE_URL;
-        }
+    if (bindingResult.hasErrors()) {
+      Map<String, String> validationRules =
+          validationRuleRenderer.render(
+              UserForm.class,
+              Map.of(
+                  "password",
+                  ClientValidationRuleRenderer.createPasswordRule(
+                      messageSource.getMessage(
+                          "users.validation.password.required",
+                          null,
+                          LocaleContextHolder.getLocale()))));
+      crudView.form(
+          model,
+          form,
+          BASE_URL,
+          FORM_METHOD_POST,
+          BASE_URL,
+          false,
+          TEMPLATE_USER_FIELDS,
+          validationRules);
 
-        UserForm form = new UserForm();
-        form.fromEntity(user);
+      model.addAttribute("pageTitle", "users.page.create.title");
+      model.addAttribute("pageIcon", "bi:person-plus");
 
-        model.addAttribute("pageTitle", "users.page.detail.title");
-        model.addAttribute("pageIcon", "bi:person");
-
-        Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
-        crudView.form(
-                model,
-                form,
-                BASE_URL + "/" + id,
-                FORM_METHOD_POST,
-                BASE_URL,
-                true,
-                TEMPLATE_USER_FIELDS,
-                validationRules);
-
-        return VIEW_USER_DETAIL;
+      return VIEW_USER_CREATE;
     }
 
-    @GetMapping("/{id}/edit")
-    public String editForm(@PathVariable Long id, Model model) {
-        User user = userService.findById(id);
-        if (user == null) {
-            return "redirect:" + BASE_URL;
-        }
+    userService.create(form.toEntity(), form.getRoleIds());
 
-        UserForm form = new UserForm();
-        form.fromEntity(user);
+    return "redirect:" + BASE_URL;
+  }
 
-        model.addAttribute("pageTitle", "users.page.edit.title");
-        model.addAttribute("pageIcon", "bi:person");
-
-        Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
-        crudView.form(
-                model,
-                form,
-                BASE_URL + "/" + id,
-                FORM_METHOD_POST,
-                BASE_URL,
-                false,
-                TEMPLATE_USER_FIELDS,
-                validationRules);
-
-        return VIEW_USER_DETAIL;
+  @GetMapping("/{id}")
+  public String detail(@PathVariable Long id, Model model) {
+    User user = userService.findById(id);
+    if (user == null) {
+      return "redirect:" + BASE_URL;
     }
 
-    @PostMapping("/{id}")
-    public String update(
-            @PathVariable Long id,
-            @Valid @ModelAttribute("data") UserForm form,
-            BindingResult bindingResult,
-            Model model) {
+    UserForm form = new UserForm();
+    form.fromEntity(user);
 
-        User existingUser = userService.findById(id);
-        if (existingUser == null) {
-            return "redirect:" + BASE_URL;
-        }
+    model.addAttribute("pageTitle", "users.page.detail.title");
+    model.addAttribute("pageIcon", "bi:person");
 
-        if (bindingResult.hasErrors()) {
-            Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
-            crudView.form(
-                    model,
-                    form,
-                    BASE_URL + "/" + id,
-                    FORM_METHOD_POST,
-                    BASE_URL,
-                    false,
-                    TEMPLATE_USER_FIELDS,
-                    validationRules);
+    Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
+    crudView.form(
+        model,
+        form,
+        BASE_URL + "/" + id,
+        FORM_METHOD_POST,
+        BASE_URL,
+        true,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
 
-            model.addAttribute("pageTitle", "users.page.edit.title");
-            model.addAttribute("pageIcon", "bi:person");
+    return VIEW_USER_DETAIL;
+  }
 
-            return VIEW_USER_DETAIL;
-        }
-
-        User updates = form.toEntity();
-        updates.setId(id);
-        userService.update(updates, form.getDepartmentId(), form.getRoleIds());
-        return "redirect:" + BASE_URL + "/" + id;
+  @GetMapping("/{id}/edit")
+  public String editForm(@PathVariable Long id, Model model) {
+    User user = userService.findById(id);
+    if (user == null) {
+      return "redirect:" + BASE_URL;
     }
 
-    @PostMapping("/{id}/delete")
-    public String delete(
-            @PathVariable Long id,
-            @RequestParam(defaultValue = "0") int force) {
+    UserForm form = new UserForm();
+    form.fromEntity(user);
 
-        if (force == FORCE_DELETE_PERMANENTLY) {
-            userService.deletePermanently(id);
-        } else {
-            userService.delete(id);
-        }
+    model.addAttribute("pageTitle", "users.page.edit.title");
+    model.addAttribute("pageIcon", "bi:person");
 
-        return "redirect:" + BASE_URL;
+    Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
+    crudView.form(
+        model,
+        form,
+        BASE_URL + "/" + id,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
+
+    return VIEW_USER_DETAIL;
+  }
+
+  @PostMapping("/{id}")
+  public String update(
+      @PathVariable Long id,
+      @Valid @ModelAttribute("data") UserForm form,
+      BindingResult bindingResult,
+      Model model) {
+
+    User existingUser = userService.findById(id);
+    if (existingUser == null) {
+      return "redirect:" + BASE_URL;
     }
 
-    @PostMapping("/delete")
-    public String batchDelete(
-            @RequestParam("ids") List<Long> ids) {
+    if (bindingResult.hasErrors()) {
+      Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
+      crudView.form(
+          model,
+          form,
+          BASE_URL + "/" + id,
+          FORM_METHOD_POST,
+          BASE_URL,
+          false,
+          TEMPLATE_USER_FIELDS,
+          validationRules);
 
-        userService.softDeleteAll(ids);
+      model.addAttribute("pageTitle", "users.page.edit.title");
+      model.addAttribute("pageIcon", "bi:person");
 
-        return "redirect:" + BASE_URL;
+      return VIEW_USER_DETAIL;
     }
 
-    @ModelAttribute
-    public void selectionData(Model model) {
-        model.addAttribute("departments", departmentService.findAll());
-        model.addAttribute("roles", roleRepository.findAll());
+    User updates = form.toEntity();
+    updates.setId(id);
+    userService.update(updates, form.getRoleIds());
+    return "redirect:" + BASE_URL + "/" + id;
+  }
+
+  @PostMapping("/{id}/delete")
+  public String delete(@PathVariable Long id, @RequestParam(defaultValue = "0") int force) {
+
+    if (force == FORCE_DELETE_PERMANENTLY) {
+      userService.deletePermanently(id);
+    } else {
+      userService.delete(id);
     }
+
+    return "redirect:" + BASE_URL;
+  }
+
+  @PostMapping("/delete")
+  public String batchDelete(@RequestParam("ids") List<Long> ids) {
+
+    userService.softDeleteAll(ids);
+
+    return "redirect:" + BASE_URL;
+  }
+
+  @ModelAttribute
+  public void selectionData(Model model) {
+    model.addAttribute("roles", roleRepository.findAll());
+  }
 }
