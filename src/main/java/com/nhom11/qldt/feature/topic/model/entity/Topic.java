@@ -1,8 +1,7 @@
 package com.nhom11.qldt.feature.topic.model.entity;
 
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
-import com.nhom11.qldt.feature.department.model.entity.Department;
-
+import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
@@ -19,13 +18,13 @@ import lombok.Setter;
 @NoArgsConstructor
 public class Topic extends SoftDeleteEntity {
 
-    @Column(nullable = false, length = 255)
-    private String title;
+  @ManyToOne(optional = false)
+  @JoinColumn(name = "registration_period_id", nullable = false)
+  private RegistrationPeriod registrationPeriod;
 
-    @Column(nullable = false, columnDefinition = "TEXT")
-    private String description;
+  @Column(nullable = false, length = 255)
+  private String title;
 
-    @ManyToOne(optional = false)
-    @JoinColumn(name = "department_id", nullable = false)
-    private Department department;
+  @Column(nullable = false, columnDefinition = "TEXT")
+  private String description;
 }

@@ -1,1 +1,19 @@
-<!DOCTYPE html><html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}"><body><th:block layout:fragment="page-content"><div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div></th:block></body></html>
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div>
+
+         <section class="mt-8 max-w-4xl w-full mx-auto">
+            <h2
+               class="text-xl font-semibold"
+               th:text="#{topics.section.title}"
+            ></h2>
+            <div
+               class="mt-4"
+               th:replace="~{fragment/crud/table :: crud-table(${table})}"
+            ></div>
+         </section>
+      </th:block>
+   </body>
+</html>

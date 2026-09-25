@@ -1,57 +1,115 @@
 <ul th:fragment="sidebar-menu" class="menu w-full grow">
-    <li sec:authorize="hasRole('ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <a href="/"
-            class="flex  btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            data-tip="Homepage">
-            <span class="iconify block shrink-0" data-icon="bi:house" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Homepage</span>
-        </a>
-    </li>
-    <li sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <a href="/departments" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right">
-            <span class="iconify block shrink-0" data-icon="bi:building" data-width="18">
-            </span>
-            <span class="is-drawer-close:hidden">Departments</span>
-        </a>
-    </li>
-    <li sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <a href="/topics" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right">
-            <span class="iconify block shrink-0" data-icon="bi:journal-text" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Topics</span>
-        </a>
-    </li>
-    <li sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <a href="/registration-periods" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right">
-            <span class="iconify block shrink-0" data-icon="bi:calendar-range" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Registration periods</span>
-        </a>
-    </li>
-    <li sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-        xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-        <a href="/announcements" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right">
-            <span class="iconify block shrink-0" data-icon="bi:megaphone" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Announcements</span>
-        </a>
-    </li>
-
-    <li>
-        <button
-            class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            data-tip="Settings">
-            <span class="iconify block shrink-0" data-icon="bi:gear" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Settings</span>
-        </button>
-    </li>
-
-    <li>
-        <a href="/users"
-            class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-            data-tip="Users">
-            <span class="iconify block shrink-0" data-icon="bi:people" data-width="18"></span>
-            <span class="is-drawer-close:hidden">Users</span>
-        </a>
-    </li>
+   <li
+      sec:authorize="hasRole('ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      class="menu-title is-drawer-close:hidden"
+   >
+      <span th:text="#{navigation.group.overview}"></span>
+   </li>
+   <li
+      sec:authorize="hasRole('ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.home}"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:house"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.home}"
+         ></span
+      ></a>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      class="menu-title mt-4 is-drawer-close:hidden"
+   >
+      <span th:text="#{navigation.group.topic-management}"></span>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/registration-periods"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.registration-periods}"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:calendar-range"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.registration-periods}"
+         ></span
+      ></a>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      class="menu-title mt-4 is-drawer-close:hidden"
+   >
+      <span th:text="#{navigation.group.information}"></span>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/announcements"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.announcements}"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:megaphone"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.announcements}"
+         ></span
+      ></a>
+   </li>
+   <li class="menu-title mt-4 is-drawer-close:hidden">
+      <span th:text="#{navigation.group.system}"></span>
+   </li>
+   <li>
+      <button
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.settings}"
+      >
+         <span
+            class="iconify block shrink-0"
+            data-icon="bi:gear"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.settings}"
+         ></span>
+      </button>
+   </li>
+   <li>
+      <a
+         href="/users"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.users}"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:people"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.users}"
+         ></span
+      ></a>
+   </li>
 </ul>

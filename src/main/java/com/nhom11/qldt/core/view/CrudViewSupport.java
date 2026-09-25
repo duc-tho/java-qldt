@@ -39,9 +39,40 @@ public class CrudViewSupport {
       String fieldsTemplate,
       Map<String, String> validationRules) {
 
+    form(
+        model,
+        data,
+        actionUrl,
+        method,
+        backUrl,
+        "w-full lg:w-1/2 mx-auto",
+        readonly,
+        fieldsTemplate,
+        validationRules);
+  }
+
+  public <T> void form(
+      Model model,
+      T data,
+      String actionUrl,
+      String method,
+      String backUrl,
+      String layoutClass,
+      boolean readonly,
+      String fieldsTemplate,
+      Map<String, String> validationRules) {
+
+    model.addAttribute("data", data);
     model.addAttribute(
         "form",
         new CrudFormModel<>(
-            data, actionUrl, method, backUrl, readonly, fieldsTemplate, validationRules));
+            data,
+            actionUrl,
+            method,
+            backUrl,
+            layoutClass,
+            readonly,
+            fieldsTemplate,
+            validationRules));
   }
 }

@@ -40,7 +40,7 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
             "registration_periods.column.type",
             item -> periodTypeLabel((RegistrationPeriod) item),
             false,
-            true,
+            false,
             true));
   }
 

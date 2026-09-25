@@ -1,6 +1,15 @@
 package com.nhom11.qldt.feature.topic.controller;
 
-import org.springframework.data.domain.Page;
+import com.nhom11.qldt.core.table.TableQuery;
+import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
+import com.nhom11.qldt.core.view.CrudViewSupport;
+import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
+import com.nhom11.qldt.feature.topic.model.entity.Topic;
+import com.nhom11.qldt.feature.topic.service.TopicService;
+import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -9,50 +18,187 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-
-import com.nhom11.qldt.core.table.TableQuery;
-import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
-import com.nhom11.qldt.core.view.CrudViewSupport;
-import com.nhom11.qldt.feature.department.service.DepartmentService;
-import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
-import com.nhom11.qldt.feature.topic.model.entity.Topic;
-import com.nhom11.qldt.feature.topic.service.TopicService;
-import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
-
-import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
-@RequestMapping("/topics")
+@RequestMapping("/registration-periods/{periodId}/topics")
 public class TopicController {
-    private static final String BASE_URL = "/topics";
-    private final TopicService topicService;
-    private final DepartmentService departmentService;
-    private final TopicTableDefinition tableDefinition;
-    private final CrudViewSupport crudView;
-    private final ClientValidationRuleRenderer validationRuleRenderer;
+  private final TopicService topicService;
+  private final TopicTableDefinition tableDefinition;
+  private final CrudViewSupport crudView;
+  private final ClientValidationRuleRenderer validationRuleRenderer;
+  private final RegistrationPeriodService registrationPeriodService;
 
-    public TopicController(TopicService topicService, DepartmentService departmentService, TopicTableDefinition tableDefinition, CrudViewSupport crudView, ClientValidationRuleRenderer validationRuleRenderer) {
-        this.topicService = topicService;
-        this.departmentService = departmentService;
-        this.tableDefinition = tableDefinition;
-        this.crudView = crudView;
-        this.validationRuleRenderer = validationRuleRenderer;
+  public TopicController(
+      TopicService topicService,
+      TopicTableDefinition tableDefinition,
+      CrudViewSupport crudView,
+      ClientValidationRuleRenderer validationRuleRenderer,
+      RegistrationPeriodService registrationPeriodService) {
+    this.topicService = topicService;
+    this.tableDefinition = tableDefinition;
+    this.crudView = crudView;
+    this.validationRuleRenderer = validationRuleRenderer;
+    this.registrationPeriodService = registrationPeriodService;
+  }
+
+  @GetMapping
+  public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query, Model model) {
+    if (findPeriod(periodId) == null) {
+      return "redirect:/registration-periods";
     }
 
-    @GetMapping
-    public String list(@ModelAttribute TableQuery query, Model model) {
-        Page<Topic> topics = topicService.findAll(query, tableDefinition);
-        crudView.table(model, topics, BASE_URL, query, tableDefinition);
-        model.addAttribute("pageTitle", "topics.page.list.title"); model.addAttribute("pageIcon", "bi:journal-text"); model.addAttribute("pageDesc", "topics.page.list.description");
-        return "fragment/page/topic/list";
+    crudView.table(
+        model,
+        topicService.findAllByRegistrationPeriodId(periodId, query, tableDefinition),
+        baseUrl(periodId),
+        query,
+        tableDefinition);
+    model.addAttribute("pageTitle", "topics.page.list.title");
+    model.addAttribute("pageIcon", "bi:journal-text");
+
+    return "fragment/page/topic/list";
+  }
+
+  @GetMapping("/new")
+  public String createForm(@PathVariable Long periodId, Model model) {
+    if (findPeriod(periodId) == null) {
+      return "redirect:/registration-periods";
     }
 
-    @GetMapping("/new") public String createForm(Model model) { prepare(model, new TopicForm(), BASE_URL, false, "topics.page.create.title"); return "fragment/page/topic/create"; }
-    @PostMapping public String create(@Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) { if (errors.hasErrors()) { prepare(model, form, BASE_URL, false, "topics.page.create.title"); return "fragment/page/topic/create"; } topicService.create(form.toEntity(), form.getDepartmentId()); return "redirect:" + BASE_URL; }
-    @GetMapping("/{id}") public String detail(@PathVariable Long id, Model model) { Topic topic = topicService.findById(id); if (topic == null) return "redirect:" + BASE_URL; TopicForm form = new TopicForm(); form.fromEntity(topic); prepare(model, form, BASE_URL + "/" + id, true, "topics.page.detail.title"); return "fragment/page/topic/detail"; }
-    @GetMapping("/{id}/edit") public String edit(@PathVariable Long id, Model model) { Topic topic = topicService.findById(id); if (topic == null) return "redirect:" + BASE_URL; TopicForm form = new TopicForm(); form.fromEntity(topic); prepare(model, form, BASE_URL + "/" + id, false, "topics.page.edit.title"); return "fragment/page/topic/detail"; }
-    @PostMapping("/{id}") public String update(@PathVariable Long id, @Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) { if (topicService.findById(id) == null) return "redirect:" + BASE_URL; if (errors.hasErrors()) { form.setId(id); prepare(model, form, BASE_URL + "/" + id, false, "topics.page.edit.title"); return "fragment/page/topic/detail"; } Topic topic = form.toEntity(); topic.setId(id); topicService.update(topic, form.getDepartmentId()); return "redirect:" + BASE_URL + "/" + id; }
-    @PostMapping("/{id}/delete") public String delete(@PathVariable Long id) { topicService.delete(id); return "redirect:" + BASE_URL; }
+    prepare(model, new TopicForm(), baseUrl(periodId), false, "topics.page.create.title", periodId);
+    return "fragment/page/topic/create";
+  }
 
-    private void prepare(Model model, TopicForm form, String actionUrl, boolean readonly, String title) { crudView.form(model, form, actionUrl, "post", BASE_URL, readonly, "fragment/page/topic/fields", validationRuleRenderer.render(TopicForm.class)); model.addAttribute("departments", departmentService.findAll()); model.addAttribute("pageTitle", title); model.addAttribute("pageIcon", "bi:journal-text"); }
+  @PostMapping
+  public String create(
+      @PathVariable Long periodId,
+      @Valid @ModelAttribute("data") TopicForm form,
+      BindingResult errors,
+      Model model) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null) {
+      return "redirect:/registration-periods";
+    }
+    if (errors.hasErrors()) {
+      prepare(model, form, baseUrl(periodId), false, "topics.page.create.title", periodId);
+      return "fragment/page/topic/create";
+    }
+
+    topicService.create(form.toEntity(), period);
+    return periodDetailRedirect(periodId);
+  }
+
+  @GetMapping("/{id}")
+  public String detail(@PathVariable Long periodId, @PathVariable Long id, Model model) {
+    Topic topic = findTopic(periodId, id);
+    if (topic == null) {
+      return periodDetailRedirect(periodId);
+    }
+
+    TopicForm form = new TopicForm();
+    form.fromEntity(topic);
+    prepare(model, form, topicUrl(periodId, id), true, "topics.page.detail.title", periodId);
+    return "fragment/page/topic/detail";
+  }
+
+  @GetMapping("/{id}/edit")
+  public String edit(@PathVariable Long periodId, @PathVariable Long id, Model model) {
+    Topic topic = findTopic(periodId, id);
+    if (topic == null) {
+      return periodDetailRedirect(periodId);
+    }
+
+    TopicForm form = new TopicForm();
+    form.fromEntity(topic);
+    prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+    return "fragment/page/topic/detail";
+  }
+
+  @PostMapping("/{id}")
+  public String update(
+      @PathVariable Long periodId,
+      @PathVariable Long id,
+      @Valid @ModelAttribute("data") TopicForm form,
+      BindingResult errors,
+      Model model) {
+    Topic old = findTopic(periodId, id);
+    if (old == null) {
+      return periodDetailRedirect(periodId);
+    }
+    if (errors.hasErrors()) {
+      form.setId(id);
+      prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+      return "fragment/page/topic/detail";
+    }
+
+    Topic topic = form.toEntity();
+    topic.setId(id);
+    topicService.update(topic, old.getRegistrationPeriod());
+    return periodDetailRedirect(periodId);
+  }
+
+  @PostMapping("/{id}/delete")
+  public String delete(@PathVariable Long periodId, @PathVariable Long id) {
+    if (findTopic(periodId, id) != null) {
+      topicService.delete(id);
+    }
+    return periodDetailRedirect(periodId);
+  }
+
+  @PostMapping("/delete")
+  public String deleteSelected(
+      @PathVariable Long periodId,
+      @RequestParam(name = "ids", required = false) java.util.List<Long> ids) {
+    if (findPeriod(periodId) == null) {
+      return "redirect:/registration-periods";
+    }
+
+    topicService.deleteAllByRegistrationPeriodId(ids, periodId);
+    return periodDetailRedirect(periodId);
+  }
+
+  private RegistrationPeriod findPeriod(Long periodId) {
+    return registrationPeriodService.findById(periodId);
+  }
+
+  private Topic findTopic(Long periodId, Long id) {
+    if (findPeriod(periodId) == null) {
+      return null;
+    }
+
+    return topicService.findByIdAndRegistrationPeriodId(id, periodId);
+  }
+
+  private String baseUrl(Long periodId) {
+    return "/registration-periods/" + periodId + "/topics";
+  }
+
+  private String topicUrl(Long periodId, Long id) {
+    return baseUrl(periodId) + "/" + id;
+  }
+
+  private String periodDetailRedirect(Long periodId) {
+    return "redirect:/registration-periods/" + periodId;
+  }
+
+  private void prepare(
+      Model model,
+      TopicForm form,
+      String actionUrl,
+      boolean readonly,
+      String title,
+      Long periodId) {
+    crudView.form(
+        model,
+        form,
+        actionUrl,
+        "post",
+        "/registration-periods/" + periodId,
+        readonly,
+        "fragment/page/topic/fields",
+        validationRuleRenderer.render(TopicForm.class));
+    model.addAttribute("pageTitle", title);
+    model.addAttribute("pageIcon", "bi:journal-text");
+  }
 }

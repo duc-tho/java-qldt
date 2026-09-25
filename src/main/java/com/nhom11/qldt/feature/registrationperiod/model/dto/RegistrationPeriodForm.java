@@ -14,30 +14,34 @@ import org.springframework.format.annotation.DateTimeFormat;
 @Setter
 public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
   private Long id;
-  @NotBlank private String name;
-  @NotNull private PeriodType periodType;
 
-  @NotNull
+  @NotBlank(message = "{registration_periods.validation.name.required}")
+  private String name;
+
+  @NotNull(message = "{registration_periods.validation.type.required}")
+  private PeriodType periodType;
+
+  @NotNull(message = "{registration_periods.validation.lecturer_registration_start.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime lecturerRegistrationStart;
 
-  @NotNull
+  @NotNull(message = "{registration_periods.validation.lecturer_registration_end.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime lecturerRegistrationEnd;
 
-  @NotNull
+  @NotNull(message = "{registration_periods.validation.topic_publication_at.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime topicPublicationAt;
 
-  @NotNull
+  @NotNull(message = "{registration_periods.validation.student_registration_start.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime studentRegistrationStart;
 
-  @NotNull
+  @NotNull(message = "{registration_periods.validation.student_registration_end.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime studentRegistrationEnd;
 
-  @NotNull
+  @NotNull(message = "{registration_periods.validation.report_deadline.required}")
   @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
   private LocalDateTime reportDeadline;
 
@@ -50,7 +54,6 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
   public RegistrationPeriod toEntity() {
 
     RegistrationPeriod item = new RegistrationPeriod();
-    item.setId(id);
     item.setName(name);
     item.setPeriodType(periodType);
     item.setLecturerRegistrationStart(lecturerRegistrationStart);

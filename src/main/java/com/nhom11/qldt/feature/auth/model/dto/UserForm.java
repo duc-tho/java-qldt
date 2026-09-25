@@ -2,71 +2,69 @@ package com.nhom11.qldt.feature.auth.model.dto;
 
 import com.nhom11.qldt.core.form.CrudForm;
 import com.nhom11.qldt.feature.auth.model.entity.User;
-
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
+import java.util.Set;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.Set;
 
 @Getter
 @Setter
 public class UserForm implements CrudForm<User> {
 
-    private Long id;
+  private Long id;
 
-    @NotBlank(message = "{users.validation.username.required}")
-    @Size(max = 50, message = "{users.validation.username.max}")
-    private String username;
+  @NotBlank(message = "{users.validation.username.required}")
+  @Size(max = 50, message = "{users.validation.username.max}")
+  private String username;
 
-    @Pattern(regexp = "^$|^.{6,}$", message = "{users.validation.password.min}")
-    private String password;
+  @Pattern(regexp = "^$|^.{6,}$", message = "{users.validation.password.min}")
+  private String password;
 
-    @NotBlank(message = "{users.validation.email.required}")
-    @Email(message = "{users.validation.email.invalid}")
-    private String email;
+  @NotBlank(message = "{users.validation.email.required}")
+  @Email(message = "{users.validation.email.invalid}")
+  private String email;
 
-    @Size(max = 20, message = "{users.validation.phone.max}")
-    private String phone;
+  @Size(max = 20, message = "{users.validation.phone.max}")
+  private String phone;
 
-    @NotBlank(message = "{users.validation.full_name.required}")
-    @Size(max = 50, message = "{users.validation.full_name.max}")
-    private String fullName;
+  @NotBlank(message = "{users.validation.full_name.required}")
+  @Size(max = 50, message = "{users.validation.full_name.max}")
+  private String fullName;
 
-    @Size(max = 30, message = "{users.validation.user_code.max}")
-    private String userCode;
+  @Size(max = 30, message = "{users.validation.user_code.max}")
+  private String userCode;
 
-    private Long departmentId;
+  private Set<Long> roleIds;
 
-    private Set<Long> roleIds;
-
-    @Override
-    public User toEntity() {
-        User user = new User();
-        user.setId(id);
-        user.setUsername(username);
-        if (password != null && !password.isBlank()) {
-            user.setPassword(password);
-        }
-        user.setEmail(email);
-        user.setPhone(phone);
-        user.setFullName(fullName);
-        user.setUserCode(userCode);
-        return user;
+  @Override
+  public User toEntity() {
+    User user = new User();
+    user.setId(id);
+    user.setUsername(username);
+    if (password != null && !password.isBlank()) {
+      user.setPassword(password);
     }
+    user.setEmail(email);
+    user.setPhone(phone);
+    user.setFullName(fullName);
+    user.setUserCode(userCode);
+    return user;
+  }
 
-    @Override
-    public void fromEntity(User entity) {
-        this.id = entity.getId();
-        this.username = entity.getUsername();
-        this.email = entity.getEmail();
-        this.phone = entity.getPhone();
-        this.fullName = entity.getFullName();
-        this.userCode = entity.getUserCode();
-        this.departmentId = entity.getDepartment() == null ? null : entity.getDepartment().getId();
-        this.roleIds = entity.getRoles().stream().map(role -> role.getId()).collect(java.util.stream.Collectors.toSet());
-    }
+  @Override
+  public void fromEntity(User entity) {
+    this.id = entity.getId();
+    this.username = entity.getUsername();
+    this.email = entity.getEmail();
+    this.phone = entity.getPhone();
+    this.fullName = entity.getFullName();
+    this.userCode = entity.getUserCode();
+    this.roleIds =
+        entity.getRoles().stream()
+            .map(role -> role.getId())
+            .collect(java.util.stream.Collectors.toSet());
+  }
 }

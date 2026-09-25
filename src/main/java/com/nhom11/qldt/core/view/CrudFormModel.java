@@ -7,6 +7,7 @@ public record CrudFormModel<T>(
     String actionUrl,
     String method,
     String backUrl,
+    String layoutClass,
     boolean readonly,
     String fieldsTemplate,
     Map<String, String> validationRules) {}
