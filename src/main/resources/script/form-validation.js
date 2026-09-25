@@ -14,9 +14,30 @@ export function createFormValidator(formElement) {
       return;
     }
 
+    const matchSelector = input.dataset.validateMatch;
+    const matchInput = matchSelector ? formElement.querySelector(matchSelector) : null;
+    if (matchInput) {
+      rules.push({
+        validator: (value) => value === matchInput.value,
+        errorMessage: input.dataset.validateMatchMessage,
+      });
+    }
+
     validator.addField(input, rules, {
       errorsContainer: `#${input.id}-error`,
     });
+
+    if (formElement.dataset.liveValidation !== undefined) {
+      validator.addListener("input", input, () => {
+        void validator.revalidateField(input);
+      });
+
+      if (matchInput) {
+        validator.addListener("input", matchInput, () => {
+          void validator.revalidateField(input);
+        });
+      }
+    }
   });
 
   return validator;

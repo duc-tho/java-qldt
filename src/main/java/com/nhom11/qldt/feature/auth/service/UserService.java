@@ -1,6 +1,8 @@
 package com.nhom11.qldt.feature.auth.service;
 
 import com.nhom11.qldt.core.service.BaseCrudService;
+import com.nhom11.qldt.feature.auth.model.dto.AccountForm;
+import com.nhom11.qldt.feature.auth.model.dto.PasswordChangeForm;
 import com.nhom11.qldt.feature.auth.model.entity.Role;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.RoleRepository;
@@ -9,6 +11,7 @@ import java.util.Optional;
 import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class UserService extends BaseCrudService<User, Long> {
@@ -62,6 +65,28 @@ public class UserService extends BaseCrudService<User, Long> {
   public User update(User user, Set<Long> roleIds) {
     assignRoles(user, roleIds);
     return super.update(user);
+  }
+
+  @Transactional
+  public User updateAccount(Long id, AccountForm form) {
+    User user = userRepository.findById(id).orElseThrow();
+    user.setEmail(form.getEmail());
+    user.setPhone(form.getPhone());
+    user.setFullName(form.getFullName());
+
+    return userRepository.save(user);
+  }
+
+  @Transactional
+  public boolean changePassword(Long id, PasswordChangeForm form) {
+    User user = userRepository.findById(id).orElseThrow();
+    if (!passwordEncoder.matches(form.getCurrentPassword(), user.getPassword())) {
+      return false;
+    }
+
+    user.setPassword(passwordEncoder.encode(form.getNewPassword()));
+    userRepository.save(user);
+    return true;
   }
 
   private void assignRoles(User user, Set<Long> roleIds) {

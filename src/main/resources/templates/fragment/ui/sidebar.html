@@ -81,7 +81,22 @@
       <span th:text="#{navigation.group.system}"></span>
    </li>
    <li>
-      <button
+      <a
+         href="/account"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.account}"
+      >
+         <span
+            class="iconify block shrink-0"
+            data-icon="bi:person-circle"
+            data-width="18"
+         ></span>
+         <span class="is-drawer-close:hidden" th:text="#{navigation.item.account}"></span>
+      </a>
+   </li>
+   <li>
+      <a
+         href="/settings"
          class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
          th:attr="data-tip=#{navigation.item.settings}"
       >
@@ -89,12 +104,9 @@
             class="iconify block shrink-0"
             data-icon="bi:gear"
             data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.settings}"
          ></span>
-      </button>
+         <span class="is-drawer-close:hidden" th:text="#{navigation.item.settings}"></span>
+      </a>
    </li>
    <li>
       <a

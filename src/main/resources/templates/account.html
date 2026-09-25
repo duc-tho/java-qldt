@@ -1,0 +1,183 @@
+<!doctype html>
+<html
+   xmlns:th="http://www.thymeleaf.org"
+   layout:decorate="~{layout/page.html}"
+   lang="vi"
+>
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
+
+   <body>
+      <th:block layout:fragment="actions">
+         <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            onclick="document.getElementById('change-password-dialog').showModal()"
+         >
+            <span class="iconify inline" data-icon="bi:key" data-width="16"></span>
+            <span th:text="#{account.action.change_password}"></span>
+         </button>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <form
+            method="post"
+            th:action="@{/account}"
+            th:object="${data}"
+            class="w-full lg:w-1/2 mx-auto"
+            data-live-validation
+            novalidate
+            x-data="formValidation"
+            @submit.prevent="submit"
+         >
+            <div class="flex flex-col gap-5">
+               <div
+                  th:if="${param.updated}"
+                  role="status"
+                  class="alert alert-success alert-soft"
+               >
+                  <span th:text="#{account.update.success}"></span>
+               </div>
+               <div
+                  th:if="${param.passwordUpdated}"
+                  role="status"
+                  class="alert alert-success alert-soft"
+               >
+                  <span th:text="#{account.password.update.success}"></span>
+               </div>
+               <div
+                  th:if="${#fields.hasAnyErrors()}"
+                  role="alert"
+                  class="alert alert-error alert-soft flex flex-col gap-2"
+               >
+                  <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+               </div>
+
+               <div class="form-control">
+               <label class="label" for="account-full-name">
+                  <span class="label-text font-bold" th:text="#{users.field.full_name}"></span>
+               </label>
+               <input
+                  id="account-full-name"
+                  type="text"
+                  class="input w-full"
+                  th:field="*{fullName}"
+                  th:attr="validate-data=${validationRules.fullName}"
+               />
+               <div id="account-full-name-error"></div>
+               </div>
+
+               <div class="form-control">
+               <label class="label" for="account-email">
+                  <span class="label-text font-bold" th:text="#{users.field.email}"></span>
+               </label>
+               <input
+                  id="account-email"
+                  type="email"
+                  class="input w-full"
+                  th:field="*{email}"
+                  th:attr="validate-data=${validationRules.email}"
+               />
+               <div id="account-email-error"></div>
+               </div>
+
+               <div class="form-control">
+               <label class="label" for="account-phone">
+                  <span class="label-text font-bold" th:text="#{users.field.phone}"></span>
+               </label>
+               <input
+                  id="account-phone"
+                  type="text"
+                  class="input w-full"
+                  th:field="*{phone}"
+                  th:attr="validate-data=${validationRules.phone}"
+               />
+               <div id="account-phone-error"></div>
+               </div>
+
+               <div class="flex items-center justify-end gap-3 border-t border-base-300 pt-2">
+                  <a href="/" class="btn btn-ghost btn-sm" th:text="#{crud.form.cancel}"></a>
+                  <button type="submit" class="btn btn-primary btn-sm">
+                     <span class="iconify inline" data-icon="bi:check-lg" data-width="16"></span>
+                     <span th:text="#{crud.form.save}"></span>
+                  </button>
+               </div>
+            </div>
+         </form>
+
+         <dialog
+            id="change-password-dialog"
+            class="modal"
+            th:open="${passwordDialogOpen}"
+         >
+            <div class="modal-box">
+               <h2 class="text-lg font-bold" th:text="#{account.action.change_password}"></h2>
+               <form
+                  method="post"
+                  th:action="@{/account/password}"
+                  th:object="${passwordData}"
+                  class="mt-5 flex flex-col gap-4"
+                  data-live-validation
+                  novalidate
+                  x-data="formValidation"
+                  @submit.prevent="submit"
+               >
+                  <div
+                     th:if="${#fields.hasAnyErrors()}"
+                     role="alert"
+                     class="alert alert-error alert-soft flex flex-col gap-2"
+                  >
+                     <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+                  </div>
+                  <div class="form-control">
+                     <label class="label" for="current-password">
+                        <span class="label-text font-bold" th:text="#{account.field.current_password}"></span>
+                     </label>
+                     <input
+                        id="current-password"
+                        type="password"
+                        class="input w-full"
+                        th:field="*{currentPassword}"
+                        th:attr="validate-data=${passwordValidationRules.currentPassword}"
+                     />
+                     <div id="current-password-error"></div>
+                  </div>
+                  <div class="form-control">
+                     <label class="label" for="new-password">
+                        <span class="label-text font-bold" th:text="#{account.field.new_password}"></span>
+                     </label>
+                     <input
+                        id="new-password"
+                        type="password"
+                        class="input w-full"
+                        th:field="*{newPassword}"
+                        th:attr="validate-data=${passwordValidationRules.newPassword}"
+                     />
+                     <div id="new-password-error"></div>
+                  </div>
+                  <div class="form-control">
+                     <label class="label" for="confirm-password">
+                        <span class="label-text font-bold" th:text="#{account.field.confirm_password}"></span>
+                     </label>
+                     <input
+                        id="confirm-password"
+                        type="password"
+                        class="input w-full"
+                        th:field="*{confirmPassword}"
+                        data-validate-match="#new-password"
+                        th:attr="validate-data=${passwordValidationRules.confirmPassword}, data-validate-match-message=#{account.validation.confirm_password.mismatch}"
+                     />
+                     <div id="confirm-password-error"></div>
+                  </div>
+                  <div class="modal-action">
+                     <button type="button" class="btn btn-ghost" onclick="document.getElementById('change-password-dialog').close()" th:text="#{crud.form.cancel}"></button>
+                     <button type="submit" class="btn btn-primary" th:text="#{crud.form.save}"></button>
+                  </div>
+               </form>
+            </div>
+            <form method="dialog" class="modal-backdrop"><button th:text="#{crud.delete.close}"></button></form>
+         </dialog>
+      </th:block>
+   </body>
+</html>
