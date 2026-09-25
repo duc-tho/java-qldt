@@ -32,6 +32,7 @@ public class TableModelFactory {
         filters,
         definition.pageSizeOptions(),
         definition.columns(),
-        definition.actions(baseUrl));
+        definition.actions(baseUrl),
+        definition.bulkDeleteEnabled());
   }
 }

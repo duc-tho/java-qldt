@@ -14,6 +14,10 @@ public abstract class BaseTableDefinition<T> {
 
   public abstract List<ActionDef> actions(String baseUrl);
 
+  public boolean bulkDeleteEnabled() {
+    return false;
+  }
+
   public int defaultPage() {
     return DEFAULT_PAGE;
   }

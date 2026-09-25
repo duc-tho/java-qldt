@@ -14,7 +14,8 @@ public record TableModel<T>(
     Map<String, String> filters,
     List<Integer> pageSizeOptions,
     List<ColumnDef> columns,
-    List<ActionDef> actions) {
+    List<ActionDef> actions,
+    boolean bulkDeleteEnabled) {
 
   public List<ColumnDef> searchableColumns() {
     return columns.stream().filter(column -> column.searchable).toList();
