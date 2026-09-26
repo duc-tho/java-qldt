@@ -5,6 +5,8 @@ import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.service.TopicService;
@@ -28,18 +30,24 @@ public class TopicController {
   private final CrudViewSupport crudView;
   private final ClientValidationRuleRenderer validationRuleRenderer;
   private final RegistrationPeriodService registrationPeriodService;
+  private final DepartmentService departmentService;
+  private final UserService userService;
 
   public TopicController(
       TopicService topicService,
       TopicTableDefinition tableDefinition,
       CrudViewSupport crudView,
       ClientValidationRuleRenderer validationRuleRenderer,
-      RegistrationPeriodService registrationPeriodService) {
+      RegistrationPeriodService registrationPeriodService,
+      DepartmentService departmentService,
+      UserService userService) {
     this.topicService = topicService;
     this.tableDefinition = tableDefinition;
     this.crudView = crudView;
     this.validationRuleRenderer = validationRuleRenderer;
     this.registrationPeriodService = registrationPeriodService;
+    this.departmentService = departmentService;
+    this.userService = userService;
   }
 
   @GetMapping
@@ -85,7 +93,13 @@ public class TopicController {
       return "fragment/page/topic/create";
     }
 
-    topicService.create(form.toEntity(), period);
+    try {
+      topicService.create(form.toEntity(), period, form.getDepartmentId(), form.getAdviserIds());
+    } catch (IllegalArgumentException exception) {
+      errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      prepare(model, form, baseUrl(periodId), false, "topics.page.create.title", periodId);
+      return "fragment/page/topic/create";
+    }
     return periodDetailRedirect(periodId);
   }
 
@@ -134,7 +148,13 @@ public class TopicController {
 
     Topic topic = form.toEntity();
     topic.setId(id);
-    topicService.update(topic, old.getRegistrationPeriod());
+    try {
+      topicService.update(topic, old.getRegistrationPeriod(), form.getDepartmentId(), form.getAdviserIds());
+    } catch (IllegalArgumentException exception) {
+      errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+      return "fragment/page/topic/detail";
+    }
     return periodDetailRedirect(periodId);
   }
 
@@ -200,5 +220,7 @@ public class TopicController {
         validationRuleRenderer.render(TopicForm.class));
     model.addAttribute("pageTitle", title);
     model.addAttribute("pageIcon", "bi:journal-text");
+    model.addAttribute("departments", departmentService.findAll());
+    model.addAttribute("lecturers", userService.findAllLecturers());
   }
 }

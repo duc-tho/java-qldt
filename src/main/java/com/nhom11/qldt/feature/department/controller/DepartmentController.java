@@ -1,0 +1,109 @@
+package com.nhom11.qldt.feature.department.controller;
+
+import com.nhom11.qldt.core.table.TableQuery;
+import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
+import com.nhom11.qldt.core.view.CrudViewSupport;
+import com.nhom11.qldt.feature.department.model.dto.DepartmentForm;
+import com.nhom11.qldt.feature.department.model.entity.Department;
+import com.nhom11.qldt.feature.department.service.DepartmentService;
+import com.nhom11.qldt.feature.department.view.DepartmentTableDefinition;
+import jakarta.validation.Valid;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+
+@Controller
+@RequestMapping("/departments")
+public class DepartmentController {
+
+  private final DepartmentService service;
+  private final DepartmentTableDefinition table;
+  private final CrudViewSupport view;
+  private final ClientValidationRuleRenderer validation;
+
+  public DepartmentController(DepartmentService service, DepartmentTableDefinition table, CrudViewSupport view, ClientValidationRuleRenderer validation) {
+    this.service = service;
+    this.table = table;
+    this.view = view;
+    this.validation = validation;
+  }
+
+  @GetMapping
+  public String list(@ModelAttribute TableQuery query, Model model) {
+    view.table(model, service.findAll(query, table), "/departments", query, table);
+    model.addAttribute("pageTitle", "departments.page.list.title");
+    model.addAttribute("pageIcon", "bi:diagram-3");
+    return "fragment/page/department/list";
+  }
+
+  @GetMapping("/new")
+  public String createForm(Model model) {
+    form(model, new DepartmentForm(), "/departments", false, "departments.page.create.title");
+    return "fragment/page/department/create";
+  }
+
+  @PostMapping
+  public String create(@Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
+    if (errors.hasErrors()) {
+      form(model, form, "/departments", false, "departments.page.create.title");
+      return "fragment/page/department/create";
+    }
+
+    service.create(form.toEntity());
+    return "redirect:/departments";
+  }
+
+  @GetMapping("/{id}")
+  public String detail(@PathVariable Long id, Model model) {
+    Department department = service.findById(id);
+    if (department == null) return "redirect:/departments";
+    DepartmentForm form = new DepartmentForm();
+    form.fromEntity(department);
+    form(model, form, "/departments/" + id, true, "departments.page.detail.title");
+    return "fragment/page/department/detail";
+  }
+
+  @GetMapping("/{id}/edit")
+  public String edit(@PathVariable Long id, Model model) {
+    Department department = service.findById(id);
+    if (department == null) return "redirect:/departments";
+    DepartmentForm form = new DepartmentForm();
+    form.fromEntity(department);
+    form(model, form, "/departments/" + id, false, "departments.page.edit.title");
+    return "fragment/page/department/detail";
+  }
+
+  @PostMapping("/{id}")
+  public String update(@PathVariable Long id, @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
+    if (service.findById(id) == null) return "redirect:/departments";
+    if (errors.hasErrors()) {
+      form.setId(id);
+      form(model, form, "/departments/" + id, false, "departments.page.edit.title");
+      return "fragment/page/department/detail";
+    }
+    Department department = form.toEntity();
+    department.setId(id);
+    service.update(department);
+    return "redirect:/departments/" + id;
+  }
+
+  @PostMapping("/{id}/delete")
+  public String delete(@PathVariable Long id) {
+    try {
+      service.delete(id);
+    } catch (IllegalStateException ignored) {
+    }
+    return "redirect:/departments";
+  }
+
+  private void form(Model model, DepartmentForm data, String action, boolean readonly, String title) {
+    view.form(model, data, action, "post", "/departments", readonly, "fragment/page/department/fields", validation.render(DepartmentForm.class));
+    model.addAttribute("pageTitle", title);
+    model.addAttribute("pageIcon", "bi:diagram-3");
+  }
+}

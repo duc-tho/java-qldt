@@ -26,4 +26,6 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
   Optional<Topic> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);
+
+  boolean existsByDepartmentId(Long departmentId);
 }

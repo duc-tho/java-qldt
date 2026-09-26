@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="form-fields">
+      <div class="flex flex-col gap-3">
+         <div class="form-control">
+            <label class="label" for="code">
+               <span class="font-bold" th:text="#{departments.field.code}"></span>
+            </label>
+            <input th:field="*{code}" class="input w-full" th:classappend="${#fields.hasErrors('code')} ? ' input-error'" th:readonly="${form.readonly}" th:attr="validate-data=${form.validationRules.code}" />
+            <span class="text-error text-sm mt-1 block" th:if="${#fields.hasErrors('code')}" th:errors="*{code}"></span>
+         </div>
+         <div class="form-control">
+            <label class="label" for="name">
+               <span class="font-bold" th:text="#{departments.field.name}"></span>
+            </label>
+            <input th:field="*{name}" class="input w-full" th:classappend="${#fields.hasErrors('name')} ? ' input-error'" th:readonly="${form.readonly}" th:attr="validate-data=${form.validationRules.name}" />
+            <span class="text-error text-sm mt-1 block" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+         </div>
+      </div>
+   </th:block>
+</html>

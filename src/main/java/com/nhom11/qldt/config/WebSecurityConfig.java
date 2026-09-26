@@ -28,7 +28,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/users/**")
                     .hasRole("ADMIN")
                     // --------
-                    .requestMatchers("/registration-periods/**", "/announcements/**")
+                    .requestMatchers("/registration-periods/**", "/announcements/**", "/departments/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     // --------
                     .anyRequest()

@@ -45,11 +45,11 @@
             />
          </div>
 
-         <div class="form-control" th:unless="${form.readonly}">
-            <span
-               class="label-text font-bold"
-               th:text="#{users.field.roles}"
-            ></span>
+         <div
+            class="form-control flex items-center gap-4 border p-3 rounded-lg border-gray-300"
+            th:unless="${form.readonly}"
+         >
+            <span class="label font-bold" th:text="#{users.field.roles}"></span>
             <label class="label justify-start gap-3" th:each="role : ${roles}">
                <input
                   type="checkbox"

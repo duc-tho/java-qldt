@@ -21,7 +21,26 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
             false,
             true),
         new ColumnDef(
-            "title", "topics.column.title", item -> ((Topic) item).getTitle(), true, true, true));
+            "title", "topics.column.title", item -> ((Topic) item).getTitle(), true, true, true),
+        new ColumnDef(
+            "department",
+            "topics.column.department",
+            item -> ((Topic) item).getDepartment().getName(),
+            false,
+            false,
+            false),
+        new ColumnDef(
+            "advisers",
+            "topics.column.advisers",
+            item ->
+                ((Topic) item)
+                    .getAdvisers()
+                    .stream()
+                    .map(adviser -> adviser.getFullName())
+                    .collect(java.util.stream.Collectors.joining(", ")),
+            false,
+            false,
+            false));
   }
 
   @Override

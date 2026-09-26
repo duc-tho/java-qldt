@@ -54,6 +54,18 @@
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/departments"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.departments}"
+         ><span class="iconify block shrink-0" data-icon="bi:diagram-3" data-width="18"></span
+         ><span class="is-drawer-close:hidden" th:text="#{navigation.item.departments}"></span
+      ></a>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
       class="menu-title mt-4 is-drawer-close:hidden"
    >
       <span th:text="#{navigation.group.information}"></span>

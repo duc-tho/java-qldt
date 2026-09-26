@@ -8,6 +8,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.RoleRepository;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import java.util.Optional;
+import java.util.List;
 import java.util.Set;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -36,6 +37,10 @@ public class UserService extends BaseCrudService<User, Long> {
 
   public Optional<User> findByEmail(String email) {
     return userRepository.findByEmail(email);
+  }
+
+  public List<User> findAllLecturers() {
+    return userRepository.findAllLecturers();
   }
 
   @Override
