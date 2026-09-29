@@ -4,11 +4,19 @@ import com.nhom11.qldt.core.table.ActionDef;
 import com.nhom11.qldt.core.table.BaseTableDefinition;
 import com.nhom11.qldt.core.table.ColumnDef;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
+import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import java.util.List;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class TopicTableDefinition extends BaseTableDefinition<Topic> {
+  private final MessageSource messageSource;
+
+  public TopicTableDefinition(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
 
   @Override
   public List<ColumnDef> columns() {
@@ -40,12 +48,24 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
                     .collect(java.util.stream.Collectors.joining(", ")),
             false,
             false,
+            false),
+        new ColumnDef(
+            "status",
+            "topics.column.status",
+            item -> statusLabel((Topic) item),
+            false,
+            false,
             false));
   }
 
   @Override
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
+        new ActionDef.Post(
+            "topics.action.approve",
+            "bi:check-circle",
+            item -> baseUrl + "/" + ((Topic) item).getId() + "/approve",
+            item -> ((Topic) item).getStatus() == TopicStatus.PROPOSED),
         new ActionDef.Link(
             "topics.action.edit",
             "bi:pencil-square",
@@ -55,5 +75,10 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
             "bi:trash",
             item -> baseUrl + "/" + ((Topic) item).getId(),
             item -> ((Topic) item).getTitle()));
+  }
+
+  private String statusLabel(Topic topic) {
+    return messageSource.getMessage(
+        "topics.status." + topic.getStatus().name(), null, LocaleContextHolder.getLocale());
   }
 }

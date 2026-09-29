@@ -2,6 +2,7 @@ package com.nhom11.qldt.feature.topic.repository;
 
 import com.nhom11.qldt.core.repository.BaseRepository;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
+import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -28,4 +29,20 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);
 
   boolean existsByDepartmentId(Long departmentId);
+
+  @Query("""
+      select distinct topic from Topic topic
+      left join fetch topic.department
+      left join fetch topic.advisers
+      where topic.registrationPeriod.id = :periodId
+        and topic.status = :status
+        and (:search is null or lower(topic.title) like lower(concat('%', :search, '%')))
+        and (:departmentId is null or topic.department.id = :departmentId)
+      order by topic.title
+      """)
+  List<Topic> findAllByRegistrationPeriodIdAndStatus(
+      @Param("periodId") Long periodId,
+      @Param("status") TopicStatus status,
+      @Param("search") String search,
+      @Param("departmentId") Long departmentId);
 }

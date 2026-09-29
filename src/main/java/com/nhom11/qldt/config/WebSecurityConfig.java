@@ -28,6 +28,17 @@ public class WebSecurityConfig {
                     .requestMatchers("/users/**")
                     .hasRole("ADMIN")
                     // --------
+                    .requestMatchers("/registration-periods/*/student-group/**")
+                    .hasRole("STUDENT")
+                    .requestMatchers("/student-groups/**")
+                    .hasRole("STUDENT")
+                    .requestMatchers("/topic-registrations/**")
+                    .hasRole("LECTURER")
+                    .requestMatchers("/topic-proposals/**")
+                    .hasRole("LECTURER")
+                    .requestMatchers("/registration-periods/{periodId}/topics/propose")
+                    .hasRole("LECTURER")
+                    // --------
                     .requestMatchers("/registration-periods/**", "/announcements/**", "/departments/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     // --------
@@ -39,7 +50,7 @@ public class WebSecurityConfig {
                     .loginProcessingUrl("/login")
                     .usernameParameter("email")
                     .passwordParameter("password")
-                    .defaultSuccessUrl("/", false)
+                    .defaultSuccessUrl("/", true)
                     .failureHandler(
                         (request, response, exception) -> {
                           request

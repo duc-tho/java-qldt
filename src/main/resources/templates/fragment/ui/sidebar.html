@@ -51,6 +51,11 @@
          ></span
       ></a>
    </li>
+   <li sec:authorize="hasRole('LECTURER')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="menu-title mt-4 is-drawer-close:hidden"><span th:text="#{navigation.group.lecturer}"></span></li>
+   <li sec:authorize="hasRole('LECTURER')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><a href="/topic-registrations" class="flex btn btn-ghost text-left justify-start items-center"><span class="iconify block shrink-0" data-icon="bi:journal-check" data-width="18"></span><span class="is-drawer-close:hidden" th:text="#{navigation.item.topic-registrations}"></span></a></li>
+   <li sec:authorize="hasRole('LECTURER')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><a href="/topic-proposals" class="flex btn btn-ghost text-left justify-start items-center"><span class="iconify block shrink-0" data-icon="bi:journal-plus" data-width="18"></span><span class="is-drawer-close:hidden" th:text="#{navigation.item.topic-proposals}"></span></a></li>
+   <li sec:authorize="hasRole('STUDENT')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" class="menu-title mt-4 is-drawer-close:hidden"><span th:text="#{navigation.group.student}"></span></li>
+   <li sec:authorize="hasRole('STUDENT')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"><a href="/student-groups" class="flex btn btn-ghost text-left justify-start items-center"><span class="iconify block shrink-0" data-icon="bi:people" data-width="18"></span><span class="is-drawer-close:hidden" th:text="#{navigation.item.student-groups}"></span></a></li>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
@@ -120,7 +125,7 @@
          <span class="is-drawer-close:hidden" th:text="#{navigation.item.settings}"></span>
       </a>
    </li>
-   <li>
+   <li sec:authorize="hasRole('ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
       <a
          href="/users"
          class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"

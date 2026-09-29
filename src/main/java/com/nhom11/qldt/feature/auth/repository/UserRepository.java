@@ -13,6 +13,9 @@ public interface UserRepository extends BaseRepository<User, Long> {
   @EntityGraph(attributePaths = "roles")
   Optional<User> findByEmail(String email);
 
+  @EntityGraph(attributePaths = "roles")
+  Optional<User> findByUserCode(String userCode);
+
   @Query(
       """
       select distinct user from User user join user.roles role

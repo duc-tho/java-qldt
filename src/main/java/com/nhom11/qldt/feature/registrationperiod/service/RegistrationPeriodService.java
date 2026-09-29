@@ -6,6 +6,7 @@ import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPerio
 import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
 import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodValidationError;
 import com.nhom11.qldt.feature.registrationperiod.repository.RegistrationPeriodRepository;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -69,5 +70,13 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     }
 
     return errors;
+  }
+
+  public List<RegistrationPeriod> findOpenForStudents() {
+    return repository.findOpenForStudents(LocalDateTime.now());
+  }
+
+  public List<RegistrationPeriod> findVisibleForLecturers() {
+    return repository.findVisibleForLecturers(LocalDateTime.now());
   }
 }

@@ -13,6 +13,14 @@ public interface ActionDef {
     return false;
   }
 
+  default boolean isPost() {
+    return false;
+  }
+
+  default boolean isVisible(Object item) {
+    return true;
+  }
+
   record Link(String label, String icon, Function<Object, String> urlExtractor)
       implements ActionDef {
     @Override
@@ -39,6 +47,28 @@ public interface ActionDef {
 
     public String getName(Object item) {
       return nameExtractor.apply(item);
+    }
+  }
+
+  record Post(
+      String label,
+      String icon,
+      Function<Object, String> urlExtractor,
+      java.util.function.Predicate<Object> visiblePredicate)
+      implements ActionDef {
+    @Override
+    public boolean isPost() {
+      return true;
+    }
+
+    @Override
+    public boolean isVisible(Object item) {
+      return visiblePredicate.test(item);
+    }
+
+    @Override
+    public String getUrl(Object item) {
+      return urlExtractor.apply(item);
     }
   }
 }

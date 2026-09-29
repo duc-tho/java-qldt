@@ -13,6 +13,8 @@ import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/registration-periods/{periodId}/topics")
@@ -222,5 +225,44 @@ public class TopicController {
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("departments", departmentService.findAll());
     model.addAttribute("lecturers", userService.findAllLecturers());
+  }
+
+  @GetMapping("/propose")
+  public String proposeForm(@PathVariable Long periodId, Model model) {
+    if (findPeriod(periodId) == null) return "redirect:/registration-periods";
+    prepare(model, new TopicForm(), baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+    return "fragment/page/topic/create";
+  }
+
+  @PostMapping("/propose")
+  public String propose(@PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal,
+      @Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null || principal == null) return "redirect:/registration-periods";
+    if (errors.hasErrors()) {
+      prepare(model, form, baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+      return "fragment/page/topic/create";
+    }
+    try {
+      topicService.createProposal(form.toEntity(), period, form.getDepartmentId(), form.getAdviserIds(),
+          userService.findByEmail(principal.getUsername()).orElseThrow());
+    } catch (IllegalArgumentException exception) {
+      errors.reject(exception.getMessage());
+      prepare(model, form, baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+      return "fragment/page/topic/create";
+    }
+    return "redirect:/topic-proposals";
+  }
+
+  @PostMapping("/{id}/approve")
+  public String approve(
+      @PathVariable Long periodId,
+      @PathVariable Long id,
+      RedirectAttributes redirectAttributes) {
+    try { topicService.approve(id, periodId); }
+    catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("error", exception.getMessage());
+    }
+    return periodDetailRedirect(periodId);
   }
 }

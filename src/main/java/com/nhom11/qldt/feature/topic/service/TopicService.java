@@ -11,6 +11,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.department.model.entity.Department;
 import com.nhom11.qldt.feature.department.repository.DepartmentRepository;
+import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import java.util.Set;
 import java.util.List;
 import org.springframework.data.domain.Page;
@@ -58,12 +59,40 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     return topicRepository.findByIdAndRegistrationPeriodId(id, registrationPeriodId).orElse(null);
   }
 
+  public List<Topic> findApprovedByRegistrationPeriodId(Long registrationPeriodId) {
+    return topicRepository.findAllByRegistrationPeriodIdAndStatus(
+        registrationPeriodId, TopicStatus.APPROVED, null, null);
+  }
+
   public Topic create(Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     return create(topic);
   }
 
+  public Topic createProposal(Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds, User lecturer) {
+    requireLecturerRegistrationOpen(registrationPeriod);
+    if (adviserIds == null || !adviserIds.contains(lecturer.getId())) {
+      throw new IllegalArgumentException("topics.validation.proposer-adviser");
+    }
+    assignRelations(topic, registrationPeriod, departmentId, adviserIds);
+    topic.setStatus(TopicStatus.PROPOSED);
+    return create(topic);
+  }
+
+  @Transactional
+  public void approve(Long topicId, Long registrationPeriodId) {
+    Topic topic = topicRepository.findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
+        .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    if (topic.getStatus() != TopicStatus.PROPOSED) {
+      throw new IllegalArgumentException("topics.error.approval-state");
+    }
+    topic.setStatus(TopicStatus.APPROVED);
+  }
+
   public Topic update(Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
+    Topic existingTopic = topicRepository.findById(topic.getId())
+        .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    topic.setStatus(existingTopic.getStatus());
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     return update(topic);
   }
@@ -108,5 +137,16 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     topic.setRegistrationPeriod(registrationPeriod);
     topic.setDepartment(department);
     topic.setAdvisers(Set.copyOf(advisers));
+    if (topic.getStatus() == null) {
+      topic.setStatus(TopicStatus.APPROVED);
+    }
+  }
+
+  private void requireLecturerRegistrationOpen(RegistrationPeriod registrationPeriod) {
+    java.time.LocalDateTime now = java.time.LocalDateTime.now();
+    if (now.isBefore(registrationPeriod.getLecturerRegistrationStart())
+        || now.isAfter(registrationPeriod.getLecturerRegistrationEnd())) {
+      throw new IllegalArgumentException("topics.error.lecturer-registration-closed");
+    }
   }
 }

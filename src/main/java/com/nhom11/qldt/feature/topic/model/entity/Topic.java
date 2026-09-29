@@ -4,8 +4,11 @@ import com.nhom11.qldt.core.entity.SoftDeleteEntity;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.department.model.entity.Department;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
@@ -44,4 +47,8 @@ public class Topic extends SoftDeleteEntity {
 
   @Column(nullable = false, columnDefinition = "TEXT")
   private String description;
+
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 20)
+  private TopicStatus status;
 }
