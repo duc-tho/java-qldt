@@ -67,6 +67,7 @@ public class TopicController {
         tableDefinition);
     model.addAttribute("pageTitle", "topics.page.list.title");
     model.addAttribute("pageIcon", "bi:journal-text");
+    addBreadcrumbParent(model, periodId);
 
     return "fragment/page/topic/list";
   }
@@ -226,6 +227,15 @@ public class TopicController {
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("departments", departmentService.findAll());
     model.addAttribute("lecturers", userService.findAllLecturers());
+    addBreadcrumbParent(model, periodId);
+  }
+
+  private void addBreadcrumbParent(Model model, Long periodId) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null) return;
+
+    model.addAttribute("breadcrumbParentUrl", "/registration-periods/" + periodId);
+    model.addAttribute("breadcrumbParentLabel", period.getName());
   }
 
   @GetMapping("/propose")

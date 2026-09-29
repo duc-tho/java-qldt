@@ -31,6 +31,17 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
 
   @Query(
       """
+      select registration from TopicRegistration registration
+      join fetch registration.studentGroup studentGroup
+      join fetch registration.topic topic
+      join fetch topic.department
+      where studentGroup.registrationPeriod.id = :periodId
+      order by registration.updatedAt desc
+      """)
+  List<TopicRegistration> findAllByRegistrationPeriodId(@Param("periodId") Long periodId);
+
+  @Query(
+      """
       select distinct registration from TopicRegistration registration
       join fetch registration.studentGroup studentGroup
       join fetch registration.topic topic

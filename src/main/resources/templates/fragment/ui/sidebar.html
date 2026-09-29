@@ -36,20 +36,48 @@
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/registration-periods"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.registration-periods}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:calendar-range"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.registration-periods}"
-         ></span
-      ></a>
+      <details
+         th:open="${#strings.startsWith(currentPath, '/registration-periods')}"
+      >
+         <summary
+            class="flex btn btn-ghost text-left justify-start items-center"
+         >
+            <span
+               class="iconify block shrink-0"
+               data-icon="bi:folder2-open"
+               data-width="18"
+            ></span>
+            <span
+               class="is-drawer-close:hidden"
+               th:text="#{navigation.group.topic-management}"
+            ></span>
+         </summary>
+         <ul>
+            <li>
+               <a
+                  href="/registration-periods"
+                  th:classappend="${currentPath == '/registration-periods'} ? ' menu-active'"
+                  ><span
+                     th:text="#{navigation.item.registration-periods}"
+                  ></span
+               ></a>
+            </li>
+            <li>
+               <a
+                  href="/registration-periods/topics"
+                  th:classappend="${#strings.contains(currentPath, '/topics')} ? ' menu-active'"
+                  ><span th:text="#{navigation.item.topics}"></span
+               ></a>
+            </li>
+            <li>
+               <a
+                  href="/registration-periods/groups"
+                  th:classappend="${#strings.contains(currentPath, '/groups')} ? ' menu-active'"
+                  ><span th:text="#{navigation.item.groups}"></span
+               ></a>
+            </li>
+         </ul>
+      </details>
    </li>
    <li
       sec:authorize="hasRole('LECTURER')"

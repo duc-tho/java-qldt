@@ -171,7 +171,14 @@
                         </td>
                         <th:block th:each="col : ${table.columns}">
                            <td>
+                              <span
+                                 th:if="${col.field == 'status'}"
+                                 class="badge badge-soft"
+                                 th:classappend="${item.status.name() == 'PUBLISHED' or item.status.name() == 'APPROVED'} ? ' badge-success' : (${item.status.name() == 'WITHDRAWN'} ? ' badge-neutral' : ' badge-warning')"
+                                 th:text="${col.getValue(item)}"
+                              ></span>
                               <a
+                                 th:unless="${col.field == 'status'}"
                                  th:href="${table.baseUrl + '/' + item.id}"
                                  class="block"
                                  th:text="${col.getValue(item)}"

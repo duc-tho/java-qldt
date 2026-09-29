@@ -3,8 +3,6 @@ package com.nhom11.qldt.feature.auth.model.entity;
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
 import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import java.util.HashSet;
@@ -26,11 +24,4 @@ public final class Role extends SoftDeleteEntity {
 
   @ManyToMany(mappedBy = "roles")
   private Set<User> users = new HashSet<>();
-
-  @ManyToMany
-  @JoinTable(
-      name = "role_permissions",
-      joinColumns = @JoinColumn(name = "role_id"),
-      inverseJoinColumns = @JoinColumn(name = "permission_id"))
-  private Set<Permission> permissions = new HashSet<>();
 }

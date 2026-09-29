@@ -21,8 +21,21 @@ public interface ActionDef {
     return true;
   }
 
-  record Link(String label, String icon, Function<Object, String> urlExtractor)
+  record Link(
+      String label,
+      String icon,
+      Function<Object, String> urlExtractor,
+      java.util.function.Predicate<Object> visiblePredicate)
       implements ActionDef {
+    public Link(String label, String icon, Function<Object, String> urlExtractor) {
+      this(label, icon, urlExtractor, item -> true);
+    }
+
+    @Override
+    public boolean isVisible(Object item) {
+      return visiblePredicate.test(item);
+    }
+
     @Override
     public String getUrl(Object item) {
       return urlExtractor.apply(item);

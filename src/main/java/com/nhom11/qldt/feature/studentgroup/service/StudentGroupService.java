@@ -215,6 +215,10 @@ public class StudentGroupService {
     return topicRegistrationRepository.findAllByAdviserId(lecturer.getId());
   }
 
+  public List<TopicRegistration> registrations(Long periodId) {
+    return topicRegistrationRepository.findAllByRegistrationPeriodId(periodId);
+  }
+
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {
     return topicRegistrationRepository
         .findByIdAndAdviserId(registrationId, lecturer.getId())

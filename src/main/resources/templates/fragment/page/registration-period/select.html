@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div class="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+            <a
+               th:each="period : ${periods}"
+               class="card card-border border-base-300 bg-base-100 transition-colors hover:bg-base-200"
+               th:href="${target == 'topics'} ? @{/registration-periods/{id}/topics(id=${period.id})} : @{/registration-periods/{id}/groups(id=${period.id})}"
+            >
+               <div class="card-body p-5">
+                  <span
+                     class="iconify text-primary"
+                     data-icon="bi:calendar-range"
+                     data-width="22"
+                  ></span>
+                  <h2 class="card-title" th:text="${period.name}"></h2>
+                  <p
+                     class="text-sm text-base-content/60"
+                     th:text="#{period-types.__${period.periodType.name()}__}"
+                  ></p>
+               </div>
+            </a>
+         </div>
+         <div
+            class="alert alert-info"
+            th:if="${#lists.isEmpty(periods)}"
+            th:text="#{crud.table.empty}"
+         ></div>
+      </th:block>
+   </body>
+</html>

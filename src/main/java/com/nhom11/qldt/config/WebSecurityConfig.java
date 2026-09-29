@@ -22,7 +22,17 @@ public class WebSecurityConfig {
     http.securityMatcher("/**")
         .authorizeHttpRequests(
             auth ->
-                auth.requestMatchers("/login", "/assets/**", "/images/**")
+                auth.requestMatchers(
+                        "/login",
+                        "/assets/**",
+                        "/images/**",
+                        "/favicon.svg",
+                        "/favicon-96x96.png",
+                        "/favicon.ico",
+                        "/apple-touch-icon.png",
+                        "/web-app-manifest-192x192.png",
+                        "/web-app-manifest-512x512.png",
+                        "/site.webmanifest")
                     .permitAll()
                     // --------
                     .requestMatchers("/users/**")

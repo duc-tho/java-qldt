@@ -9,6 +9,7 @@ import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPerio
 import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.registrationperiod.view.RegistrationPeriodTableDefinition;
+import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
@@ -33,6 +34,7 @@ public class RegistrationPeriodController {
   private final ClientValidationRuleRenderer validation;
   private final TopicService topicService;
   private final TopicTableDefinition topicTable;
+  private final StudentGroupService studentGroupService;
 
   public RegistrationPeriodController(
       RegistrationPeriodService service,
@@ -41,7 +43,8 @@ public class RegistrationPeriodController {
       CrudViewSupport view,
       ClientValidationRuleRenderer validation,
       TopicService topicService,
-      TopicTableDefinition topicTable) {
+      TopicTableDefinition topicTable,
+      StudentGroupService studentGroupService) {
     this.service = service;
     this.table = table;
     this.users = users;
@@ -49,6 +52,7 @@ public class RegistrationPeriodController {
     this.validation = validation;
     this.topicService = topicService;
     this.topicTable = topicTable;
+    this.studentGroupService = studentGroupService;
   }
 
   @GetMapping
@@ -72,6 +76,30 @@ public class RegistrationPeriodController {
         "registration_periods.page.create.title");
 
     return "fragment/page/registration-period/create";
+  }
+
+  @GetMapping("/topics")
+  public String topicPeriods(Model model) {
+    return periodSelection(model, "topics");
+  }
+
+  @GetMapping("/groups")
+  public String groupPeriods(Model model) {
+    return periodSelection(model, "groups");
+  }
+
+  @GetMapping("/{id}/groups")
+  public String groups(@PathVariable Long id, Model model) {
+    RegistrationPeriod period = service.findById(id);
+    if (period == null) return "redirect:/registration-periods/groups";
+
+    model.addAttribute("period", period);
+    model.addAttribute("registrations", studentGroupService.registrations(id));
+    model.addAttribute("pageTitle", "student-groups.page.list.title");
+    model.addAttribute("pageIcon", "bi:people");
+    model.addAttribute("breadcrumbParentUrl", "/registration-periods/" + id);
+    model.addAttribute("breadcrumbParentLabel", period.getName());
+    return "fragment/page/registration-period/groups";
   }
 
   @PostMapping
@@ -118,6 +146,7 @@ public class RegistrationPeriodController {
     form(
         model, form, "/registration-periods/" + id, true, "registration_periods.page.detail.title");
     addTopicsTable(model, id, topicQuery);
+    addRegistrations(model, id);
 
     return "fragment/page/registration-period/detail";
   }
@@ -133,6 +162,7 @@ public class RegistrationPeriodController {
 
     form(model, form, "/registration-periods/" + id, false, "registration_periods.page.edit.title");
     addTopicsTable(model, id, topicQuery);
+    addRegistrations(model, id);
 
     return "fragment/page/registration-period/detail";
   }
@@ -219,5 +249,17 @@ public class RegistrationPeriodController {
         "/registration-periods/" + periodId + "/topics",
         topicQuery,
         topicTable);
+  }
+
+  private String periodSelection(Model model, String target) {
+    model.addAttribute("periods", service.findAll());
+    model.addAttribute("target", target);
+    model.addAttribute("pageTitle", "registration-periods.page.select.title");
+    model.addAttribute("pageIcon", "bi:calendar-range");
+    return "fragment/page/registration-period/select";
+  }
+
+  private void addRegistrations(Model model, Long periodId) {
+    model.addAttribute("registrations", studentGroupService.registrations(periodId));
   }
 }

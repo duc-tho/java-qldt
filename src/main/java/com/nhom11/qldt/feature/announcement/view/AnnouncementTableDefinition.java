@@ -4,11 +4,20 @@ import com.nhom11.qldt.core.table.ActionDef;
 import com.nhom11.qldt.core.table.BaseTableDefinition;
 import com.nhom11.qldt.core.table.ColumnDef;
 import com.nhom11.qldt.feature.announcement.model.entity.Announcement;
+import com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus;
 import java.util.List;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
 public class AnnouncementTableDefinition extends BaseTableDefinition<Announcement> {
+  private final MessageSource messageSource;
+
+  public AnnouncementTableDefinition(MessageSource messageSource) {
+    this.messageSource = messageSource;
+  }
+
   public List<ColumnDef> columns() {
     return List.of(
         new ColumnDef(
@@ -28,7 +37,7 @@ public class AnnouncementTableDefinition extends BaseTableDefinition<Announcemen
         new ColumnDef(
             "status",
             "announcements.column.status",
-            item -> ((Announcement) item).getStatus().name(),
+            item -> statusLabel((Announcement) item),
             false,
             false,
             true));
@@ -39,6 +48,19 @@ public class AnnouncementTableDefinition extends BaseTableDefinition<Announcemen
         new ActionDef.Link(
             "announcements.action.edit",
             "bi:pencil-square",
-            item -> baseUrl + "/" + ((Announcement) item).getId() + "/edit"));
+            item -> baseUrl + "/" + ((Announcement) item).getId() + "/edit",
+            item -> ((Announcement) item).getStatus() == AnnouncementStatus.PUBLISHED),
+        new ActionDef.Link(
+            "announcements.action.view",
+            "bi:eye",
+            item -> baseUrl + "/" + ((Announcement) item).getId(),
+            item -> ((Announcement) item).getStatus() == AnnouncementStatus.WITHDRAWN));
+  }
+
+  private String statusLabel(Announcement announcement) {
+    return messageSource.getMessage(
+        "announcements.status." + announcement.getStatus().name(),
+        null,
+        LocaleContextHolder.getLocale());
   }
 }

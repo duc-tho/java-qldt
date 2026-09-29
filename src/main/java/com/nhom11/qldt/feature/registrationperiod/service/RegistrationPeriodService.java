@@ -79,4 +79,8 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
   public List<RegistrationPeriod> findVisibleForLecturers() {
     return repository.findVisibleForLecturers(LocalDateTime.now());
   }
+
+  public List<RegistrationPeriod> findAll() {
+    return repository.findAll();
+  }
 }
