@@ -39,7 +39,8 @@ public class WebSecurityConfig {
                     .requestMatchers("/registration-periods/{periodId}/topics/propose")
                     .hasRole("LECTURER")
                     // --------
-                    .requestMatchers("/registration-periods/**", "/announcements/**", "/departments/**")
+                    .requestMatchers(
+                        "/registration-periods/**", "/announcements/**", "/departments/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     // --------
                     .anyRequest()

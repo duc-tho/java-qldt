@@ -10,12 +10,12 @@ Tài liệu tổng hợp đề bài gốc và các quyết định trong `Answer
 
 Hệ thống tự động hóa quản lý đề tài của Khoa CNTT cho bốn loại:
 
-| Mã | Loại |
-| --- | --- |
-| `MON_HOC` | Đề tài môn học |
-| `NCKH` | Nghiên cứu khoa học |
-| `TLCN` | Tiểu luận chuyên ngành |
-| `KLTN` | Khóa luận tốt nghiệp |
+| Mã        | Loại                   |
+| --------- | ---------------------- |
+| `MON_HOC` | Đề tài môn học         |
+| `NCKH`    | Nghiên cứu khoa học    |
+| `TLCN`    | Tiểu luận chuyên ngành |
+| `KLTN`    | Khóa luận tốt nghiệp   |
 
 Phạm vi gồm quản lý đợt đăng ký; đề xuất, phê duyệt và công bố đề tài; lập nhóm và đăng ký đề tài; phân công giảng viên; nộp báo cáo; đánh giá/phản biện; hội đồng NCKH/TLCN/KLTN; tổng hợp và công bố kết quả; tài khoản; thông báo cấp Khoa; phân quyền và bảo vệ dữ liệu.
 
@@ -23,15 +23,15 @@ Không thuộc phạm vi: quản lý lớp học phần/học kỳ/tín chỉ, t
 
 ## 3. Tác nhân
 
-| Tác nhân / chức trách | Trách nhiệm chính |
-| --- | --- |
-| `ADMIN` | Cấp và quản lý tài khoản; không mặc định có quyền nghiệp vụ |
-| `HEAD_OF_FACULTY` | Quản lý đợt, duyệt/công bố đề tài, phân công GV, quản lý hội đồng, mở lại đánh giá, công bố kết quả và đăng thông báo cấp Khoa |
-| `LECTURER` | Đề xuất đề tài; làm GV phụ trách, GVHD, GVPB hoặc thành viên hội đồng theo phân công; không được thuộc hội đồng phụ trách đề tài mình hướng dẫn |
-| `STUDENT` | Tạo/tham gia nhóm, đăng ký và thực hiện đề tài, xem kết quả đã công bố |
-| Nhóm trưởng | Mời thành viên, quản lý đăng ký và nộp báo cáo |
-| Chủ tịch hội đồng | Xác nhận kết quả NCKH/TLCN/KLTN do hệ thống tổng hợp |
-| Thư ký hội đồng | Quản lý hồ sơ/phiên, nhập biên bản; không sửa điểm của thành viên khác |
+| Tác nhân / chức trách | Trách nhiệm chính                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| `ADMIN`               | Cấp và quản lý tài khoản; không mặc định có quyền nghiệp vụ                                                                                     |
+| `HEAD_OF_FACULTY`     | Quản lý đợt, duyệt/công bố đề tài, phân công GV, quản lý hội đồng, mở lại đánh giá, công bố kết quả và đăng thông báo cấp Khoa                  |
+| `LECTURER`            | Đề xuất đề tài; làm GV phụ trách, GVHD, GVPB hoặc thành viên hội đồng theo phân công; không được thuộc hội đồng phụ trách đề tài mình hướng dẫn |
+| `STUDENT`             | Tạo/tham gia nhóm, đăng ký và thực hiện đề tài, xem kết quả đã công bố                                                                          |
+| Nhóm trưởng           | Mời thành viên, quản lý đăng ký và nộp báo cáo                                                                                                  |
+| Chủ tịch hội đồng     | Xác nhận kết quả NCKH/TLCN/KLTN do hệ thống tổng hợp                                                                                            |
+| Thư ký hội đồng       | Quản lý hồ sơ/phiên, nhập biên bản; không sửa điểm của thành viên khác                                                                          |
 
 Nhóm trưởng, GVHD, GVPB, Chủ tịch và Thư ký là chức trách theo ngữ cảnh, không phải vai trò tài khoản độc lập. Khoa và bộ môn là hai cấp khác nhau; không có vai trò Trưởng bộ môn trong phạm vi đã chốt.
 
@@ -51,14 +51,14 @@ Nhóm trưởng, GVHD, GVPB, Chủ tịch và Thư ký là chức trách theo ng
 
 ## 5. Khác biệt theo loại
 
-| Nội dung | Môn học | NCKH | TLCN | KLTN |
-| --- | --- | --- | --- | --- |
-| Người hướng dẫn/phụ trách | GV phụ trách | GVHD | GVHD | GVHD |
-| Người đánh giá bắt buộc | GV phụ trách | Mọi thành viên hợp lệ của hội đồng | Mọi thành viên hợp lệ của hội đồng | Mọi thành viên hợp lệ của hội đồng |
-| Hội đồng | Không | Có | Có | Có |
-| Hạn GVPB | Không | Không | Bắt buộc | Bắt buộc |
-| Ngày hội đồng | Không | Không | Không | Bắt buộc |
-| Người chốt | GV phụ trách | Chủ tịch hội đồng | Chủ tịch hội đồng | Chủ tịch hội đồng |
+| Nội dung                  | Môn học      | NCKH                               | TLCN                               | KLTN                               |
+| ------------------------- | ------------ | ---------------------------------- | ---------------------------------- | ---------------------------------- |
+| Người hướng dẫn/phụ trách | GV phụ trách | GVHD                               | GVHD                               | GVHD                               |
+| Người đánh giá bắt buộc   | GV phụ trách | Mọi thành viên hợp lệ của hội đồng | Mọi thành viên hợp lệ của hội đồng | Mọi thành viên hợp lệ của hội đồng |
+| Hội đồng                  | Không        | Có                                 | Có                                 | Có                                 |
+| Hạn GVPB                  | Không        | Không                              | Bắt buộc                           | Bắt buộc                           |
+| Ngày hội đồng             | Không        | Không                              | Không                              | Bắt buộc                           |
+| Người chốt                | GV phụ trách | Chủ tịch hội đồng                  | Chủ tịch hội đồng                  | Chủ tịch hội đồng                  |
 
 Mỗi hội đồng có 3–5 GV, đúng một Chủ tịch và một Thư ký. Mọi thành viên hợp lệ đều phải gửi đánh giá; chỉ được chốt khi đủ các đánh giá bắt buộc. Người chốt chỉ xác nhận kết quả do hệ thống tính, không ghi đè công thức hoặc điểm của người chấm.
 

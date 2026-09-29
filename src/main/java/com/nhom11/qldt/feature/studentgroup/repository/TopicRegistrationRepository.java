@@ -9,10 +9,18 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TopicRegistrationRepository extends BaseRepository<TopicRegistration, Long> {
-  @EntityGraph(attributePaths = {"studentGroup", "topic", "topic.department", "topic.advisers", "reviewedBy"})
+  @EntityGraph(
+      attributePaths = {
+        "studentGroup",
+        "topic",
+        "topic.department",
+        "topic.advisers",
+        "reviewedBy"
+      })
   Optional<TopicRegistration> findByStudentGroupId(Long studentGroupId);
 
-  @Query("""
+  @Query(
+      """
       select distinct registration from TopicRegistration registration
       join registration.topic topic
       join topic.advisers adviser
@@ -21,7 +29,8 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       """)
   List<TopicRegistration> findAllByAdviserId(@Param("lecturerId") Long lecturerId);
 
-  @Query("""
+  @Query(
+      """
       select distinct registration from TopicRegistration registration
       join fetch registration.studentGroup studentGroup
       join fetch registration.topic topic

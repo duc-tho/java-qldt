@@ -12,21 +12,21 @@ import lombok.Setter;
 @Setter
 public class AccountForm {
 
-    @NotBlank(message = "{users.validation.email.required}")
-    @Email(message = "{users.validation.email.invalid}")
-    private String email;
+  @NotBlank(message = "{users.validation.email.required}")
+  @Email(message = "{users.validation.email.invalid}")
+  private String email;
 
-    @Size(max = 20, message = "{users.validation.phone.max}")
-    @Pattern(regexp = "^$|^0\\d{9}$", message = "{users.validation.phone.invalid}")
-    private String phone;
+  @Size(max = 20, message = "{users.validation.phone.max}")
+  @Pattern(regexp = "^$|^0\\d{9}$", message = "{users.validation.phone.invalid}")
+  private String phone;
 
-    @NotBlank(message = "{users.validation.full_name.required}")
-    @Size(max = 50, message = "{users.validation.full_name.max}")
-    private String fullName;
+  @NotBlank(message = "{users.validation.full_name.required}")
+  @Size(max = 50, message = "{users.validation.full_name.max}")
+  private String fullName;
 
-    public void fromEntity(User user) {
-        email = user.getEmail();
-        phone = user.getPhone();
-        fullName = user.getFullName();
-    }
+  public void fromEntity(User user) {
+    email = user.getEmail();
+    phone = user.getPhone();
+    fullName = user.getFullName();
+  }
 }

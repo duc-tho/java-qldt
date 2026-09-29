@@ -13,15 +13,40 @@ public class DepartmentTableDefinition extends BaseTableDefinition<Department> {
   @Override
   public List<ColumnDef> columns() {
     return List.of(
-        new ColumnDef("id", "departments.column.id", item -> String.valueOf(((Department) item).getId()), false, false, true),
-        new ColumnDef("code", "departments.column.code", item -> ((Department) item).getCode(), true, true, true),
-        new ColumnDef("name", "departments.column.name", item -> ((Department) item).getName(), true, true, true));
+        new ColumnDef(
+            "id",
+            "departments.column.id",
+            item -> String.valueOf(((Department) item).getId()),
+            false,
+            false,
+            true),
+        new ColumnDef(
+            "code",
+            "departments.column.code",
+            item -> ((Department) item).getCode(),
+            true,
+            true,
+            true),
+        new ColumnDef(
+            "name",
+            "departments.column.name",
+            item -> ((Department) item).getName(),
+            true,
+            true,
+            true));
   }
 
   @Override
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
-        new ActionDef.Link("departments.action.edit", "bi:pencil-square", item -> baseUrl + "/" + ((Department) item).getId() + "/edit"),
-        new ActionDef.Delete("departments.action.delete", "bi:trash", item -> baseUrl + "/" + ((Department) item).getId(), item -> ((Department) item).getName()));
+        new ActionDef.Link(
+            "departments.action.edit",
+            "bi:pencil-square",
+            item -> baseUrl + "/" + ((Department) item).getId() + "/edit"),
+        new ActionDef.Delete(
+            "departments.action.delete",
+            "bi:trash",
+            item -> baseUrl + "/" + ((Department) item).getId(),
+            item -> ((Department) item).getName()));
   }
 }

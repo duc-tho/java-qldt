@@ -3,10 +3,20 @@
    <th:block th:fragment="crud-actions(actions, item)">
       <div class="flex items-center justify-end gap-1">
          <th:block th:each="action, actionStat : ${actions}">
-            <th:block th:if="${actionStat.count <= 3 and action.isVisible(item)}">
-               <form th:if="${action.isPost()}" th:action="${action.getUrl(item)}" method="post">
+            <th:block
+               th:if="${actionStat.count <= 3 and action.isVisible(item)}"
+            >
+               <form
+                  th:if="${action.isPost()}"
+                  th:action="${action.getUrl(item)}"
+                  method="post"
+               >
                   <button type="submit" class="btn btn-ghost btn-xs">
-                     <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                     <span
+                        class="iconify"
+                        th:attr="data-icon=${action.icon()}"
+                        data-width="14"
+                     ></span>
                      <span th:text="${#messages.msg(action.label())}"></span>
                   </button>
                </form>
@@ -57,9 +67,17 @@
                   th:each="action, actionStat : ${actions}"
                   th:if="${actionStat.count > 3 and action.isVisible(item)}"
                >
-                  <form th:if="${action.isPost()}" th:action="${action.getUrl(item)}" method="post">
+                  <form
+                     th:if="${action.isPost()}"
+                     th:action="${action.getUrl(item)}"
+                     method="post"
+                  >
                      <button type="submit">
-                        <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                        <span
+                           class="iconify"
+                           th:attr="data-icon=${action.icon()}"
+                           data-width="14"
+                        ></span>
                         <span th:text="${#messages.msg(action.label())}"></span>
                      </button>
                   </form>

@@ -30,18 +30,21 @@ public class TopicProposalController {
   }
 
   @GetMapping("/{periodId}/topics")
-  public String topics(@org.springframework.web.bind.annotation.PathVariable Long periodId, Model model) {
-    var period = registrationPeriodService.findVisibleForLecturers().stream()
-        .filter(value -> value.getId().equals(periodId))
-        .findFirst()
-        .orElse(null);
+  public String topics(
+      @org.springframework.web.bind.annotation.PathVariable Long periodId, Model model) {
+    var period =
+        registrationPeriodService.findVisibleForLecturers().stream()
+            .filter(value -> value.getId().equals(periodId))
+            .findFirst()
+            .orElse(null);
     if (period == null) {
       return "redirect:/topic-proposals";
     }
 
     LocalDateTime now = LocalDateTime.now();
-    boolean isProposalOpen = !now.isBefore(period.getLecturerRegistrationStart())
-        && !now.isAfter(period.getLecturerRegistrationEnd());
+    boolean isProposalOpen =
+        !now.isBefore(period.getLecturerRegistrationStart())
+            && !now.isAfter(period.getLecturerRegistrationEnd());
     model.addAttribute("period", period);
     model.addAttribute("topics", topicService.findApprovedByRegistrationPeriodId(periodId));
     model.addAttribute("isProposalOpen", isProposalOpen);

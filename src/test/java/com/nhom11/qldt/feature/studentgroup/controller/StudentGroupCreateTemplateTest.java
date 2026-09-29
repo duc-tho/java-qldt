@@ -10,7 +10,8 @@ import org.springframework.core.io.ClassPathResource;
 class StudentGroupCreateTemplateTest {
   @Test
   void createFormUsesThePeriodIdProvidedByTheController() throws IOException {
-    ClassPathResource template = new ClassPathResource("templates/fragment/page/student-group/create.html");
+    ClassPathResource template =
+        new ClassPathResource("templates/fragment/page/student-group/create.html");
     String content = new String(template.getInputStream().readAllBytes(), StandardCharsets.UTF_8);
 
     assertThat(content).doesNotContain("#pathVariables");

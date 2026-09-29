@@ -1,51 +1,47 @@
 // For format details, see https://aka.ms/devcontainer.json. For config options, see the
 // README at: https://github.com/devcontainers/templates/tree/main/src/java
 {
-    "name": "QLDT Dev container",
-    "service": "app",
-    "workspaceFolder": "/workspace",
-    "features": {
-        "ghcr.io/devcontainers/features/java:1": {
-            "version": "none",
-            "installMaven": "true",
-            "installGradle": "false"
-        },
-        "ghcr.io/devcontainers/features/node:2.1.0": {
-            "version": "24.20.0"
-        }
+  "name": "QLDT Dev container",
+  "service": "app",
+  "workspaceFolder": "/workspace",
+  "features": {
+    "ghcr.io/devcontainers/features/java:1": {
+      "version": "none",
+      "installMaven": "true",
+      "installGradle": "false"
     },
-    "dockerComposeFile": "docker-compose.yaml",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "PKief.material-icon-theme",
-                "akamud.vscode-theme-onedark",
-                "streetsidesoftware.code-spell-checker",
-                "bradlc.vscode-tailwindcss",
-                "naumovs.color-highlight",
-                "oderwat.indent-rainbow",
-                "vscjava.vscode-java-pack"
-            ],
-            "settings": {
-                "workbench.colorTheme": "Atom One Dark",
-                "workbench.iconTheme": "material-icon-theme",
-                "chat.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
-                "editor.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
-                "editor.formatOnSave": true,
-                "editor.fontLigatures": true
-            }
-        }
-    },
-    // Use 'forwardPorts' to make a list of ports inside the container available locally.
-    "forwardPorts": [
-        3306,
-        6379,
-        3000
-    ]
-    // Use 'postCreateCommand' to run commands after the container is created.
-    // "postCreateCommand": "java -version",
-    // Configure tool-specific properties.
-    // "customizations": {},
-    // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
-    // "remoteUser": "root"
+    "ghcr.io/devcontainers/features/node:2.1.0": {
+      "version": "24.20.0"
+    }
+  },
+  "dockerComposeFile": "docker-compose.yaml",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "PKief.material-icon-theme",
+        "akamud.vscode-theme-onedark",
+        "streetsidesoftware.code-spell-checker",
+        "bradlc.vscode-tailwindcss",
+        "naumovs.color-highlight",
+        "oderwat.indent-rainbow",
+        "vscjava.vscode-java-pack"
+      ],
+      "settings": {
+        "workbench.colorTheme": "Atom One Dark",
+        "workbench.iconTheme": "material-icon-theme",
+        "chat.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
+        "editor.fontFamily": "'JetBrains Mono', Consolas, 'Courier New', monospace",
+        "editor.formatOnSave": true,
+        "editor.fontLigatures": true
+      }
+    }
+  },
+  // Use 'forwardPorts' to make a list of ports inside the container available locally.
+  "forwardPorts": [3306, 6379, 3000]
+  // Use 'postCreateCommand' to run commands after the container is created.
+  // "postCreateCommand": "java -version",
+  // Configure tool-specific properties.
+  // "customizations": {},
+  // Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+  // "remoteUser": "root"
 }

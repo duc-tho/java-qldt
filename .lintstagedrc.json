@@ -1,8 +1,4 @@
 {
-    "*.html": [
-        "npx prettier --write"
-    ],
-    "*.java": [
-        "npx google-java-format --replace"
-    ]
+  "*.html": ["npx prettier --write"],
+  "*.java": ["npx google-java-format --replace"]
 }

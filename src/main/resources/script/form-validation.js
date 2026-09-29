@@ -15,7 +15,9 @@ export function createFormValidator(formElement) {
     }
 
     const matchSelector = input.dataset.validateMatch;
-    const matchInput = matchSelector ? formElement.querySelector(matchSelector) : null;
+    const matchInput = matchSelector
+      ? formElement.querySelector(matchSelector)
+      : null;
     if (matchInput) {
       rules.push({
         validator: (value) => value === matchInput.value,

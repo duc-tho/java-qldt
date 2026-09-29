@@ -2,7 +2,11 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
    <th:block th:fragment="form-fields">
       <div class="form-control">
-         <label class="label" for="title" th:text="#{announcements.field.title}"></label>
+         <label
+            class="label"
+            for="title"
+            th:text="#{announcements.field.title}"
+         ></label>
          <input
             th:field="*{title}"
             class="input w-full"
@@ -19,7 +23,11 @@
          </div>
       </div>
       <div class="form-control">
-         <label class="label" for="content" th:text="#{announcements.field.content}"></label>
+         <label
+            class="label"
+            for="content"
+            th:text="#{announcements.field.content}"
+         ></label>
          <textarea
             th:field="*{content}"
             class="textarea w-full"

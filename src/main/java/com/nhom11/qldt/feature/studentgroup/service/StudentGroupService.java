@@ -77,10 +77,15 @@ public class StudentGroupService {
       throw new IllegalArgumentException("student-groups.error.member-limit");
     }
 
-    User student = userRepository.findByUserCode(studentCode.trim()).orElseThrow(
-        () -> new IllegalArgumentException("student-groups.error.student-not-found"));
+    User student =
+        userRepository
+            .findByUserCode(studentCode.trim())
+            .orElseThrow(
+                () -> new IllegalArgumentException("student-groups.error.student-not-found"));
     requireStudent(student);
-    if (groupMemberRepository.findByStudentIdAndPeriodId(student.getId(), group.getRegistrationPeriod().getId()).isPresent()) {
+    if (groupMemberRepository
+        .findByStudentIdAndPeriodId(student.getId(), group.getRegistrationPeriod().getId())
+        .isPresent()) {
       throw new IllegalArgumentException("student-groups.error.already-member");
     }
 
@@ -97,9 +102,12 @@ public class StudentGroupService {
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
-    GroupMember member = groupMemberRepository.findById(memberId)
-        .filter(value -> value.getStudentGroup().getId().equals(groupId))
-        .orElseThrow(() -> new IllegalArgumentException("student-groups.error.member-not-found"));
+    GroupMember member =
+        groupMemberRepository
+            .findById(memberId)
+            .filter(value -> value.getStudentGroup().getId().equals(groupId))
+            .orElseThrow(
+                () -> new IllegalArgumentException("student-groups.error.member-not-found"));
     if (member.isLeader()) {
       throw new IllegalArgumentException("student-groups.error.leader-removal");
     }
@@ -112,9 +120,12 @@ public class StudentGroupService {
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     GroupMember currentLeader = requireLeader(groupId, leader);
-    GroupMember newLeader = groupMemberRepository.findById(memberId)
-        .filter(value -> value.getStudentGroup().getId().equals(groupId))
-        .orElseThrow(() -> new IllegalArgumentException("student-groups.error.member-not-found"));
+    GroupMember newLeader =
+        groupMemberRepository
+            .findById(memberId)
+            .filter(value -> value.getStudentGroup().getId().equals(groupId))
+            .orElseThrow(
+                () -> new IllegalArgumentException("student-groups.error.member-not-found"));
     if (newLeader.isLeader()) {
       throw new IllegalArgumentException("student-groups.error.leader-already-assigned");
     }
@@ -128,16 +139,22 @@ public class StudentGroupService {
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
-    Topic topic = topicRepository.findByIdAndRegistrationPeriodId(topicId, group.getRegistrationPeriod().getId())
-        .filter(value -> value.getStatus() == TopicStatus.APPROVED)
-        .orElseThrow(() -> new IllegalArgumentException("student-groups.error.topic-not-available"));
+    Topic topic =
+        topicRepository
+            .findByIdAndRegistrationPeriodId(topicId, group.getRegistrationPeriod().getId())
+            .filter(value -> value.getStatus() == TopicStatus.APPROVED)
+            .orElseThrow(
+                () -> new IllegalArgumentException("student-groups.error.topic-not-available"));
 
-    TopicRegistration registration = topicRegistrationRepository.findByStudentGroupId(groupId)
-        .orElseGet(() -> {
-          TopicRegistration value = new TopicRegistration();
-          value.setStudentGroup(group);
-          return value;
-        });
+    TopicRegistration registration =
+        topicRegistrationRepository
+            .findByStudentGroupId(groupId)
+            .orElseGet(
+                () -> {
+                  TopicRegistration value = new TopicRegistration();
+                  value.setStudentGroup(group);
+                  return value;
+                });
     registration.setTopic(topic);
     resetRegistrationReview(registration);
     topicRegistrationRepository.save(registration);
@@ -168,7 +185,8 @@ public class StudentGroupService {
   }
 
   public StudentGroup findCurrentGroup(Long periodId, User student) {
-    return groupMemberRepository.findByStudentIdAndPeriodId(student.getId(), periodId)
+    return groupMemberRepository
+        .findByStudentIdAndPeriodId(student.getId(), periodId)
         .map(GroupMember::getStudentGroup)
         .orElse(null);
   }
@@ -187,7 +205,10 @@ public class StudentGroupService {
 
   public List<Topic> approvedTopics(Long periodId, String search, Long departmentId) {
     return topicRepository.findAllByRegistrationPeriodIdAndStatus(
-        periodId, TopicStatus.APPROVED, search == null || search.isBlank() ? null : search.trim(), departmentId);
+        periodId,
+        TopicStatus.APPROVED,
+        search == null || search.isBlank() ? null : search.trim(),
+        departmentId);
   }
 
   public List<TopicRegistration> adviserRegistrations(User lecturer) {
@@ -195,16 +216,20 @@ public class StudentGroupService {
   }
 
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {
-    return topicRegistrationRepository.findByIdAndAdviserId(registrationId, lecturer.getId()).orElse(null);
+    return topicRegistrationRepository
+        .findByIdAndAdviserId(registrationId, lecturer.getId())
+        .orElse(null);
   }
 
   public boolean isOpen(RegistrationPeriod period) {
     LocalDateTime now = LocalDateTime.now();
-    return !now.isBefore(period.getStudentRegistrationStart()) && !now.isAfter(period.getStudentRegistrationEnd());
+    return !now.isBefore(period.getStudentRegistrationStart())
+        && !now.isAfter(period.getStudentRegistrationEnd());
   }
 
   private StudentGroup requireGroup(Long groupId) {
-    return studentGroupRepository.findById(groupId)
+    return studentGroupRepository
+        .findById(groupId)
         .orElseThrow(() -> new IllegalArgumentException("student-groups.error.not-found"));
   }
 
@@ -217,14 +242,17 @@ public class StudentGroupService {
   }
 
   private GroupMember requireLeader(Long groupId, User user) {
-    return groupMemberRepository.findByStudentGroupIdAndStudentId(groupId, user.getId())
+    return groupMemberRepository
+        .findByStudentGroupIdAndStudentId(groupId, user.getId())
         .filter(GroupMember::isLeader)
         .orElseThrow(() -> new IllegalArgumentException("student-groups.error.leader-required"));
   }
 
   private TopicRegistration requireAdviserRegistration(Long registrationId, User lecturer) {
-    return topicRegistrationRepository.findByIdAndAdviserId(registrationId, lecturer.getId())
-        .orElseThrow(() -> new IllegalArgumentException("topic-registrations.error.adviser-required"));
+    return topicRegistrationRepository
+        .findByIdAndAdviserId(registrationId, lecturer.getId())
+        .orElseThrow(
+            () -> new IllegalArgumentException("topic-registrations.error.adviser-required"));
   }
 
   private void requirePending(TopicRegistration registration) {
@@ -247,7 +275,9 @@ public class StudentGroupService {
   }
 
   private void resetRegistrationReview(Long groupId) {
-    topicRegistrationRepository.findByStudentGroupId(groupId).ifPresent(this::resetRegistrationReview);
+    topicRegistrationRepository
+        .findByStudentGroupId(groupId)
+        .ifPresent(this::resetRegistrationReview);
   }
 
   private void resetRegistrationReview(TopicRegistration registration) {

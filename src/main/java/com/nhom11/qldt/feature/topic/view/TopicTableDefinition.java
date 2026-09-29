@@ -42,10 +42,9 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
             "topics.column.advisers",
             item ->
                 ((Topic) item)
-                    .getAdvisers()
-                    .stream()
-                    .map(adviser -> adviser.getFullName())
-                    .collect(java.util.stream.Collectors.joining(", ")),
+                    .getAdvisers().stream()
+                        .map(adviser -> adviser.getFullName())
+                        .collect(java.util.stream.Collectors.joining(", ")),
             false,
             false,
             false),

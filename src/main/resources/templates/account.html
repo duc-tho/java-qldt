@@ -13,9 +13,15 @@
          <button
             type="button"
             class="btn btn-primary btn-sm"
-            onclick="document.getElementById('change-password-dialog').showModal()"
+            onclick="
+               document.getElementById('change-password-dialog').showModal()
+            "
          >
-            <span class="iconify inline" data-icon="bi:key" data-width="16"></span>
+            <span
+               class="iconify inline"
+               data-icon="bi:key"
+               data-width="16"
+            ></span>
             <span th:text="#{account.action.change_password}"></span>
          </button>
       </th:block>
@@ -51,55 +57,77 @@
                   role="alert"
                   class="alert alert-error alert-soft flex flex-col gap-2"
                >
-                  <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+                  <p
+                     th:each="err : ${#fields.errors('*')}"
+                     th:text="${err}"
+                  ></p>
                </div>
 
                <div class="form-control">
-               <label class="label" for="account-full-name">
-                  <span class="label-text font-bold" th:text="#{users.field.full_name}"></span>
-               </label>
-               <input
-                  id="account-full-name"
-                  type="text"
-                  class="input w-full"
-                  th:field="*{fullName}"
-                  th:attr="validate-data=${validationRules.fullName}"
-               />
-               <div id="account-full-name-error"></div>
+                  <label class="label" for="account-full-name">
+                     <span
+                        class="label-text font-bold"
+                        th:text="#{users.field.full_name}"
+                     ></span>
+                  </label>
+                  <input
+                     id="account-full-name"
+                     type="text"
+                     class="input w-full"
+                     th:field="*{fullName}"
+                     th:attr="validate-data=${validationRules.fullName}"
+                  />
+                  <div id="account-full-name-error"></div>
                </div>
 
                <div class="form-control">
-               <label class="label" for="account-email">
-                  <span class="label-text font-bold" th:text="#{users.field.email}"></span>
-               </label>
-               <input
-                  id="account-email"
-                  type="email"
-                  class="input w-full"
-                  th:field="*{email}"
-                  th:attr="validate-data=${validationRules.email}"
-               />
-               <div id="account-email-error"></div>
+                  <label class="label" for="account-email">
+                     <span
+                        class="label-text font-bold"
+                        th:text="#{users.field.email}"
+                     ></span>
+                  </label>
+                  <input
+                     id="account-email"
+                     type="email"
+                     class="input w-full"
+                     th:field="*{email}"
+                     th:attr="validate-data=${validationRules.email}"
+                  />
+                  <div id="account-email-error"></div>
                </div>
 
                <div class="form-control">
-               <label class="label" for="account-phone">
-                  <span class="label-text font-bold" th:text="#{users.field.phone}"></span>
-               </label>
-               <input
-                  id="account-phone"
-                  type="text"
-                  class="input w-full"
-                  th:field="*{phone}"
-                  th:attr="validate-data=${validationRules.phone}"
-               />
-               <div id="account-phone-error"></div>
+                  <label class="label" for="account-phone">
+                     <span
+                        class="label-text font-bold"
+                        th:text="#{users.field.phone}"
+                     ></span>
+                  </label>
+                  <input
+                     id="account-phone"
+                     type="text"
+                     class="input w-full"
+                     th:field="*{phone}"
+                     th:attr="validate-data=${validationRules.phone}"
+                  />
+                  <div id="account-phone-error"></div>
                </div>
 
-               <div class="flex items-center justify-end gap-3 border-t border-base-300 pt-2">
-                  <a href="/" class="btn btn-ghost btn-sm" th:text="#{crud.form.cancel}"></a>
+               <div
+                  class="flex items-center justify-end gap-3 border-t border-base-300 pt-2"
+               >
+                  <a
+                     href="/"
+                     class="btn btn-ghost btn-sm"
+                     th:text="#{crud.form.cancel}"
+                  ></a>
                   <button type="submit" class="btn btn-primary btn-sm">
-                     <span class="iconify inline" data-icon="bi:check-lg" data-width="16"></span>
+                     <span
+                        class="iconify inline"
+                        data-icon="bi:check-lg"
+                        data-width="16"
+                     ></span>
                      <span th:text="#{crud.form.save}"></span>
                   </button>
                </div>
@@ -112,7 +140,10 @@
             th:open="${passwordDialogOpen}"
          >
             <div class="modal-box">
-               <h2 class="text-lg font-bold" th:text="#{account.action.change_password}"></h2>
+               <h2
+                  class="text-lg font-bold"
+                  th:text="#{account.action.change_password}"
+               ></h2>
                <form
                   method="post"
                   th:action="@{/account/password}"
@@ -128,11 +159,17 @@
                      role="alert"
                      class="alert alert-error alert-soft flex flex-col gap-2"
                   >
-                     <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+                     <p
+                        th:each="err : ${#fields.errors('*')}"
+                        th:text="${err}"
+                     ></p>
                   </div>
                   <div class="form-control">
                      <label class="label" for="current-password">
-                        <span class="label-text font-bold" th:text="#{account.field.current_password}"></span>
+                        <span
+                           class="label-text font-bold"
+                           th:text="#{account.field.current_password}"
+                        ></span>
                      </label>
                      <input
                         id="current-password"
@@ -145,7 +182,10 @@
                   </div>
                   <div class="form-control">
                      <label class="label" for="new-password">
-                        <span class="label-text font-bold" th:text="#{account.field.new_password}"></span>
+                        <span
+                           class="label-text font-bold"
+                           th:text="#{account.field.new_password}"
+                        ></span>
                      </label>
                      <input
                         id="new-password"
@@ -158,7 +198,10 @@
                   </div>
                   <div class="form-control">
                      <label class="label" for="confirm-password">
-                        <span class="label-text font-bold" th:text="#{account.field.confirm_password}"></span>
+                        <span
+                           class="label-text font-bold"
+                           th:text="#{account.field.confirm_password}"
+                        ></span>
                      </label>
                      <input
                         id="confirm-password"
@@ -171,12 +214,27 @@
                      <div id="confirm-password-error"></div>
                   </div>
                   <div class="modal-action">
-                     <button type="button" class="btn btn-ghost" onclick="document.getElementById('change-password-dialog').close()" th:text="#{crud.form.cancel}"></button>
-                     <button type="submit" class="btn btn-primary" th:text="#{crud.form.save}"></button>
+                     <button
+                        type="button"
+                        class="btn btn-ghost"
+                        onclick="
+                           document
+                              .getElementById('change-password-dialog')
+                              .close()
+                        "
+                        th:text="#{crud.form.cancel}"
+                     ></button>
+                     <button
+                        type="submit"
+                        class="btn btn-primary"
+                        th:text="#{crud.form.save}"
+                     ></button>
                   </div>
                </form>
             </div>
-            <form method="dialog" class="modal-backdrop"><button th:text="#{crud.delete.close}"></button></form>
+            <form method="dialog" class="modal-backdrop">
+               <button th:text="#{crud.delete.close}"></button>
+            </form>
          </dialog>
       </th:block>
    </body>

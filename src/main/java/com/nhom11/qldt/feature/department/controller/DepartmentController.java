@@ -26,7 +26,11 @@ public class DepartmentController {
   private final CrudViewSupport view;
   private final ClientValidationRuleRenderer validation;
 
-  public DepartmentController(DepartmentService service, DepartmentTableDefinition table, CrudViewSupport view, ClientValidationRuleRenderer validation) {
+  public DepartmentController(
+      DepartmentService service,
+      DepartmentTableDefinition table,
+      CrudViewSupport view,
+      ClientValidationRuleRenderer validation) {
     this.service = service;
     this.table = table;
     this.view = view;
@@ -48,7 +52,8 @@ public class DepartmentController {
   }
 
   @PostMapping
-  public String create(@Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
+  public String create(
+      @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
     if (errors.hasErrors()) {
       form(model, form, "/departments", false, "departments.page.create.title");
       return "fragment/page/department/create";
@@ -79,7 +84,11 @@ public class DepartmentController {
   }
 
   @PostMapping("/{id}")
-  public String update(@PathVariable Long id, @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
+  public String update(
+      @PathVariable Long id,
+      @Valid @ModelAttribute("data") DepartmentForm form,
+      BindingResult errors,
+      Model model) {
     if (service.findById(id) == null) return "redirect:/departments";
     if (errors.hasErrors()) {
       form.setId(id);
@@ -101,8 +110,17 @@ public class DepartmentController {
     return "redirect:/departments";
   }
 
-  private void form(Model model, DepartmentForm data, String action, boolean readonly, String title) {
-    view.form(model, data, action, "post", "/departments", readonly, "fragment/page/department/fields", validation.render(DepartmentForm.class));
+  private void form(
+      Model model, DepartmentForm data, String action, boolean readonly, String title) {
+    view.form(
+        model,
+        data,
+        action,
+        "post",
+        "/departments",
+        readonly,
+        "fragment/page/department/fields",
+        validation.render(DepartmentForm.class));
     model.addAttribute("pageTitle", title);
     model.addAttribute("pageIcon", "bi:diagram-3");
   }

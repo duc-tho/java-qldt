@@ -3,18 +3,18 @@ package com.nhom11.qldt.feature.topic.controller;
 import com.nhom11.qldt.core.table.TableQuery;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.department.service.DepartmentService;
+import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
-import org.springframework.stereotype.Controller;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -152,7 +152,8 @@ public class TopicController {
     Topic topic = form.toEntity();
     topic.setId(id);
     try {
-      topicService.update(topic, old.getRegistrationPeriod(), form.getDepartmentId(), form.getAdviserIds());
+      topicService.update(
+          topic, old.getRegistrationPeriod(), form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
       errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
       prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
@@ -230,25 +231,51 @@ public class TopicController {
   @GetMapping("/propose")
   public String proposeForm(@PathVariable Long periodId, Model model) {
     if (findPeriod(periodId) == null) return "redirect:/registration-periods";
-    prepare(model, new TopicForm(), baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+    prepare(
+        model,
+        new TopicForm(),
+        baseUrl(periodId) + "/propose",
+        false,
+        "topics.page.propose.title",
+        periodId);
     return "fragment/page/topic/create";
   }
 
   @PostMapping("/propose")
-  public String propose(@PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal,
-      @Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) {
+  public String propose(
+      @PathVariable Long periodId,
+      @AuthenticationPrincipal UserDetails principal,
+      @Valid @ModelAttribute("data") TopicForm form,
+      BindingResult errors,
+      Model model) {
     RegistrationPeriod period = findPeriod(periodId);
     if (period == null || principal == null) return "redirect:/registration-periods";
     if (errors.hasErrors()) {
-      prepare(model, form, baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+      prepare(
+          model,
+          form,
+          baseUrl(periodId) + "/propose",
+          false,
+          "topics.page.propose.title",
+          periodId);
       return "fragment/page/topic/create";
     }
     try {
-      topicService.createProposal(form.toEntity(), period, form.getDepartmentId(), form.getAdviserIds(),
+      topicService.createProposal(
+          form.toEntity(),
+          period,
+          form.getDepartmentId(),
+          form.getAdviserIds(),
           userService.findByEmail(principal.getUsername()).orElseThrow());
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
-      prepare(model, form, baseUrl(periodId) + "/propose", false, "topics.page.propose.title", periodId);
+      prepare(
+          model,
+          form,
+          baseUrl(periodId) + "/propose",
+          false,
+          "topics.page.propose.title",
+          periodId);
       return "fragment/page/topic/create";
     }
     return "redirect:/topic-proposals";
@@ -256,11 +283,10 @@ public class TopicController {
 
   @PostMapping("/{id}/approve")
   public String approve(
-      @PathVariable Long periodId,
-      @PathVariable Long id,
-      RedirectAttributes redirectAttributes) {
-    try { topicService.approve(id, periodId); }
-    catch (IllegalArgumentException exception) {
+      @PathVariable Long periodId, @PathVariable Long id, RedirectAttributes redirectAttributes) {
+    try {
+      topicService.approve(id, periodId);
+    } catch (IllegalArgumentException exception) {
       redirectAttributes.addFlashAttribute("error", exception.getMessage());
     }
     return periodDetailRedirect(periodId);

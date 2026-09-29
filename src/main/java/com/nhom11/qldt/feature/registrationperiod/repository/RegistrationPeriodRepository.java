@@ -8,7 +8,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface RegistrationPeriodRepository extends BaseRepository<RegistrationPeriod, Long> {
-  @Query("""
+  @Query(
+      """
       select period from RegistrationPeriod period
       where period.studentRegistrationStart <= :now
         and period.studentRegistrationEnd >= :now
@@ -16,7 +17,8 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
       """)
   List<RegistrationPeriod> findOpenForStudents(@Param("now") LocalDateTime now);
 
-  @Query("""
+  @Query(
+      """
       select period from RegistrationPeriod period
       where period.lecturerRegistrationStart <= :now
         and period.studentRegistrationEnd >= :now

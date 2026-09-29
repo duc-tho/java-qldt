@@ -1,11 +1,32 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
-<body><th:block layout:fragment="page-content">
-  <section class="card card-border border-base-300 shadow-sm max-w-xl mx-auto"><div class="card-body p-6 items-start">
-    <span class="iconify text-3xl" data-icon="bi:people"></span>
-    <h2 class="card-title" th:text="#{student-groups.page.index.title}"></h2>
-    <p th:text="#{student-groups.empty}"></p>
-    <div class="card-actions" th:if="${isOpen}"><a class="btn btn-primary" th:href="@{/registration-periods/{id}/student-group/new(id=${period.id})}" th:text="#{student-groups.action.create}"></a></div>
-    <div role="alert" class="alert alert-warning" th:unless="${isOpen}" th:text="#{student-groups.locked}"></div>
-  </div></section>
-</th:block></body></html>
+   <body>
+      <th:block layout:fragment="page-content">
+         <section
+            class="card card-border border-base-300 shadow-sm max-w-xl mx-auto"
+         >
+            <div class="card-body p-6 items-start">
+               <span class="iconify text-3xl" data-icon="bi:people"></span>
+               <h2
+                  class="card-title"
+                  th:text="#{student-groups.page.index.title}"
+               ></h2>
+               <p th:text="#{student-groups.empty}"></p>
+               <div class="card-actions" th:if="${isOpen}">
+                  <a
+                     class="btn btn-primary"
+                     th:href="@{/registration-periods/{id}/student-group/new(id=${period.id})}"
+                     th:text="#{student-groups.action.create}"
+                  ></a>
+               </div>
+               <div
+                  role="alert"
+                  class="alert alert-warning"
+                  th:unless="${isOpen}"
+                  th:text="#{student-groups.locked}"
+               ></div>
+            </div>
+         </section>
+      </th:block>
+   </body>
+</html>

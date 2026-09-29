@@ -30,7 +30,8 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
 
   boolean existsByDepartmentId(Long departmentId);
 
-  @Query("""
+  @Query(
+      """
       select distinct topic from Topic topic
       left join fetch topic.department
       left join fetch topic.advisers

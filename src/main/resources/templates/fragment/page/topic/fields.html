@@ -23,13 +23,32 @@
          </div>
          <div class="form-control">
             <label class="label" for="departmentId">
-               <span class="font-bold" th:text="#{topics.field.department}"></span>
+               <span
+                  class="font-bold"
+                  th:text="#{topics.field.department}"
+               ></span>
             </label>
-            <select th:field="*{departmentId}" class="select w-full" th:classappend="${#fields.hasErrors('departmentId')} ? ' select-error'" th:disabled="${form.readonly}">
-               <option value="" th:text="#{topics.field.department.placeholder}"></option>
-               <option th:each="department : ${departments}" th:value="${department.id}" th:text="${department.name}"></option>
+            <select
+               th:field="*{departmentId}"
+               class="select w-full"
+               th:classappend="${#fields.hasErrors('departmentId')} ? ' select-error'"
+               th:disabled="${form.readonly}"
+            >
+               <option
+                  value=""
+                  th:text="#{topics.field.department.placeholder}"
+               ></option>
+               <option
+                  th:each="department : ${departments}"
+                  th:value="${department.id}"
+                  th:text="${department.name}"
+               ></option>
             </select>
-            <span class="text-error text-sm mt-1 block" th:if="${#fields.hasErrors('departmentId')}" th:errors="*{departmentId}"></span>
+            <span
+               class="text-error text-sm mt-1 block"
+               th:if="${#fields.hasErrors('departmentId')}"
+               th:errors="*{departmentId}"
+            ></span>
          </div>
          <div class="form-control">
             <label class="label" for="description">
@@ -56,13 +75,30 @@
          </div>
          <div class="form-control">
             <label class="label" for="adviserIds">
-               <span class="font-bold" th:text="#{topics.field.advisers}"></span>
+               <span
+                  class="font-bold"
+                  th:text="#{topics.field.advisers}"
+               ></span>
             </label>
-            <select th:field="*{adviserIds}" multiple class="select w-full min-h-28" th:classappend="${#fields.hasErrors('adviserIds')} ? ' select-error'" th:disabled="${form.readonly}">
-               <option th:each="lecturer : ${lecturers}" th:value="${lecturer.id}" th:text="${lecturer.fullName}"></option>
+            <select
+               th:field="*{adviserIds}"
+               multiple
+               class="select w-full min-h-28"
+               th:classappend="${#fields.hasErrors('adviserIds')} ? ' select-error'"
+               th:disabled="${form.readonly}"
+            >
+               <option
+                  th:each="lecturer : ${lecturers}"
+                  th:value="${lecturer.id}"
+                  th:text="${lecturer.fullName}"
+               ></option>
             </select>
             <span class="label" th:text="#{topics.field.advisers.hint}"></span>
-            <span class="text-error text-sm mt-1 block" th:if="${#fields.hasErrors('adviserIds')}" th:errors="*{adviserIds}"></span>
+            <span
+               class="text-error text-sm mt-1 block"
+               th:if="${#fields.hasErrors('adviserIds')}"
+               th:errors="*{adviserIds}"
+            ></span>
          </div>
       </div>
    </th:block>

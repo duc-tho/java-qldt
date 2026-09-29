@@ -15,7 +15,8 @@ public interface GroupMemberRepository extends BaseRepository<GroupMember, Long>
   @EntityGraph(attributePaths = {"student"})
   List<GroupMember> findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(Long studentGroupId);
 
-  @Query("""
+  @Query(
+      """
       select member from GroupMember member
       where member.student.id = :studentId
         and member.studentGroup.registrationPeriod.id = :periodId

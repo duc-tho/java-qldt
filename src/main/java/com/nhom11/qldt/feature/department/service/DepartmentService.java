@@ -13,7 +13,8 @@ public class DepartmentService extends BaseCrudService<Department, Long> {
   private final DepartmentRepository departmentRepository;
   private final TopicRepository topicRepository;
 
-  public DepartmentService(DepartmentRepository departmentRepository, TopicRepository topicRepository) {
+  public DepartmentService(
+      DepartmentRepository departmentRepository, TopicRepository topicRepository) {
     this.departmentRepository = departmentRepository;
     this.topicRepository = topicRepository;
   }
