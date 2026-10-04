@@ -1,0 +1,85 @@
+{
+  "version": "1.0",
+  "stitch": {
+    "projectId": "11869934335476174606",
+    "referenceScreen": {
+      "id": "2940354178649328088",
+      "route": "/registration-periods/4/student-group/5",
+      "title": "Student group rejected registration",
+      "deviceType": "DESKTOP",
+      "extractedAt": "2026-10-04T13:26:02.345Z"
+    },
+    "referenceScreens": [
+      {
+        "id": "11478105811536679674",
+        "route": "/registration-periods",
+        "title": "Registration periods",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:23:21.371Z"
+      },
+      {
+        "id": "12951732789044932574",
+        "route": "/registration-periods/1",
+        "title": "Registration period detail",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:23:31.887Z"
+      },
+      {
+        "id": "13269007681649360802",
+        "route": "/registration-periods/1/topics/12",
+        "title": "Topic detail",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:24:08.261Z"
+      },
+      {
+        "id": "15325011813493566859",
+        "route": "/student-groups",
+        "title": "Student open registration periods",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:24:18.022Z"
+      },
+      {
+        "id": "5767890406742441010",
+        "route": "/registration-periods/4/student-group/3",
+        "title": "Student group pending registration",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:24:49.078Z"
+      },
+      {
+        "id": "4177045499179614618",
+        "route": "/registration-periods/4/student-group/3/topics",
+        "title": "Student topic selection",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:24:59.112Z"
+      },
+      {
+        "id": "17909321650841606583",
+        "route": "/topic-registrations",
+        "title": "Lecturer registration reviews",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:25:22.158Z"
+      },
+      {
+        "id": "12563370157095403335",
+        "route": "/topic-registrations/3",
+        "title": "Lecturer registration review detail",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:25:31.137Z"
+      },
+      {
+        "id": "10498374038284551226",
+        "route": "/registration-periods/4/student-group/4",
+        "title": "Student group approved registration",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:25:52.381Z"
+      },
+      {
+        "id": "2940354178649328088",
+        "route": "/registration-periods/4/student-group/5",
+        "title": "Student group rejected registration",
+        "deviceType": "DESKTOP",
+        "extractedAt": "2026-10-04T13:26:02.345Z"
+      }
+    ]
+  }
+}
