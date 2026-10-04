@@ -1,5 +1,9 @@
 Always response to user with vietnamese and use English when coding
 
+## UI Design Source of Truth
+
+For every UI, Tailwind, daisyUI, Thymeleaf template, or shared layout task, read and follow the root [`DESIGN.md`](DESIGN.md) before proposing or editing code. It defines QLDT's approved Forest Ledger design system, product hierarchy, shared component contracts, and visual-change boundaries.
+
 # Master concept
 
 Behavioral guidelines to reduce common LLM coding mistakes. Merge with project-specific instructions as needed.
