@@ -64,7 +64,7 @@ public class TopicRegistrationReviewController {
     } catch (IllegalArgumentException exception) {
       redirectAttributes.addFlashAttribute("error", exception.getMessage());
     }
-    return "redirect:/topic-registrations/" + registrationId;
+    return "redirect:/topic-registrations";
   }
 
   @PostMapping("/{registrationId}/reject")
@@ -82,7 +82,7 @@ public class TopicRegistrationReviewController {
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
     }
-    if (!errors.hasErrors()) return "redirect:/topic-registrations/" + registrationId;
+    if (!errors.hasErrors()) return "redirect:/topic-registrations";
     TopicRegistration registration =
         studentGroupService.adviserRegistration(registrationId, currentUser(principal));
     if (registration == null) return "redirect:/topic-registrations";

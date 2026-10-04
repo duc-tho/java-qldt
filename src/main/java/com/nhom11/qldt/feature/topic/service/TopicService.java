@@ -67,6 +67,10 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         registrationPeriodId, TopicStatus.APPROVED, null, null);
   }
 
+  public List<Topic> findAllWithDetailsByRegistrationPeriodId(Long registrationPeriodId) {
+    return topicRepository.findAllWithDetailsByRegistrationPeriodId(registrationPeriodId);
+  }
+
   public Topic create(
       Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
@@ -85,7 +89,33 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     }
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     topic.setStatus(TopicStatus.PROPOSED);
+    topic.setProposedBy(lecturer);
     return create(topic);
+  }
+
+  @Transactional
+  public void updateProposal(
+      Long topicId,
+      Long periodId,
+      User proposer,
+      Topic topic,
+      Long departmentId,
+      Set<Long> adviserIds) {
+    Topic existing = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
+    requireProposalOwner(existing, proposer);
+    assignRelations(topic, existing.getRegistrationPeriod(), departmentId, adviserIds);
+    topic.setId(existing.getId());
+    topic.setStatus(TopicStatus.PROPOSED);
+    topic.setProposedBy(existing.getProposedBy());
+    topic.setRejectionReason(null);
+    topicRepository.save(topic);
+  }
+
+  @Transactional
+  public void deleteProposal(Long topicId, Long periodId, User proposer) {
+    Topic topic = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
+    requireProposalOwner(topic, proposer);
+    topicRepository.softDelete(topic);
   }
 
   @Transactional
@@ -98,6 +128,20 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       throw new IllegalArgumentException("topics.error.approval-state");
     }
     topic.setStatus(TopicStatus.APPROVED);
+    topic.setRejectionReason(null);
+  }
+
+  @Transactional
+  public void reject(Long topicId, Long registrationPeriodId, String reason) {
+    Topic topic =
+        topicRepository
+            .findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
+            .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    if (topic.getStatus() != TopicStatus.PROPOSED) {
+      throw new IllegalArgumentException("topics.error.rejection-state");
+    }
+    topic.setStatus(TopicStatus.REJECTED);
+    topic.setRejectionReason(reason.trim());
   }
 
   public Topic update(
@@ -107,6 +151,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
             .findById(topic.getId())
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
     topic.setStatus(existingTopic.getStatus());
+    topic.setRejectionReason(existingTopic.getRejectionReason());
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     return update(topic);
   }
@@ -165,6 +210,14 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     if (now.isBefore(registrationPeriod.getLecturerRegistrationStart())
         || now.isAfter(registrationPeriod.getLecturerRegistrationEnd())) {
       throw new IllegalArgumentException("topics.error.lecturer-registration-closed");
+    }
+  }
+
+  private void requireProposalOwner(Topic topic, User user) {
+    if ((topic.getStatus() != TopicStatus.PROPOSED && topic.getStatus() != TopicStatus.REJECTED)
+        || topic.getProposedBy() == null
+        || !topic.getProposedBy().getId().equals(user.getId())) {
+      throw new IllegalArgumentException("topics.error.proposal-owner-required");
     }
   }
 }

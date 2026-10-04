@@ -2,14 +2,17 @@ package com.nhom11.qldt.feature.studentgroup.controller;
 
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
 import com.nhom11.qldt.feature.studentgroup.model.dto.AddGroupMemberForm;
 import com.nhom11.qldt.feature.studentgroup.model.dto.CreateStudentGroupForm;
 import com.nhom11.qldt.feature.studentgroup.model.entity.GroupMember;
 import com.nhom11.qldt.feature.studentgroup.model.entity.StudentGroup;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
+import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -33,16 +36,22 @@ public class StudentGroupController {
   private final RegistrationPeriodService registrationPeriodService;
   private final UserService userService;
   private final DepartmentService departmentService;
+  private final ReportSubmissionService reportSubmissionService;
+  private final CouncilService councilService;
 
   public StudentGroupController(
       StudentGroupService studentGroupService,
       RegistrationPeriodService registrationPeriodService,
       UserService userService,
-      DepartmentService departmentService) {
+      DepartmentService departmentService,
+      ReportSubmissionService reportSubmissionService,
+      CouncilService councilService) {
     this.studentGroupService = studentGroupService;
     this.registrationPeriodService = registrationPeriodService;
     this.userService = userService;
     this.departmentService = departmentService;
+    this.reportSubmissionService = reportSubmissionService;
+    this.councilService = councilService;
   }
 
   @GetMapping
@@ -161,6 +170,21 @@ public class StudentGroupController {
     return redirectDetail(periodId, groupId);
   }
 
+  @PostMapping("/{groupId}/request-approval")
+  public String requestApproval(
+      @PathVariable Long periodId,
+      @PathVariable Long groupId,
+      @AuthenticationPrincipal UserDetails principal,
+      RedirectAttributes redirectAttributes) {
+    if (principal == null) return "redirect:/login";
+    try {
+      studentGroupService.requestRegistrationApproval(groupId, currentUser(principal));
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("error", exception.getMessage());
+    }
+    return redirectDetail(periodId, groupId);
+  }
+
   @GetMapping("/{groupId}/topics")
   public String topics(
       @PathVariable Long periodId,
@@ -211,7 +235,16 @@ public class StudentGroupController {
     List<GroupMember> members = studentGroupService.members(group.getId());
     model.addAttribute("group", group);
     model.addAttribute("members", members);
-    model.addAttribute("registration", studentGroupService.registration(group.getId()));
+    TopicRegistration registration = studentGroupService.registration(group.getId());
+    model.addAttribute("registration", registration);
+    model.addAttribute("currentReport", registration == null ? null : reportSubmissionService.current(registration.getId()));
+    model.addAttribute("reportHistory", registration == null ? List.of() : reportSubmissionService.history(registration.getId()));
+    model.addAttribute("canUploadReport", registration != null && reportSubmissionService.canUpload(registration, viewer));
+    model.addAttribute("isReportUploadClosed", reportSubmissionService.isUploadClosed(registration));
+    model.addAttribute("publishedResult", councilService.publishedResult(group.getId()));
+    model.addAttribute(
+        "isDraftRegistration",
+        registration != null && registration.getStatus() == TopicRegistrationStatus.DRAFT);
     model.addAttribute("isLeader", isLeader(group.getId(), viewer));
     model.addAttribute("isOpen", studentGroupService.isOpen(group.getRegistrationPeriod()));
     if (!model.containsAttribute("addMemberForm")) {

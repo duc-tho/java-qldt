@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPerio
 import java.util.List;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -46,6 +47,13 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
 
   @Override
   public List<ActionDef> actions(String baseUrl) {
+    if (!canManageRegistrationPeriods()) {
+      return List.of(
+          new ActionDef.Link(
+              "registration_periods.action.view",
+              "bi:eye",
+              item -> baseUrl + "/" + ((RegistrationPeriod) item).getId()));
+    }
     return List.of(
         new ActionDef.Link(
             "registration_periods.action.edit",
@@ -56,6 +64,19 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
             "bi:trash",
             item -> baseUrl + "/" + ((RegistrationPeriod) item).getId(),
             item -> ((RegistrationPeriod) item).getName()));
+  }
+
+  @Override
+  public boolean canCreate() {
+    return canManageRegistrationPeriods();
+  }
+
+  private boolean canManageRegistrationPeriods() {
+    return SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream()
+        .anyMatch(
+            authority ->
+                authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY")
+                    || authority.getAuthority().equals("ROLE_ADMIN"));
   }
 
   private String periodTypeLabel(RegistrationPeriod period) {

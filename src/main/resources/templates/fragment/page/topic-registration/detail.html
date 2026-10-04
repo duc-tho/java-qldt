@@ -109,8 +109,9 @@
                         th:text="#{topic-registrations.action.reject}"
                      ></button
                      ><button
+                        type="button"
                         class="btn"
-                        formmethod="dialog"
+                        onclick="reject_registration.close()"
                         th:text="#{crud.form.cancel}"
                      ></button>
                   </div>

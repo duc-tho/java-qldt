@@ -8,6 +8,7 @@ import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
+import com.nhom11.qldt.feature.topic.model.dto.RejectTopicForm;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
@@ -114,10 +115,7 @@ public class TopicController {
       return periodDetailRedirect(periodId);
     }
 
-    TopicForm form = new TopicForm();
-    form.fromEntity(topic);
-    prepare(model, form, topicUrl(periodId, id), true, "topics.page.detail.title", periodId);
-    return "fragment/page/topic/detail";
+    return detailView(model, topic, periodId);
   }
 
   @GetMapping("/{id}/edit")
@@ -130,6 +128,8 @@ public class TopicController {
     TopicForm form = new TopicForm();
     form.fromEntity(topic);
     prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+    model.addAttribute("topic", topic);
+    model.addAttribute("rejectForm", new RejectTopicForm());
     return "fragment/page/topic/detail";
   }
 
@@ -147,6 +147,8 @@ public class TopicController {
     if (errors.hasErrors()) {
       form.setId(id);
       prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+      model.addAttribute("topic", old);
+      model.addAttribute("rejectForm", new RejectTopicForm());
       return "fragment/page/topic/detail";
     }
 
@@ -158,6 +160,8 @@ public class TopicController {
     } catch (IllegalArgumentException exception) {
       errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
       prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
+      model.addAttribute("topic", old);
+      model.addAttribute("rejectForm", new RejectTopicForm());
       return "fragment/page/topic/detail";
     }
     return periodDetailRedirect(periodId);
@@ -299,6 +303,41 @@ public class TopicController {
     } catch (IllegalArgumentException exception) {
       redirectAttributes.addFlashAttribute("error", exception.getMessage());
     }
-    return periodDetailRedirect(periodId);
+    return "redirect:" + topicUrl(periodId, id);
+  }
+
+  @PostMapping("/{id}/reject")
+  public String reject(
+      @PathVariable Long periodId,
+      @PathVariable Long id,
+      @Valid @ModelAttribute("rejectForm") RejectTopicForm form,
+      BindingResult errors,
+      Model model) {
+    Topic topic = findTopic(periodId, id);
+    if (topic == null) {
+      return periodDetailRedirect(periodId);
+    }
+    if (!errors.hasErrors()) {
+      try {
+        topicService.reject(id, periodId, form.getReason());
+      } catch (IllegalArgumentException exception) {
+        errors.reject(exception.getMessage());
+      }
+    }
+    if (!errors.hasErrors()) {
+      return "redirect:" + topicUrl(periodId, id);
+    }
+    return detailView(model, topic, periodId);
+  }
+
+  private String detailView(Model model, Topic topic, Long periodId) {
+    TopicForm form = new TopicForm();
+    form.fromEntity(topic);
+    prepare(model, form, topicUrl(periodId, topic.getId()), true, "topics.page.detail.title", periodId);
+    model.addAttribute("topic", topic);
+    if (!model.containsAttribute("rejectForm")) {
+      model.addAttribute("rejectForm", new RejectTopicForm());
+    }
+    return "fragment/page/topic/detail";
   }
 }

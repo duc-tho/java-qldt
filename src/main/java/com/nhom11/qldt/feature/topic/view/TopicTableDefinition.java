@@ -65,6 +65,11 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
             "bi:check-circle",
             item -> baseUrl + "/" + ((Topic) item).getId() + "/approve",
             item -> ((Topic) item).getStatus() == TopicStatus.PROPOSED),
+        new ActionDef.Reject(
+            "topics.action.reject",
+            "bi:x-circle",
+            item -> baseUrl + "/" + ((Topic) item).getId() + "/reject",
+            item -> ((Topic) item).getStatus() == TopicStatus.PROPOSED),
         new ActionDef.Link(
             "topics.action.edit",
             "bi:pencil-square",

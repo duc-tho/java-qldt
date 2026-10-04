@@ -6,3 +6,11 @@ spring:
   messages:
     basename: i18n/messages
     encoding: UTF-8
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 500MB
+
+qldt:
+  report-storage:
+    root: ./local-report-storage

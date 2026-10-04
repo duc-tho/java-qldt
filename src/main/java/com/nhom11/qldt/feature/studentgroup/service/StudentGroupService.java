@@ -171,6 +171,20 @@ public class StudentGroupService {
   }
 
   @Transactional
+  public void requestRegistrationApproval(Long groupId, User leader) {
+    StudentGroup group = requireGroup(groupId);
+    requireOpenWindow(group.getRegistrationPeriod());
+    requireLeader(groupId, leader);
+    TopicRegistration registration =
+        topicRegistrationRepository
+            .findByStudentGroupId(groupId)
+            .orElseThrow(
+                () -> new IllegalArgumentException("topic-registrations.error.registration-required"));
+    requireDraft(registration);
+    registration.setStatus(TopicRegistrationStatus.PENDING);
+  }
+
+  @Transactional
   public void rejectRegistration(Long registrationId, User lecturer, String reason) {
     TopicRegistration registration = requireAdviserRegistration(registrationId, lecturer);
     requireOpenWindow(registration.getStudentGroup().getRegistrationPeriod());
@@ -212,7 +226,8 @@ public class StudentGroupService {
   }
 
   public List<TopicRegistration> adviserRegistrations(User lecturer) {
-    return topicRegistrationRepository.findAllByAdviserId(lecturer.getId());
+    return topicRegistrationRepository.findAllByAdviserIdAndStatus(
+        lecturer.getId(), TopicRegistrationStatus.PENDING);
   }
 
   public List<TopicRegistration> registrations(Long periodId) {
@@ -222,6 +237,7 @@ public class StudentGroupService {
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {
     return topicRegistrationRepository
         .findByIdAndAdviserId(registrationId, lecturer.getId())
+        .filter(registration -> registration.getStatus() == TopicRegistrationStatus.PENDING)
         .orElse(null);
   }
 
@@ -265,6 +281,12 @@ public class StudentGroupService {
     }
   }
 
+  private void requireDraft(TopicRegistration registration) {
+    if (registration.getStatus() != TopicRegistrationStatus.DRAFT) {
+      throw new IllegalArgumentException("topic-registrations.error.draft-required");
+    }
+  }
+
   private void requireStudent(User user) {
     boolean isStudent = user.getRoles().stream().anyMatch(role -> "STUDENT".equals(role.getName()));
     if (!isStudent) {
@@ -285,7 +307,7 @@ public class StudentGroupService {
   }
 
   private void resetRegistrationReview(TopicRegistration registration) {
-    registration.setStatus(TopicRegistrationStatus.PENDING);
+    registration.setStatus(TopicRegistrationStatus.DRAFT);
     registration.setRejectionReason(null);
     registration.setReviewedBy(null);
     registration.setReviewedAt(null);

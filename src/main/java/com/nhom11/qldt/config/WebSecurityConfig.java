@@ -3,6 +3,7 @@ package com.nhom11.qldt.config;
 import com.nhom11.qldt.feature.auth.model.dto.LoginForm;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -38,16 +39,34 @@ public class WebSecurityConfig {
                     .requestMatchers("/users/**")
                     .hasRole("ADMIN")
                     // --------
+                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*/reports/files/*")
+                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
                     .requestMatchers("/registration-periods/*/student-group/**")
                     .hasRole("STUDENT")
                     .requestMatchers("/student-groups/**")
                     .hasRole("STUDENT")
                     .requestMatchers("/topic-registrations/**")
                     .hasRole("LECTURER")
+                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/councils")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
+                    .requestMatchers("/registration-periods/*/councils/**")
+                    .hasRole("HEAD_OF_FACULTY")
+                    .requestMatchers("/council-workspace/**")
+                    .hasRole("LECTURER")
+                    .requestMatchers("/council-evaluations/**")
+                    .hasRole("LECTURER")
                     .requestMatchers("/topic-proposals/**")
                     .hasRole("LECTURER")
                     .requestMatchers("/registration-periods/{periodId}/topics/propose")
                     .hasRole("LECTURER")
+                    .requestMatchers(
+                        HttpMethod.GET,
+                        "/registration-periods",
+                        "/registration-periods/*",
+                        "/registration-periods/*/groups",
+                        "/registration-periods/*/topics",
+                        "/registration-periods/*/topics/*")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN", "LECTURER")
                     // --------
                     .requestMatchers(
                         "/registration-periods/**", "/announcements/**", "/departments/**")

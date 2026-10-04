@@ -18,6 +18,10 @@ public abstract class BaseTableDefinition<T> {
     return false;
   }
 
+  public boolean canCreate() {
+    return true;
+  }
+
   public int defaultPage() {
     return DEFAULT_PAGE;
   }

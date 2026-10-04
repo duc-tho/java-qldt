@@ -10,6 +10,7 @@ import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +42,10 @@ public class UserService extends BaseCrudService<User, Long> {
 
   public List<User> findAllLecturers() {
     return userRepository.findAllLecturers();
+  }
+
+  public List<User> searchLecturers(String search) {
+    return userRepository.searchLecturers(search == null || search.isBlank() ? null : search.trim(), PageRequest.of(0, 10));
   }
 
   @Override

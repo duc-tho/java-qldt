@@ -44,10 +44,19 @@
                      class="badge badge-outline"
                      th:text="${topic.department.name}"
                   ></span>
+                  <span
+                     class="badge badge-soft"
+                     th:classappend="${topic.status.name() == 'APPROVED'} ? ' badge-success' : (${topic.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning')"
+                     th:text="#{__${'topics.status.' + topic.status.name()}__}"
+                  ></span>
                   <p
                      class="text-base-content/70"
                      th:text="${topic.description}"
                   ></p>
+                  <div role="alert" class="alert alert-error alert-soft" th:if="${topic.status.name() == 'REJECTED' and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
+                     <span class="iconify" data-icon="bi:exclamation-circle"></span>
+                     <span th:text="${topic.rejectionReason}"></span>
+                  </div>
                   <div class="flex flex-wrap gap-2">
                      <span
                         class="badge badge-primary"
@@ -55,6 +64,10 @@
                         ><span class="iconify mr-1" data-icon="bi:person"></span
                         ><span th:text="${adviser.fullName}"></span
                      ></span>
+                  </div>
+                  <div class="card-actions justify-end" th:if="${(topic.status.name() == 'PROPOSED' or topic.status.name() == 'REJECTED') and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
+                     <a class="btn btn-sm" th:href="@{/topic-proposals/{periodId}/topics/{topicId}/edit(periodId=${period.id},topicId=${topic.id})}"><span class="iconify" data-icon="bi:pencil"></span><span th:text="#{topics.action.edit}"></span></a>
+                     <form method="post" th:action="@{/topic-proposals/{periodId}/topics/{topicId}/delete(periodId=${period.id},topicId=${topic.id})}"><button class="btn btn-sm btn-error btn-outline"><span class="iconify" data-icon="bi:trash"></span><span th:text="#{topics.action.delete}"></span></button></form>
                   </div>
                </div>
             </article>

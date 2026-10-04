@@ -187,6 +187,7 @@ public class RegistrationPeriodController {
           false,
           "registration_periods.page.edit.title");
       addTopicsTable(model, id, topicQuery);
+      addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
     }
@@ -204,6 +205,7 @@ public class RegistrationPeriodController {
           false,
           "registration_periods.page.edit.title");
       addTopicsTable(model, id, topicQuery);
+      addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
     }
