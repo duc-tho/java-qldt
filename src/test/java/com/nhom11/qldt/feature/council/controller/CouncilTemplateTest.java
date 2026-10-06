@@ -28,7 +28,7 @@ class CouncilTemplateTest {
         .contains("/draft")
         .contains("/submit")
         .contains("/finalize")
-        .contains("th:if=\"${canFinalize}\"");
+        .contains("th:if=\"${councilEvaluation and canFinalize}\"");
   }
 
   private String template(String name) throws IOException {

@@ -4,12 +4,13 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.dto.FinalResultForm;
-import com.nhom11.qldt.feature.council.model.entity.CouncilMember;
 import com.nhom11.qldt.feature.council.model.entity.Evaluation;
-import com.nhom11.qldt.feature.council.model.enums.CouncilMemberRole;
 import com.nhom11.qldt.feature.council.service.CouncilService;
+import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
+import com.nhom11.qldt.feature.reportsubmission.model.entity.ReportSubmission;
 import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -50,27 +51,27 @@ public class CouncilWorkspaceController {
       User member = user(principal);
       TopicRegistration registration = councilService.workspaceRegistration(registrationId, member);
       Evaluation evaluation = councilService.evaluation(registrationId, member.getId());
-      CouncilMember membership =
-          councilService.membership(registration.getTopic().getCouncil().getId(), member.getId());
       EvaluationForm evaluationForm = new EvaluationForm();
       if (evaluation != null) {
         evaluationForm.setScore(evaluation.getScore());
         evaluationForm.setComment(evaluation.getComment());
       }
       model.addAttribute("registration", registration);
-      model.addAttribute("currentReport", reportSubmissionService.current(registrationId));
+      ReportSubmission currentReport = reportSubmissionService.current(registrationId);
+      model.addAttribute("currentReport", currentReport);
+      model.addAttribute(
+          "reportFiles",
+          currentReport == null ? List.of() : reportSubmissionService.files(currentReport.getId()));
       model.addAttribute("evaluations", councilService.evaluations(registrationId));
       model.addAttribute("finalResult", councilService.finalResult(registrationId));
       model.addAttribute("evaluation", evaluation);
       model.addAttribute("evaluationForm", evaluationForm);
       model.addAttribute("finalResultForm", new FinalResultForm());
       model.addAttribute("canEvaluate", councilService.canEvaluate(registrationId, member));
+      model.addAttribute("canFinalize", councilService.canFinalizeResult(registrationId, member));
       model.addAttribute(
-          "canFinalize",
-          membership != null
-              && membership.getMemberRole() == CouncilMemberRole.CHAIRPERSON
-              && councilService.finalResult(registrationId) == null
-              && councilService.allMemberEvaluationsSubmitted(registrationId));
+          "councilEvaluation",
+          registration.getTopic().getRegistrationPeriod().getPeriodType() == PeriodType.KLTN);
       model.addAttribute("pageTitle", "councils.workspace.title");
       model.addAttribute("pageIcon", "bi:clipboard2-check");
       return "fragment/page/council/workspace";

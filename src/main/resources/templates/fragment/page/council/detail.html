@@ -2,12 +2,13 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="actions">
-         <a class="btn btn-primary btn-sm" th:href="@{/registration-periods/{periodId}/councils/{id}/edit(periodId=${council.registrationPeriod.id},id=${council.id})}">
+         <a class="btn btn-primary btn-sm" th:if="${managementOpen}" th:href="@{/registration-periods/{periodId}/councils/{id}/edit(periodId=${council.registrationPeriod.id},id=${council.id})}">
             <span class="iconify" data-icon="bi:pencil-square"></span>
             <span th:text="#{councils.action.edit}"></span>
          </a>
          <button
             class="btn btn-error btn-outline btn-sm"
+            th:if="${managementOpen}"
             type="button"
             x-data
             th:attr="data-delete-url=@{/registration-periods/{periodId}/councils/{id}/delete(periodId=${council.registrationPeriod.id},id=${council.id})},data-delete-name=${council.name}"
@@ -23,6 +24,11 @@
             <div role="alert" class="alert alert-error alert-soft" th:if="${error != null}">
                <span class="iconify" data-icon="bi:exclamation-circle"></span>
                <span th:text="#{__${error}__}"></span>
+            </div>
+
+            <div role="alert" class="alert alert-info alert-soft" th:unless="${managementOpen}">
+               <span class="iconify" data-icon="bi:info-circle"></span>
+               <span th:text="#{councils.management-closed}"></span>
             </div>
 
             <div class="card card-border border-base-300">
@@ -94,6 +100,7 @@
                            <th th:text="#{councils.column.topic}"></th>
                            <th th:text="#{councils.column.group}"></th>
                            <th th:text="#{councils.column.registration-status}"></th>
+                           <th class="text-right" th:if="${managementOpen}" th:text="#{crud.table.actions}"></th>
                         </tr>
                      </thead>
                      <tbody>
@@ -102,6 +109,14 @@
                            <td th:text="${registration.studentGroup.name}"></td>
                            <td>
                               <span class="badge badge-success badge-soft" th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"></span>
+                           </td>
+                           <td class="text-right" th:if="${managementOpen}">
+                              <form method="post" th:action="@{/registration-periods/{periodId}/councils/{councilId}/topics/{topicId}/unassign(periodId=${council.registrationPeriod.id},councilId=${council.id},topicId=${registration.topic.id})}">
+                                 <button class="btn btn-error btn-outline btn-sm" type="submit">
+                                    <span class="iconify" data-icon="bi:x-circle"></span>
+                                    <span th:text="#{councils.action.unassign}"></span>
+                                 </button>
+                              </form>
                            </td>
                         </tr>
                      </tbody>

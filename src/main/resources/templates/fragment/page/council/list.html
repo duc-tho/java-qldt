@@ -8,7 +8,8 @@
       <th:block layout:fragment="actions">
          <a
             class="btn btn-primary btn-sm"
-            sec:authorize="hasRole('HEAD_OF_FACULTY')"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            th:if="${managementOpen}"
             th:href="@{/registration-periods/{id}/councils/new(id=${period.id})}"
          >
             <span class="iconify" data-icon="bi:plus-lg"></span>
@@ -28,6 +29,11 @@
                <span th:text="#{__${error}__}"></span>
             </div>
 
+            <div role="alert" class="alert alert-info alert-soft" th:unless="${managementOpen}">
+               <span class="iconify" data-icon="bi:info-circle"></span>
+               <span th:text="#{councils.management-closed}"></span>
+            </div>
+
             <div class="overflow-x-auto rounded-box border border-base-300">
                <table class="table table-sm">
                   <thead class="bg-base-200">
@@ -35,7 +41,7 @@
                         <th th:text="#{councils.field.name}"></th>
                         <th th:text="#{councils.column.members}"></th>
                         <th th:text="#{councils.column.assignments}"></th>
-                        <th class="text-right" sec:authorize="hasRole('HEAD_OF_FACULTY')" th:text="#{crud.table.actions}"></th>
+                        <th class="text-right" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" th:text="#{crud.table.actions}"></th>
                      </tr>
                   </thead>
                   <tbody>
@@ -49,18 +55,19 @@
                               th:text="${assignedCounts.get(council.id)}"
                            ></span>
                         </td>
-                        <td class="text-right" sec:authorize="hasRole('HEAD_OF_FACULTY')">
+                        <td class="text-right" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
                            <div class="flex justify-end gap-2">
                               <a class="btn btn-outline btn-xs" th:href="@{/registration-periods/{periodId}/councils/{id}(periodId=${period.id},id=${council.id})}">
                                  <span class="iconify" data-icon="bi:eye"></span>
                                  <span th:text="#{councils.action.view}"></span>
                               </a>
-                              <a class="btn btn-outline btn-xs" th:href="@{/registration-periods/{periodId}/councils/{id}/edit(periodId=${period.id},id=${council.id})}">
+                              <a class="btn btn-outline btn-xs" th:if="${managementOpen}" th:href="@{/registration-periods/{periodId}/councils/{id}/edit(periodId=${period.id},id=${council.id})}">
                                  <span class="iconify" data-icon="bi:pencil-square"></span>
                                  <span th:text="#{councils.action.edit}"></span>
                               </a>
                               <button
                                  class="btn btn-error btn-outline btn-xs"
+                                 th:if="${managementOpen}"
                                  type="button"
                                  x-data
                                  th:attr="data-delete-url=@{/registration-periods/{periodId}/councils/{id}/delete(periodId=${period.id},id=${council.id})},data-delete-name=${council.name}"
@@ -79,77 +86,7 @@
                </table>
             </div>
 
-            <section class="border-t border-base-300 pt-6">
-               <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-                  <div>
-                     <h2 class="text-xl font-semibold" th:text="#{result-publications.title}"></h2>
-                     <p class="mt-1 text-sm text-base-content/60" th:text="#{result-publications.description}"></p>
-                  </div>
-                  <span
-                     class="badge badge-soft"
-                     th:if="${latestPublication != null}"
-                     th:classappend="${latestPublication.action.name() == 'PUBLISHED'} ? ' badge-success' : ' badge-warning'"
-                     th:text="#{__${'result-publications.action.' + latestPublication.action.name()}__}"
-                  ></span>
-               </div>
-
-               <div class="mt-4 flex flex-wrap gap-3">
-                  <form method="post" th:action="@{/registration-periods/{id}/result-publication(id=${period.id})}" th:if="${latestPublication == null or latestPublication.action.name() == 'REVOKED'}">
-                     <button class="btn btn-primary" type="submit">
-                        <span class="iconify" data-icon="bi:send-check"></span>
-                        <span th:text="#{result-publications.action.publish}"></span>
-                     </button>
-                  </form>
-                  <button
-                     class="btn btn-error btn-outline"
-                     type="button"
-                     onclick="revoke_publication.showModal()"
-                     th:if="${latestPublication != null and latestPublication.action.name() == 'PUBLISHED'}"
-                  >
-                     <span class="iconify" data-icon="bi:x-circle"></span>
-                     <span th:text="#{result-publications.action.revoke}"></span>
-                  </button>
-               </div>
-
-               <div class="mt-4 overflow-x-auto" th:unless="${#lists.isEmpty(publicationHistory)}">
-                  <table class="table table-sm">
-                     <thead class="bg-base-200">
-                        <tr>
-                           <th th:text="#{result-publications.column.action}"></th>
-                           <th th:text="#{result-publications.column.performer}"></th>
-                           <th th:text="#{result-publications.column.time}"></th>
-                           <th th:text="#{result-publications.column.reason}"></th>
-                        </tr>
-                     </thead>
-                     <tbody>
-                        <tr th:each="publication : ${publicationHistory}">
-                           <td th:text="#{__${'result-publications.action.' + publication.action.name()}__}"></td>
-                           <td th:text="${publication.performedBy.fullName}"></td>
-                           <td class="tabular-nums" th:text="${#temporals.format(publication.performedAt, 'dd/MM/yyyy HH:mm')}"></td>
-                           <td th:text="${publication.reason != null ? publication.reason : '—'}"></td>
-                        </tr>
-                     </tbody>
-                  </table>
-               </div>
-            </section>
          </section>
-
-         <dialog id="revoke_publication" class="modal">
-            <div class="modal-box">
-               <form method="post" th:action="@{/registration-periods/{id}/result-publication/revoke(id=${period.id})}" th:object="${revocationForm}">
-                  <h3 class="text-lg font-semibold" th:text="#{result-publications.action.revoke}"></h3>
-                  <label class="fieldset mt-4">
-                     <span class="label font-semibold" th:text="#{result-publications.column.reason}"></span>
-                     <textarea class="textarea min-h-28 w-full" th:field="*{reason}" required></textarea>
-                  </label>
-                  <div class="modal-action">
-                     <button class="btn btn-error" type="submit" th:text="#{result-publications.action.revoke}"></button>
-                     <button class="btn" type="button" onclick="revoke_publication.close()" th:text="#{crud.form.cancel}"></button>
-                  </div>
-               </form>
-            </div>
-            <form method="dialog" class="modal-backdrop"><button>close</button></form>
-         </dialog>
       </th:block>
    </body>
 </html>

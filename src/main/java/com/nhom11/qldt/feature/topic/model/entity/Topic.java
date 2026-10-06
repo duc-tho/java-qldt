@@ -37,6 +37,10 @@ public class Topic extends SoftDeleteEntity {
   private Council council;
 
   @ManyToOne
+  @JoinColumn(name = "reviewer_id")
+  private User reviewer;
+
+  @ManyToOne
   @JoinColumn(name = "proposed_by")
   private User proposedBy;
 

@@ -32,7 +32,9 @@ import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -91,10 +93,17 @@ public class CouncilService {
     return councilMemberRepository.findAllByCouncilId(councilId);
   }
 
+  public boolean isCouncilManagementOpen(Long periodId) {
+    RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
+    requireCouncilPeriod(period);
+    return isCouncilManagementOpen(period);
+  }
+
   @Transactional
   public void deleteCouncil(Long periodId, Long councilId) {
     Council council = requireCouncil(periodId, councilId);
     requireCouncilPeriod(council.getRegistrationPeriod());
+    requireCouncilManagementWindow(council.getRegistrationPeriod());
     if (topicRepository.existsByCouncilId(councilId)) {
       throw new IllegalArgumentException("councils.error.delete-assigned");
     }
@@ -162,15 +171,112 @@ public class CouncilService {
   }
 
   @Transactional
+  public void unassignTopic(Long periodId, Long councilId, Long topicId) {
+    Council council = requireCouncil(periodId, councilId);
+    requireCouncilPeriod(council.getRegistrationPeriod());
+    requireCouncilManagementWindow(council.getRegistrationPeriod());
+
+    Topic topic =
+        topicRepository
+            .findByIdAndRegistrationPeriodId(topicId, periodId)
+            .orElseThrow(() -> new IllegalArgumentException("councils.error.topic-period"));
+    if (topic.getCouncil() == null || !topic.getCouncil().getId().equals(councilId)) {
+      throw new IllegalArgumentException("councils.error.topic-not-assigned");
+    }
+
+    TopicRegistration registration =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .filter(item -> item.getTopic().getId().equals(topicId))
+            .findFirst()
+            .orElseThrow(
+                () ->
+                    new IllegalArgumentException(
+                        "councils.error.topic-registration-required"));
+    if (evaluationRepository.existsByTopicRegistrationId(registration.getId())) {
+      throw new IllegalArgumentException("councils.error.assignment-locked");
+    }
+
+    topic.setCouncil(null);
+    topicRepository.save(topic);
+  }
+
+  public boolean isReviewerAssignmentOpen(Long periodId) {
+    RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
+    requireReviewerPeriod(period);
+    return isReviewerAssignmentOpen(period);
+  }
+
+  public List<Topic> reviewerAssignmentTopics(Long periodId) {
+    RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
+    requireReviewerPeriod(period);
+    Set<Long> approvedTopicIds =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
+            .map(registration -> registration.getTopic().getId())
+            .collect(java.util.stream.Collectors.toSet());
+    return topicRepository.findAllWithDetailsByRegistrationPeriodId(periodId).stream()
+        .filter(topic -> approvedTopicIds.contains(topic.getId()))
+        .toList();
+  }
+
+  @Transactional
+  public void assignReviewer(Long periodId, Long topicId, Long reviewerId) {
+    RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
+    requireReviewerPeriod(period);
+    requireReviewerAssignmentWindow(period);
+
+    Topic topic =
+        topicRepository
+            .findByIdAndRegistrationPeriodId(topicId, periodId)
+            .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    boolean hasApprovedRegistration =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .anyMatch(
+                registration ->
+                    registration.getTopic().getId().equals(topicId)
+                        && registration.getStatus() == TopicRegistrationStatus.APPROVED);
+    if (!hasApprovedRegistration) {
+      throw new IllegalArgumentException("reviewer-assignments.error.registration-required");
+    }
+
+    User reviewer =
+        userRepository.findAllLecturersByIdIn(Set.of(reviewerId)).stream()
+            .findFirst()
+            .orElseThrow(
+                () -> new IllegalArgumentException("reviewer-assignments.error.invalid-reviewer"));
+    if (topic.getAdvisers().stream()
+        .anyMatch(adviser -> adviser.getId().equals(reviewer.getId()))) {
+      throw new IllegalArgumentException("reviewer-assignments.error.adviser-conflict");
+    }
+
+    boolean gradingStarted =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .filter(registration -> registration.getTopic().getId().equals(topicId))
+            .anyMatch(
+                registration ->
+                    evaluationRepository.existsByTopicRegistrationId(registration.getId()));
+    if (gradingStarted) {
+      throw new IllegalArgumentException("reviewer-assignments.error.locked");
+    }
+
+    topic.setReviewer(reviewer);
+    topicRepository.save(topic);
+  }
+
+  @Transactional
   public void saveEvaluation(Long registrationId, User evaluator, EvaluationForm form, boolean submit) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
-    requireCouncilPeriod(registration.getTopic().getRegistrationPeriod());
-    Council council = registration.getTopic().getCouncil();
-    if (council == null || !councilMemberRepository.existsByCouncilIdAndLecturerId(council.getId(), evaluator.getId())) {
+    if (registration.getStatus() != TopicRegistrationStatus.APPROVED) {
+      throw new IllegalArgumentException("evaluations.error.registration-required");
+    }
+    if (!requiredEvaluatorIds(registration).contains(evaluator.getId())) {
       throw new IllegalArgumentException("evaluations.error.not-assigned");
     }
     if (!reportSubmissionService.hasCurrentSubmission(registrationId)) {
       throw new IllegalArgumentException("evaluations.error.report-required");
+    }
+    if (!isEvaluationOpen(registration)) {
+      throw new IllegalArgumentException("evaluations.error.deadline-passed");
     }
     Evaluation evaluation = evaluationRepository.findByTopicRegistrationIdAndEvaluatorId(registrationId, evaluator.getId()).orElseGet(Evaluation::new);
     if (evaluation.getId() != null && evaluation.getStatus() == EvaluationStatus.SUBMITTED) {
@@ -179,10 +285,6 @@ public class CouncilService {
     if (submit) {
       if (form.getScore() == null || form.getScore().compareTo(MIN_SCORE) < 0 || form.getScore().compareTo(MAX_SCORE) > 0) {
         throw new IllegalArgumentException("evaluations.validation.score.range");
-      }
-      LocalDateTime deadline = registration.getTopic().getRegistrationPeriod().getReviewerDeadline();
-      if (deadline != null && !LocalDateTime.now().isBefore(deadline)) {
-        throw new IllegalArgumentException("evaluations.error.deadline-passed");
       }
       evaluation.setStatus(EvaluationStatus.SUBMITTED);
       evaluation.setSubmittedAt(LocalDateTime.now());
@@ -194,12 +296,20 @@ public class CouncilService {
     evaluation.setScore(form.getScore());
     evaluation.setComment(form.getComment());
     evaluationRepository.save(evaluation);
+
+    if (submit
+        && registration.getTopic().getRegistrationPeriod().getPeriodType() != PeriodType.KLTN) {
+      finalizeAutomaticResult(registration);
+    }
   }
 
   @Transactional
   public void finalizeResult(Long registrationId, User chairperson, FinalResultForm form) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
     requireCouncilPeriod(registration.getTopic().getRegistrationPeriod());
+    if (!isEvaluationOpen(registration)) {
+      throw new IllegalArgumentException("final-results.error.deadline-passed");
+    }
     Council council = registration.getTopic().getCouncil();
     if (council == null || members(council.getId()).stream().noneMatch(member -> member.getLecturer().getId().equals(chairperson.getId()) && member.getMemberRole() == CouncilMemberRole.CHAIRPERSON)) {
       throw new IllegalArgumentException("final-results.error.chairperson-required");
@@ -232,14 +342,12 @@ public class CouncilService {
 
   @Transactional
   public void publishResults(Long periodId, User performer) {
-    requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
+    periodRepository.findById(periodId).orElseThrow();
     requirePublisher(performer);
     if (isPublished(periodId)) {
       throw new IllegalArgumentException("result-publications.error.already-published");
     }
-    List<TopicRegistration> registrations = registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
-        .filter(registration -> registration.getTopic().getCouncil() != null).toList();
-    if (registrations.isEmpty() || registrations.stream().anyMatch(registration -> finalResultRepository.findByTopicRegistrationId(registration.getId()).map(result -> result.getStatus() != FinalResultStatus.FINALIZED).orElse(true))) {
+    if (!canPublishResults(periodId)) {
       throw new IllegalArgumentException("result-publications.error.results-incomplete");
     }
     publicationRepository.save(publication(periodId, performer, ResultPublicationAction.PUBLISHED, null));
@@ -247,13 +355,13 @@ public class CouncilService {
 
   @Transactional
   public void revokePublication(Long periodId, User performer, String reason) {
-    requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
+    periodRepository.findById(periodId).orElseThrow();
     requirePublisher(performer);
     if (!isPublished(periodId)) {
       throw new IllegalArgumentException("result-publications.error.not-published");
     }
     if (reason == null || reason.isBlank()) throw new IllegalArgumentException("result-publications.validation.reason.required");
-    publicationRepository.save(publication(periodId, performer, ResultPublicationAction.REVOKED, reason));
+    publicationRepository.save(publication(periodId, performer, ResultPublicationAction.REVOKED, reason.trim()));
   }
 
   public FinalResult publishedResult(Long groupId) {
@@ -284,8 +392,23 @@ public class CouncilService {
   }
 
   public List<ResultPublication> publicationHistory(Long periodId) {
-    requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
+    periodRepository.findById(periodId).orElseThrow();
     return publicationRepository.findAllByRegistrationPeriodIdOrderByPerformedAtDesc(periodId);
+  }
+
+  public boolean canPublishResults(Long periodId) {
+    List<TopicRegistration> registrations =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
+            .toList();
+    return !registrations.isEmpty()
+        && registrations.stream()
+            .allMatch(
+                registration ->
+                    finalResultRepository
+                        .findByTopicRegistrationId(registration.getId())
+                        .map(result -> result.getStatus() == FinalResultStatus.FINALIZED)
+                        .orElse(false));
   }
 
   public ResultPublication latestPublication(Long periodId) {
@@ -294,9 +417,7 @@ public class CouncilService {
 
   public TopicRegistration workspaceRegistration(Long registrationId, User member) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
-    requireCouncilPeriod(registration.getTopic().getRegistrationPeriod());
-    Council council = registration.getTopic().getCouncil();
-    if (council == null || !councilMemberRepository.existsByCouncilIdAndLecturerId(council.getId(), member.getId())) {
+    if (!requiredEvaluatorIds(registration).contains(member.getId())) {
       throw new IllegalArgumentException("evaluations.error.not-assigned");
     }
     return registration;
@@ -313,11 +434,9 @@ public class CouncilService {
   public boolean canEvaluate(Long registrationId, User evaluator) {
     TopicRegistration registration = workspaceRegistration(registrationId, evaluator);
     Evaluation existing = evaluation(registrationId, evaluator.getId());
-    LocalDateTime deadline = registration.getTopic().getRegistrationPeriod().getReviewerDeadline();
     return reportSubmissionService.hasCurrentSubmission(registrationId)
         && (existing == null || existing.getStatus() == EvaluationStatus.DRAFT)
-        && deadline != null
-        && LocalDateTime.now().isBefore(deadline);
+        && isEvaluationOpen(registration);
   }
 
   public boolean allMemberEvaluationsSubmitted(Long registrationId) {
@@ -337,6 +456,21 @@ public class CouncilService {
     return !memberIds.isEmpty() && submittedEvaluatorIds.equals(memberIds);
   }
 
+  public boolean canFinalizeResult(Long registrationId, User user) {
+    TopicRegistration registration = workspaceRegistration(registrationId, user);
+    if (registration.getTopic().getRegistrationPeriod().getPeriodType() != PeriodType.KLTN
+        || registration.getTopic().getCouncil() == null
+        || finalResult(registrationId) != null
+        || !isEvaluationOpen(registration)) {
+      return false;
+    }
+    CouncilMember membership =
+        membership(registration.getTopic().getCouncil().getId(), user.getId());
+    return membership != null
+        && membership.getMemberRole() == CouncilMemberRole.CHAIRPERSON
+        && allMemberEvaluationsSubmitted(registrationId);
+  }
+
   public Evaluation evaluation(Long registrationId, Long evaluatorId) {
     return evaluationRepository
         .findByTopicRegistrationIdAndEvaluatorId(registrationId, evaluatorId)
@@ -351,7 +485,23 @@ public class CouncilService {
   }
 
   public List<TopicRegistration> workspaceRegistrations(User member) {
-    return registrationRepository.findAllByCouncilMemberId(member.getId());
+    Map<Long, TopicRegistration> registrations = new LinkedHashMap<>();
+    registrationRepository
+        .findAllByAdviserIdAndStatus(member.getId(), TopicRegistrationStatus.APPROVED)
+        .stream()
+        .filter(
+            registration -> {
+              PeriodType type = registration.getTopic().getRegistrationPeriod().getPeriodType();
+              return type == PeriodType.MON_HOC || type == PeriodType.NCKH;
+            })
+        .forEach(registration -> registrations.put(registration.getId(), registration));
+    registrationRepository
+        .findAllByReviewerIdAndStatus(member.getId(), TopicRegistrationStatus.APPROVED)
+        .forEach(registration -> registrations.put(registration.getId(), registration));
+    registrationRepository
+        .findAllByCouncilMemberId(member.getId(), TopicRegistrationStatus.APPROVED)
+        .forEach(registration -> registrations.put(registration.getId(), registration));
+    return List.copyOf(registrations.values());
   }
 
   public List<CouncilLecturerOption> lecturerOptions(List<Long> ids) {
@@ -359,6 +509,80 @@ public class CouncilService {
     return userRepository.findAllLecturersByIdIn(Set.copyOf(ids)).stream()
         .map(user -> new CouncilLecturerOption(user.getId(), user.getFullName(), user.getUserCode()))
         .toList();
+  }
+
+  private Set<Long> requiredEvaluatorIds(TopicRegistration registration) {
+    Topic topic = registration.getTopic();
+    return switch (topic.getRegistrationPeriod().getPeriodType()) {
+      case MON_HOC, NCKH ->
+          topic.getAdvisers().stream()
+              .map(User::getId)
+              .collect(java.util.stream.Collectors.toSet());
+      case TLCN -> topic.getReviewer() == null ? Set.of() : Set.of(topic.getReviewer().getId());
+      case KLTN -> {
+        if (topic.getCouncil() == null) {
+          yield Set.of();
+        }
+        yield members(topic.getCouncil().getId()).stream()
+            .map(member -> member.getLecturer().getId())
+            .collect(java.util.stream.Collectors.toSet());
+      }
+    };
+  }
+
+  private boolean isEvaluationOpen(TopicRegistration registration) {
+    PeriodType type = registration.getTopic().getRegistrationPeriod().getPeriodType();
+    if (type == PeriodType.MON_HOC || type == PeriodType.NCKH) {
+      return true;
+    }
+    LocalDateTime deadline = registration.getTopic().getRegistrationPeriod().getReviewerDeadline();
+    return deadline != null && LocalDateTime.now().isBefore(deadline);
+  }
+
+  private void finalizeAutomaticResult(TopicRegistration registration) {
+    if (finalResultRepository.findByTopicRegistrationId(registration.getId()).isPresent()) {
+      return;
+    }
+
+    Set<Long> requiredEvaluatorIds = requiredEvaluatorIds(registration);
+    List<Evaluation> evaluations =
+        evaluationRepository.findAllByTopicRegistrationIdAndStatus(
+            registration.getId(), EvaluationStatus.SUBMITTED);
+    Set<Long> submittedEvaluatorIds =
+        evaluations.stream()
+            .map(evaluation -> evaluation.getEvaluator().getId())
+            .collect(java.util.stream.Collectors.toSet());
+    if (requiredEvaluatorIds.isEmpty() || !submittedEvaluatorIds.equals(requiredEvaluatorIds)) {
+      return;
+    }
+
+    BigDecimal score =
+        evaluations.stream()
+            .map(Evaluation::getScore)
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .divide(BigDecimal.valueOf(evaluations.size()), 2, RoundingMode.HALF_UP);
+    FinalResult result = new FinalResult();
+    result.setTopicRegistration(registration);
+    result.setFinalScore(score);
+    result.setStatus(FinalResultStatus.FINALIZED);
+    result.setFinalizedAt(LocalDateTime.now());
+    finalResultRepository.save(result);
+  }
+
+  private void requireReviewerAssignmentWindow(RegistrationPeriod period) {
+    if (!isReviewerAssignmentOpen(period)) {
+      throw new IllegalArgumentException("reviewer-assignments.error.management-window");
+    }
+  }
+
+  private boolean isReviewerAssignmentOpen(RegistrationPeriod period) {
+    LocalDateTime registrationEnd = period.getStudentRegistrationEnd();
+    LocalDateTime reviewerDeadline = period.getReviewerDeadline();
+    LocalDateTime now = LocalDateTime.now();
+    return registrationEnd != null
+        && reviewerDeadline != null
+        && now.isAfter(registrationEnd)
+        && now.isBefore(reviewerDeadline);
   }
 
   private List<User> validatedLecturers(CouncilForm form) {
@@ -439,6 +663,12 @@ public class CouncilService {
 
   private void requireCouncilPeriod(RegistrationPeriod period) {
     if (period.getPeriodType() != PeriodType.KLTN) throw new IllegalArgumentException("councils.error.period-type");
+  }
+
+  private void requireReviewerPeriod(RegistrationPeriod period) {
+    if (period.getPeriodType() != PeriodType.TLCN) {
+      throw new IllegalArgumentException("reviewer-assignments.error.period-type");
+    }
   }
 
   private void requirePublisher(User user) {

@@ -13,5 +13,7 @@ public interface EvaluationRepository extends BaseRepository<Evaluation, Long> {
 
   List<Evaluation> findAllByTopicRegistrationId(Long registrationId);
 
+  boolean existsByTopicRegistrationId(Long registrationId);
+
   boolean existsByTopicRegistrationTopicCouncilId(Long councilId);
 }

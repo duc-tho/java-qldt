@@ -46,7 +46,13 @@ public class ResultPublicationController {
       BindingResult errors,
       RedirectAttributes attributes) {
     if (errors.hasErrors()) {
-      attributes.addFlashAttribute("error", "result-publications.validation.reason.required");
+      attributes.addFlashAttribute(
+          "error",
+          errors.hasFieldErrors("reason")
+                  && errors.getFieldError("reason") != null
+                  && "Size".equals(errors.getFieldError("reason").getCode())
+              ? "result-publications.validation.reason.max"
+              : "result-publications.validation.reason.required");
       return redirect(periodId);
     }
     try {
@@ -62,6 +68,6 @@ public class ResultPublicationController {
   }
 
   private String redirect(Long periodId) {
-    return "redirect:/registration-periods/" + periodId + "/councils";
+    return "redirect:/registration-periods/" + periodId;
   }
 }

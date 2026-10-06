@@ -241,6 +241,7 @@ public class StudentGroupController {
     model.addAttribute("reportHistory", registration == null ? List.of() : reportSubmissionService.history(registration.getId()));
     model.addAttribute("canUploadReport", registration != null && reportSubmissionService.canUpload(registration, viewer));
     model.addAttribute("isReportUploadClosed", reportSubmissionService.isUploadClosed(registration));
+    model.addAttribute("isReportUploadNotStarted", reportSubmissionService.isUploadNotStarted(registration));
     model.addAttribute("publishedResult", councilService.publishedResult(group.getId()));
     model.addAttribute(
         "isDraftRegistration",

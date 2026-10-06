@@ -8,6 +8,7 @@ import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.council.model.dto.CouncilForm;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.entity.Council;
+import com.nhom11.qldt.feature.council.model.entity.CouncilMember;
 import com.nhom11.qldt.feature.council.repository.CouncilMemberRepository;
 import com.nhom11.qldt.feature.council.repository.CouncilRepository;
 import com.nhom11.qldt.feature.council.repository.EvaluationRepository;
@@ -18,6 +19,7 @@ import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
 import com.nhom11.qldt.feature.registrationperiod.repository.RegistrationPeriodRepository;
 import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
+import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.repository.TopicRegistrationRepository;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
@@ -99,17 +101,16 @@ class CouncilServiceTest {
     TopicRegistration registration = new TopicRegistration();
     registration.setId(REGISTRATION_ID);
     registration.setTopic(topic);
+    registration.setStatus(TopicRegistrationStatus.APPROVED);
     User evaluator = user(10L);
     EvaluationForm form = new EvaluationForm();
     form.setScore(BigDecimal.valueOf(8));
 
     when(registrationRepository.findById(REGISTRATION_ID)).thenReturn(Optional.of(registration));
-    when(councilMemberRepository.existsByCouncilIdAndLecturerId(COUNCIL_ID, evaluator.getId()))
-        .thenReturn(true);
+    CouncilMember member = new CouncilMember();
+    member.setLecturer(evaluator);
+    when(councilMemberRepository.findAllByCouncilId(COUNCIL_ID)).thenReturn(List.of(member));
     when(reportSubmissionService.hasCurrentSubmission(REGISTRATION_ID)).thenReturn(true);
-    when(evaluationRepository.findByTopicRegistrationIdAndEvaluatorId(
-            REGISTRATION_ID, evaluator.getId()))
-        .thenReturn(Optional.empty());
 
     assertThatIllegalArgumentException()
         .isThrownBy(() -> service.saveEvaluation(REGISTRATION_ID, evaluator, form, true))

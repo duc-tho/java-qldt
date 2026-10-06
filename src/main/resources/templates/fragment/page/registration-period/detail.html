@@ -26,6 +26,16 @@
             <span class="iconify inline" data-icon="bi:people-fill" data-width="16"></span>
             <span th:text="#{councils.page.list.title}"></span>
          </a>
+         <a
+            th:if="${form.readonly and form.data.periodType.name() == 'TLCN'}"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+            th:href="@{/registration-periods/{id}/reviewer-assignments(id=${form.data.id})}"
+            class="btn btn-outline btn-sm"
+         >
+            <span class="iconify inline" data-icon="bi:person-check" data-width="16"></span>
+            <span th:text="#{reviewer-assignments.page.title}"></span>
+         </a>
          <button
             th:if="${form.readonly}"
             sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
@@ -73,6 +83,10 @@
                th:replace="~{fragment/page/registration-period/registrations :: registrations(${registrations})}"
             ></div>
          </section>
+         <div
+            th:if="${form.readonly}"
+            th:replace="~{fragment/page/council/result-publication :: result-publication(${form.data})}"
+         ></div>
       </th:block>
    </body>
 </html>

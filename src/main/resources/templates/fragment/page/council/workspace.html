@@ -43,6 +43,18 @@
                      <span class="iconify" data-icon="bi:file-earmark-x"></span>
                      <span th:text="#{evaluations.error.report-required}"></span>
                   </div>
+                  <div class="flex flex-wrap gap-2" th:if="${currentReport != null}">
+                     <a
+                        class="btn btn-outline btn-sm"
+                        th:each="file : ${reportFiles}"
+                        th:href="@{/registration-periods/{periodId}/student-group/{groupId}/reports/files/{fileId}(periodId=${registration.topic.registrationPeriod.id},groupId=${registration.studentGroup.id},fileId=${file.id})}"
+                     >
+                        <span class="iconify" data-icon="bi:download"></span>
+                        <span
+                           th:text="#{report-submissions.action.download(${file.originalName})}"
+                        ></span>
+                     </a>
+                  </div>
                </div>
             </div>
 
@@ -152,7 +164,7 @@
                   class="mt-4 space-y-4"
                   method="post"
                   th:action="@{/council-evaluations/{id}/finalize(id=${registration.id})}"
-                  th:if="${canFinalize}"
+                  th:if="${councilEvaluation and canFinalize}"
                   th:object="${finalResultForm}"
                >
                   <label class="fieldset">
@@ -171,8 +183,13 @@
                </form>
                <p
                   class="mt-3 text-sm text-base-content/60"
-                  th:if="${finalResult == null and !canFinalize}"
+                  th:if="${councilEvaluation and finalResult == null and !canFinalize}"
                   th:text="#{councils.workspace.finalize-unavailable}"
+               ></p>
+               <p
+                  class="mt-3 text-sm text-base-content/60"
+                  th:if="${!councilEvaluation and finalResult == null}"
+                  th:text="#{councils.workspace.automatic-result-pending}"
                ></p>
             </section>
          </section>

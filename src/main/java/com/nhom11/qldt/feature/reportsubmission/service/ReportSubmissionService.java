@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Service
 public class ReportSubmissionService {
   private static final int MAX_FILES = 10;
+  private static final int MAX_ORIGINAL_NAME_LENGTH = 255;
   private static final long DOCUMENT_MAX_BYTES = 20L * 1024 * 1024;
   private static final long ARCHIVE_MAX_BYTES = 50L * 1024 * 1024;
 
@@ -66,7 +67,7 @@ public class ReportSubmissionService {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
     requireContext(registration, periodId, groupId);
     requireLeader(registration, actor);
-    requireOpenDeadline(registration);
+    requireSubmissionWindow(registration);
     validateFiles(files);
 
     LocalDateTime submittedAt = LocalDateTime.now();
@@ -148,7 +149,7 @@ public class ReportSubmissionService {
   public boolean canUpload(TopicRegistration registration, User actor) {
     return registration != null
         && registration.getStatus() == TopicRegistrationStatus.APPROVED
-        && isBeforeOrAtDeadline(registration)
+        && isSubmissionOpen(registration)
         && groupMemberRepository
             .findByStudentGroupIdAndStudentId(registration.getStudentGroup().getId(), actor.getId())
             .map(member -> member.isLeader())
@@ -157,6 +158,15 @@ public class ReportSubmissionService {
 
   public boolean isUploadClosed(TopicRegistration registration) {
     return registration != null && !isBeforeOrAtDeadline(registration);
+  }
+
+  public boolean isUploadNotStarted(TopicRegistration registration) {
+    if (registration == null) {
+      return false;
+    }
+    LocalDateTime registrationEnd =
+        registration.getTopic().getRegistrationPeriod().getStudentRegistrationEnd();
+    return registrationEnd == null || !LocalDateTime.now().isAfter(registrationEnd);
   }
 
   private void requireLeader(TopicRegistration registration, User actor) {
@@ -172,9 +182,12 @@ public class ReportSubmissionService {
     }
   }
 
-  private void requireOpenDeadline(TopicRegistration registration) {
+  private void requireSubmissionWindow(TopicRegistration registration) {
     if (!isBeforeOrAtDeadline(registration)) {
       throw new IllegalArgumentException("report-submissions.error.deadline-passed");
+    }
+    if (isUploadNotStarted(registration)) {
+      throw new IllegalArgumentException("report-submissions.error.not-open");
     }
   }
 
@@ -197,6 +210,10 @@ public class ReportSubmissionService {
     if (registration.getTopic().getAdvisers().stream().anyMatch(adviser -> adviser.getId().equals(actor.getId()))) {
       return true;
     }
+    if (registration.getTopic().getReviewer() != null
+        && registration.getTopic().getReviewer().getId().equals(actor.getId())) {
+      return true;
+    }
     return registration.getTopic().getCouncil() != null
         && councilMemberRepository.existsByCouncilIdAndLecturerId(
             registration.getTopic().getCouncil().getId(), actor.getId());
@@ -208,7 +225,11 @@ public class ReportSubmissionService {
     }
     for (MultipartFile file : files) {
       ReportFileType type = fileType(file);
-      if (file.isEmpty() || file.getSize() > maxBytes(type)) {
+      String originalName = file.getOriginalFilename();
+      if (file.isEmpty()
+          || originalName == null
+          || originalName.length() > MAX_ORIGINAL_NAME_LENGTH
+          || file.getSize() > maxBytes(type)) {
         throw new IllegalArgumentException("report-submissions.validation.files.invalid");
       }
     }
@@ -235,6 +256,10 @@ public class ReportSubmissionService {
   private boolean isBeforeOrAtDeadline(TopicRegistration registration) {
     LocalDateTime deadline = registration.getTopic().getRegistrationPeriod().getReportDeadline();
     return deadline != null && !LocalDateTime.now().isAfter(deadline);
+  }
+
+  private boolean isSubmissionOpen(TopicRegistration registration) {
+    return !isUploadNotStarted(registration) && isBeforeOrAtDeadline(registration);
   }
 
   private Path storagePath(ReportFileType type) {

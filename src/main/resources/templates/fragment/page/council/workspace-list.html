@@ -33,6 +33,7 @@
                         <th th:text="#{councils.workspace.topic}"></th>
                         <th th:text="#{councils.workspace.group}"></th>
                         <th th:text="#{councils.workspace.period}"></th>
+                        <th th:text="#{councils.workspace.type}"></th>
                         <th class="text-right" th:text="#{crud.table.actions}"></th>
                      </tr>
                   </thead>
@@ -41,6 +42,7 @@
                         <td class="font-medium" th:text="${registration.topic.title}"></td>
                         <td th:text="${registration.studentGroup.name}"></td>
                         <td th:text="${registration.topic.registrationPeriod.name}"></td>
+                        <td th:text="#{__${'period-types.' + registration.topic.registrationPeriod.periodType.name()}__}"></td>
                         <td class="text-right">
                            <a
                               class="btn btn-outline btn-sm"

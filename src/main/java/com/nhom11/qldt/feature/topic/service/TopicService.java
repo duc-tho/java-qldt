@@ -152,6 +152,9 @@ public class TopicService extends BaseCrudService<Topic, Long> {
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
     topic.setStatus(existingTopic.getStatus());
     topic.setRejectionReason(existingTopic.getRejectionReason());
+    topic.setProposedBy(existingTopic.getProposedBy());
+    topic.setReviewer(existingTopic.getReviewer());
+    topic.setCouncil(existingTopic.getCouncil());
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     return update(topic);
   }

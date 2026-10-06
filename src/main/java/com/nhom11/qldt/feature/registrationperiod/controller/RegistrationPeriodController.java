@@ -4,6 +4,8 @@ import com.nhom11.qldt.core.table.TableQuery;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.council.model.dto.PublicationRevocationForm;
+import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.registrationperiod.model.dto.RegistrationPeriodForm;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
@@ -35,6 +37,7 @@ public class RegistrationPeriodController {
   private final TopicService topicService;
   private final TopicTableDefinition topicTable;
   private final StudentGroupService studentGroupService;
+  private final CouncilService councilService;
 
   public RegistrationPeriodController(
       RegistrationPeriodService service,
@@ -44,7 +47,8 @@ public class RegistrationPeriodController {
       ClientValidationRuleRenderer validation,
       TopicService topicService,
       TopicTableDefinition topicTable,
-      StudentGroupService studentGroupService) {
+      StudentGroupService studentGroupService,
+      CouncilService councilService) {
     this.service = service;
     this.table = table;
     this.users = users;
@@ -53,6 +57,7 @@ public class RegistrationPeriodController {
     this.topicService = topicService;
     this.topicTable = topicTable;
     this.studentGroupService = studentGroupService;
+    this.councilService = councilService;
   }
 
   @GetMapping
@@ -147,6 +152,7 @@ public class RegistrationPeriodController {
         model, form, "/registration-periods/" + id, true, "registration_periods.page.detail.title");
     addTopicsTable(model, id, topicQuery);
     addRegistrations(model, id);
+    addResultPublication(model, id);
 
     return "fragment/page/registration-period/detail";
   }
@@ -263,5 +269,12 @@ public class RegistrationPeriodController {
 
   private void addRegistrations(Model model, Long periodId) {
     model.addAttribute("registrations", studentGroupService.registrations(periodId));
+  }
+
+  private void addResultPublication(Model model, Long periodId) {
+    model.addAttribute("latestPublication", councilService.latestPublication(periodId));
+    model.addAttribute("publicationHistory", councilService.publicationHistory(periodId));
+    model.addAttribute("canPublishResults", councilService.canPublishResults(periodId));
+    model.addAttribute("revocationForm", new PublicationRevocationForm());
   }
 }

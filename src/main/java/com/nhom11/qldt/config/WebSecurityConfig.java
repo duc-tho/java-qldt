@@ -50,7 +50,7 @@ public class WebSecurityConfig {
                     .requestMatchers(HttpMethod.GET, "/registration-periods/*/councils")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     .requestMatchers("/registration-periods/*/councils/**")
-                    .hasRole("HEAD_OF_FACULTY")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     .requestMatchers("/council-workspace/**")
                     .hasRole("LECTURER")
                     .requestMatchers("/council-evaluations/**")
