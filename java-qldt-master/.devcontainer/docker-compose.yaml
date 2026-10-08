@@ -1,0 +1,43 @@
+services:
+  app:
+    build: .
+    working_dir: /workspace
+    volumes:
+      - ..:/workspace:rw
+    ports:
+      - "3000:8080"
+    command: sleep infinity
+    depends_on:
+      - mariadb
+      - redis
+    networks:
+      - qldt-network
+  mariadb:
+    image: mariadb:11.8
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: qldt
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+    ports:
+      - "3306:3306"
+    networks:
+      - qldt-network
+    volumes:
+      - db-data:/var/lib/mysql
+  redis:
+    image: redis:8
+    ports:
+      - "6379:6379"
+    networks:
+      - qldt-network
+    volumes:
+      - redis-data:/data
+networks:
+  qldt-network:
+    driver: bridge
+volumes:
+  db-data:
+    driver: local
+  redis-data:
+    driver: local

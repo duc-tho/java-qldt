@@ -1,0 +1,58 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="crud-form(form)">
+      <form
+         th:unless="${form.readonly}"
+         method="post"
+         th:action="${form.actionUrl}"
+         th:object="${data}"
+         th:class="${form.layoutClass}"
+         novalidate
+         x-data="formValidation"
+         @submit.prevent="submit"
+      >
+         <div class="flex flex-col gap-5">
+            <div
+               th:if="${#fields.hasAnyErrors()}"
+               role="alert"
+               aria-live="assertive"
+               class="alert alert-error alert-soft flex gap-2 flex-col"
+            >
+               <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
+            </div>
+
+            <th:block
+               th:replace="~{${form.fieldsTemplate} :: form-fields}"
+            ></th:block>
+
+            <div
+               class="flex items-center justify-end gap-3 pt-2 border-t border-base-300"
+            >
+               <a
+                  th:href="${form.backUrl}"
+                  class="btn btn-ghost btn-sm"
+                  th:text="#{crud.form.cancel}"
+               ></a>
+               <button type="submit" class="btn btn-primary btn-sm">
+                  <span
+                     class="iconify inline"
+                     data-icon="bi:check-lg"
+                     data-width="16"
+                  ></span>
+                  <span th:text="#{crud.form.save}"></span>
+               </button>
+            </div>
+         </div>
+      </form>
+
+      <div
+         th:if="${form.readonly}"
+         th:class="|flex flex-col gap-5 ${form.layoutClass}|"
+         th:object="${data}"
+      >
+         <th:block
+            th:replace="~{${form.fieldsTemplate} :: form-fields}"
+         ></th:block>
+      </div>
+   </th:block>
+</html>

@@ -1,0 +1,8 @@
+spring:
+  profiles:
+    active: dev-win
+  application:
+    name: qldt
+  messages:
+    basename: i18n/messages
+    encoding: UTF-8

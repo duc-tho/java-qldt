@@ -1,0 +1,238 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="crud-table(table)">
+      <div id="crud-table" x-data="crudTable">
+         <form method="get" th:action="${table.baseUrl}" x-ref="queryForm">
+            <input type="hidden" name="page" th:value="${table.data.number}" />
+            <input type="hidden" name="sort" th:value="${table.sortField}" />
+            <input type="hidden" name="dir" th:value="${table.sortDir}" />
+
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
+               <div class="flex items-center gap-2">
+                  <button
+                     type="button"
+                     class="btn btn-ghost btn-sm btn-square"
+                     th:title="#{crud.table.reload}"
+                     x-on:click="submitQuery()"
+                  >
+                     <span
+                        class="iconify"
+                        data-icon="bi:arrow-clockwise"
+                        data-width="16"
+                     ></span>
+                  </button>
+               </div>
+
+               <div class="flex flex-wrap items-center gap-2">
+                  <input
+                     th:if="${!#lists.isEmpty(table.searchableColumns)}"
+                     type="search"
+                     name="search"
+                     th:value="${table.search}"
+                     th:placeholder="#{crud.table.search}"
+                     class="input input-sm w-56"
+                     x-on:change="submitQuery(0)"
+                  />
+                  <button
+                     th:if="${table.bulkDeleteEnabled}"
+                     type="button"
+                     class="btn btn-error btn-outline btn-sm"
+                     th:attr="data-batch-delete-url=${table.baseUrl + '/delete'}, data-batch-delete-template=#{crud.delete.batch}"
+                     x-bind:disabled="selectedIds.length === 0"
+                     x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.batchDeleteUrl, ids: selectedIds, template: $el.dataset.batchDeleteTemplate })"
+                  >
+                     <span
+                        class="iconify"
+                        data-icon="bi:trash"
+                        data-width="16"
+                     ></span>
+                     <span th:text="#{crud.table.delete_selected}"></span>
+                  </button>
+                  <a
+                     th:href="${table.baseUrl + '/new'}"
+                     class="btn btn-primary btn-sm"
+                  >
+                     <span
+                        class="iconify"
+                        data-icon="bi:plus-lg"
+                        data-width="16"
+                     ></span>
+                     <span th:text="#{crud.table.add}"></span>
+                  </a>
+               </div>
+            </div>
+
+            <div class="overflow-x-auto rounded-box border-2 border-base-300">
+               <table class="table table-zebra w-full">
+                  <thead class="bg-base-200">
+                     <tr>
+                        <th th:if="${table.bulkDeleteEnabled}" class="w-10">
+                           <input
+                              type="checkbox"
+                              id="crud-select-all"
+                              class="checkbox checkbox-sm"
+                              th:title="#{crud.table.select_all}"
+                              x-bind:checked="allSelected"
+                              x-on:change="toggleAll($event)"
+                           />
+                        </th>
+                        <th:block th:each="col : ${table.columns}">
+                           <th
+                              th:with="isSorted=${col.field == table.sortField},
+                                        isAsc=${col.field == table.sortField && table.sortDir == 'asc'},
+                                        isDesc=${col.field == table.sortField && table.sortDir == 'desc'}"
+                           >
+                              <button
+                                 th:if="${col.sortable}"
+                                 type="button"
+                                 class="btn btn-ghost btn-sm gap-1 -ml-1"
+                                 th:attr="data-sort=${isDesc ? '' : col.field}, data-dir=${isAsc ? 'desc' : 'asc'}"
+                                 x-on:click="submitQuery(0, $el.dataset.sort, $el.dataset.dir)"
+                              >
+                                 <span
+                                    th:text="${#messages.msg(col.label)}"
+                                 ></span>
+                                 <span
+                                    th:if="${!isSorted}"
+                                    class="iconify text-base-content/40"
+                                    data-icon="bi:arrow-down-up"
+                                    data-width="14"
+                                 ></span>
+                                 <span
+                                    th:if="${isAsc}"
+                                    class="iconify"
+                                    data-icon="bi:sort-down"
+                                    data-width="14"
+                                 ></span>
+                                 <span
+                                    th:if="${isDesc}"
+                                    class="iconify"
+                                    data-icon="bi:sort-up"
+                                    data-width="14"
+                                 ></span>
+                              </button>
+                              <span
+                                 th:unless="${col.sortable}"
+                                 class="text-sm"
+                                 th:text="${#messages.msg(col.label)}"
+                              ></span>
+                           </th>
+                        </th:block>
+                        <th
+                           class="text-right"
+                           th:text="#{crud.table.actions}"
+                        ></th>
+                     </tr>
+                     <tr th:if="${!#lists.isEmpty(table.filterableColumns)}">
+                        <th th:if="${table.bulkDeleteEnabled}">
+                           <button
+                              type="button"
+                              class="btn btn-primary btn-sm btn-square"
+                              th:title="#{crud.table.search}"
+                              th:aria-label="#{crud.table.search}"
+                              x-on:click="submitQuery(0)"
+                           >
+                              <span
+                                 class="iconify"
+                                 data-icon="bi:search"
+                                 data-width="16"
+                              ></span>
+                           </button>
+                        </th>
+                        <th:block th:each="col : ${table.columns}">
+                           <th>
+                              <input
+                                 th:if="${col.filterable}"
+                                 type="search"
+                                 class="input input-sm w-full"
+                                 th:name="|filters[${col.field}]|"
+                                 th:value="${table.filters[col.field]}"
+                                 th:placeholder="${#messages.msg(col.label)}"
+                                 x-on:change="submitQuery(0)"
+                              />
+                           </th>
+                        </th:block>
+                        <th></th>
+                     </tr>
+                  </thead>
+                  <tbody th:if="${!table.data.empty}">
+                     <tr
+                        th:each="item : ${table.data.content}"
+                        class="cursor-pointer transition-colors hover:bg-base-200"
+                     >
+                        <td th:if="${table.bulkDeleteEnabled}">
+                           <input
+                              type="checkbox"
+                              name="ids"
+                              class="checkbox checkbox-sm"
+                              th:value="${item.id}"
+                              x-model="selectedIds"
+                           />
+                        </td>
+                        <th:block th:each="col : ${table.columns}">
+                           <td>
+                              <span
+                                 th:if="${col.field == 'status'}"
+                                 class="badge badge-soft"
+                                 th:classappend="${item.status.name() == 'PUBLISHED' or item.status.name() == 'APPROVED'} ? ' badge-success' : (${item.status.name() == 'WITHDRAWN'} ? ' badge-neutral' : ' badge-warning')"
+                                 th:text="${col.getValue(item)}"
+                              ></span>
+                              <a
+                                 th:unless="${col.field == 'status'}"
+                                 th:href="${table.baseUrl + '/' + item.id}"
+                                 class="block"
+                                 th:text="${col.getValue(item)}"
+                              ></a>
+                           </td>
+                        </th:block>
+                        <td>
+                           <th:block
+                              th:replace="~{fragment/crud/actions :: crud-actions(${table.actions}, ${item})}"
+                           ></th:block>
+                        </td>
+                     </tr>
+                  </tbody>
+                  <tbody th:if="${table.data.empty}">
+                     <tr>
+                        <td
+                           th:attr="colspan=${#lists.size(table.columns) + (table.bulkDeleteEnabled ? 2 : 1)}"
+                           class="text-center text-base-content/50 py-6"
+                           th:text="#{crud.table.empty}"
+                        ></td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
+               <div
+                  class="flex items-center gap-2 text-sm text-base-content/70"
+               >
+                  <span
+                     th:text="|#{crud.table.page} ${table.data.totalPages == 0 ? 0 : table.data.number + 1} / ${table.data.totalPages}|"
+                  ></span>
+
+                  <select
+                     name="size"
+                     class="select select-sm w-20"
+                     x-on:change="submitQuery(0)"
+                  >
+                     <option
+                        th:each="pageSize : ${table.pageSizeOptions}"
+                        th:value="${pageSize}"
+                        th:selected="${pageSize == table.pageSize}"
+                        th:text="${pageSize}"
+                     ></option>
+                  </select>
+
+                  <span th:text="#{crud.table.per_page}"></span>
+               </div>
+
+               <div
+                  th:replace="~{fragment/crud/pagination :: crud-pagination(${table.data})}"
+               ></div>
+            </div>
+         </form>
+      </div>
+   </th:block>
+</html>

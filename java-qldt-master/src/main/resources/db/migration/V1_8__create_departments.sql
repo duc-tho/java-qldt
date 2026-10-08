@@ -1,0 +1,10 @@
+CREATE TABLE departments (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    code VARCHAR(30) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP NULL ON UPDATE CURRENT_TIMESTAMP,
+    deleted_at TIMESTAMP NULL,
+    CONSTRAINT uk_departments_code UNIQUE (code),
+    CONSTRAINT uk_departments_name UNIQUE (name)
+);

@@ -1,0 +1,12 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
+   <head>
+      <title th:text="#{home.title}"></title>
+   </head>
+
+   <body>
+      <th:block layout:fragment="main">
+         <p th:text="#{home.welcome}"></p>
+      </th:block>
+   </body>
+</html>

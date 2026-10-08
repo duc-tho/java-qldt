@@ -1,0 +1,92 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
+
+   <body>
+      <th:block layout:fragment="main">
+         <div class="flex flex-col gap-4">
+            <div class="flex items-center gap-1">
+               <button
+                  type="button"
+                  class="btn btn-ghost btn-sm btn-square"
+                  x-data="pageBack"
+                  x-on:click="goBack"
+                  th:attr="data-back-label=#{navigation.action.back}, data-home-label=#{navigation.item.home}"
+                  x-bind:aria-label="hasHistory ? $el.dataset.backLabel : $el.dataset.homeLabel"
+               >
+                  <span
+                     x-show="hasHistory"
+                     class="iconify"
+                     data-icon="bi:arrow-left"
+                     data-width="16"
+                  ></span>
+                  <span
+                     x-show="!hasHistory"
+                     class="iconify"
+                     data-icon="bi:house"
+                     data-width="16"
+                  ></span>
+               </button>
+               <div class="breadcrumbs text-sm">
+                  <ul>
+                     <li><a href="/" th:text="#{navigation.item.home}"></a></li>
+                     <li th:if="${breadcrumbParentUrl != null}">
+                        <a
+                           th:href="${breadcrumbParentUrl}"
+                           th:text="${breadcrumbParentLabel}"
+                        ></a>
+                     </li>
+                     <li th:text="${#messages.msg(pageTitle)}"></li>
+                  </ul>
+               </div>
+            </div>
+            <div
+               class="flex flex-wrap items-center justify-between gap-4 gap-y-3"
+            >
+               <div class="flex items-center gap-3">
+                  <div
+                     th:if="${pageIcon}"
+                     class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
+                  >
+                     <span
+                        class="iconify"
+                        th:attr="data-icon=${pageIcon}"
+                        data-width="22"
+                     ></span>
+                  </div>
+                  <div>
+                     <div class="flex items-center gap-2">
+                        <h1
+                           class="text-2xl font-bold"
+                           th:text="${#messages.msg(pageTitle)}"
+                        ></h1>
+                        <span
+                           th:if="${table != null}"
+                           class="badge badge-primary badge-soft"
+                           th:text="${table.data.totalElements}"
+                        ></span>
+                     </div>
+                     <p
+                        th:if="${pageDesc}"
+                        class="mt-1 text-sm text-base-content/60"
+                        th:text="${#messages.msg(pageDesc)}"
+                     ></p>
+                  </div>
+               </div>
+
+               <div class="flex items-center gap-2">
+                  <th:block layout:fragment="actions"></th:block>
+               </div>
+            </div>
+
+            <div class="border-t-2 border-dashed border-base-300"></div>
+
+            <th:block layout:fragment="page-content"></th:block>
+         </div>
+
+         <div th:replace="~{fragment/crud/delete-modal :: delete-modal}"></div>
+      </th:block>
+   </body>
+</html>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi" data-theme="light">
+   <head>
+      <title th:text="#{application.title}"></title>
+
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta name="_csrf" th:content="${_csrf.token}" />
+      <meta name="_csrf_header" th:content="${_csrf.headerName}" />
+      <meta name="apple-mobile-web-app-title" content="QLĐT" />
+
+      <link rel="icon" type="image/png" href="/favicon-96x96.png" sizes="96x96" />
+      <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+      <link rel="shortcut icon" href="/favicon.ico" />
+      <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+      <link rel="manifest" href="/site.webmanifest" />
+
+      <link rel="stylesheet" type="text/css" th:href="@{/assets/app.css}" />
+      <script defer th:src="@{/assets/app.js}"></script>
+      <script
+         defer
+         src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+      ></script>
+   </head>
+
+   <body>
+      <div layout:fragment="body"></div>
+   </body>
+</html>

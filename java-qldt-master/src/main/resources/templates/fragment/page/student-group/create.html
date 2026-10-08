@@ -1,0 +1,45 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <form
+            th:action="@{/registration-periods/{id}/student-group/new(id=${periodId})}"
+            th:object="${data}"
+            method="post"
+            class="card card-border border-base-300 shadow-sm max-w-xl mx-auto"
+         >
+            <div class="card-body p-6">
+               <h2
+                  class="card-title"
+                  th:text="#{student-groups.page.create.title}"
+               ></h2>
+               <div
+                  role="alert"
+                  class="alert alert-error"
+                  th:if="${#fields.hasGlobalErrors()}"
+                  th:errors="*{global}"
+               ></div>
+               <label class="form-control"
+                  ><span
+                     class="label font-bold"
+                     th:text="#{student-groups.field.name}"
+                  ></span
+                  ><input
+                     class="input w-full"
+                     th:field="*{name}"
+                     th:classappend="${#fields.hasErrors('name')} ? ' input-error'" /><span
+                     class="text-error text-sm"
+                     th:errors="*{name}"
+                  ></span
+               ></label>
+               <div class="card-actions justify-end">
+                  <button
+                     class="btn btn-primary"
+                     th:text="#{student-groups.action.create}"
+                  ></button>
+               </div>
+            </div>
+         </form>
+      </th:block>
+   </body>
+</html>

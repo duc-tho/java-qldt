@@ -1,0 +1,11 @@
+spring:
+  datasource:
+    url: jdbc:mariadb://mariadb:3306/qldt?useSSL=false&serverTimezone=UTC
+    username: root
+    password: root
+  security:
+    user:
+      name: admin
+      password: admin
+  application:
+    name: qldt
