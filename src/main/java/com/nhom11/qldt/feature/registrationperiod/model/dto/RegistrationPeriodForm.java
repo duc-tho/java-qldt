@@ -22,33 +22,29 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
   private PeriodType periodType;
 
   @NotNull(message = "{registration_periods.validation.lecturer_registration_start.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime lecturerRegistrationStart;
 
   @NotNull(message = "{registration_periods.validation.lecturer_registration_end.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime lecturerRegistrationEnd;
 
-  @NotNull(message = "{registration_periods.validation.topic_publication_at.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-  private LocalDateTime topicPublicationAt;
-
   @NotNull(message = "{registration_periods.validation.student_registration_start.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime studentRegistrationStart;
 
   @NotNull(message = "{registration_periods.validation.student_registration_end.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime studentRegistrationEnd;
 
   @NotNull(message = "{registration_periods.validation.report_deadline.required}")
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime reportDeadline;
 
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime reviewerDeadline;
 
-  @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
+  @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime councilDate;
 
   public RegistrationPeriod toEntity() {
@@ -58,7 +54,6 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
     item.setPeriodType(periodType);
     item.setLecturerRegistrationStart(lecturerRegistrationStart);
     item.setLecturerRegistrationEnd(lecturerRegistrationEnd);
-    item.setTopicPublicationAt(topicPublicationAt);
     item.setStudentRegistrationStart(studentRegistrationStart);
     item.setStudentRegistrationEnd(studentRegistrationEnd);
     item.setReportDeadline(reportDeadline);
@@ -74,7 +69,6 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
     periodType = item.getPeriodType();
     lecturerRegistrationStart = item.getLecturerRegistrationStart();
     lecturerRegistrationEnd = item.getLecturerRegistrationEnd();
-    topicPublicationAt = item.getTopicPublicationAt();
     studentRegistrationStart = item.getStudentRegistrationStart();
     studentRegistrationEnd = item.getStudentRegistrationEnd();
     reportDeadline = item.getReportDeadline();

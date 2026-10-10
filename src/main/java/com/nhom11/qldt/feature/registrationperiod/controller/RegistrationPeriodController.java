@@ -15,6 +15,7 @@ import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -150,7 +151,7 @@ public class RegistrationPeriodController {
 
     form(
         model, form, "/registration-periods/" + id, true, "registration_periods.page.detail.title");
-    addTopicsTable(model, id, topicQuery);
+    addTopicsTable(model, item, topicQuery);
     addRegistrations(model, id);
     addResultPublication(model, id);
 
@@ -167,7 +168,7 @@ public class RegistrationPeriodController {
     form.fromEntity(item);
 
     form(model, form, "/registration-periods/" + id, false, "registration_periods.page.edit.title");
-    addTopicsTable(model, id, topicQuery);
+    addTopicsTable(model, item, topicQuery);
     addRegistrations(model, id);
 
     return "fragment/page/registration-period/detail";
@@ -192,7 +193,7 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, id, topicQuery);
+      addTopicsTable(model, old, topicQuery);
       addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
@@ -210,7 +211,7 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, id, topicQuery);
+      addTopicsTable(model, old, topicQuery);
       addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
@@ -250,13 +251,28 @@ public class RegistrationPeriodController {
     service.validationErrors(period).forEach(error -> errors.reject(error.messageCode()));
   }
 
-  private void addTopicsTable(Model model, Long periodId, TableQuery topicQuery) {
+  private void addTopicsTable(Model model, RegistrationPeriod period, TableQuery topicQuery) {
+    Long periodId = period.getId();
     view.table(
         model,
         topicService.findAllByRegistrationPeriodId(periodId, topicQuery, topicTable),
         "/registration-periods/" + periodId + "/topics",
         topicQuery,
         topicTable);
+
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    LocalDateTime now = LocalDateTime.now();
+    boolean isLecturerRegistrationOpen =
+        !now.isBefore(period.getLecturerRegistrationStart())
+            && !now.isAfter(period.getLecturerRegistrationEnd());
+    boolean canCreateTopic =
+        authentication != null
+            && authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                    authority.getAuthority().equals("ROLE_ADMIN")
+                        || (authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY")
+                            && isLecturerRegistrationOpen));
+    model.addAttribute("tableCanCreate", canCreateTopic);
   }
 
   private String periodSelection(Model model, String target) {

@@ -5,13 +5,15 @@
   "license": "ISC",
   "author": "",
   "scripts": {
-    "dev": "vite build --watch",
+    "dev": "node scripts/watch-assets.mjs",
     "build": "vite build"
   },
   "devDependencies": {
     "@iconify/iconify": "^3.1.1",
     "@tailwindcss/vite": "^4.3.3",
+    "chokidar": "^5.0.0",
     "daisyui": "^5.7.24",
+    "flatpickr": "^4.6.13",
     "just-validate": "^4.3.0",
     "tailwindcss": "^4.3.3",
     "vite": "^8.2.2"

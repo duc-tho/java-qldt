@@ -5,3 +5,4 @@ import "./form-validation.js";
 import "./crud-table.js";
 import "./crud-delete-modal.js";
 import "./page-back.js";
+import "./date-picker.js";

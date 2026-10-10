@@ -63,9 +63,9 @@ Tài liệu được tổng hợp từ yêu cầu đề tài, tiêu chí chấm,
 | Mã | Chức năng | Cần làm | Kết quả cần đạt |
 | --- | --- | --- | --- |
 | TRI-01 | Quản lý đợt đăng ký | Hoàn thiện danh sách, tạo, xem, sửa và xóa; kiểm tra dữ liệu đầu vào và quyền Trưởng khoa; trang sửa chỉ hiển thị biểu mẫu trong bố cục chung có thanh bên và chân trang. | Đợt được quản lý đầy đủ, dữ liệu sai bị từ chối và người không có quyền không thể thay đổi. |
-| TRI-02 | Hai giai đoạn đăng ký | Kiểm tra thứ tự các mốc: đề xuất, duyệt và công bố đề tài, sinh viên đăng ký, nộp báo cáo, chấm điểm; xác định giai đoạn hiện tại từ thời gian hệ thống. | Giai đoạn 1 dành cho đề xuất và duyệt đề tài; chỉ sang giai đoạn 2 sinh viên mới được đăng ký. |
+| TRI-02 | Hai giai đoạn đăng ký | Kiểm tra thứ tự các mốc: đề xuất và duyệt đề tài, sinh viên đăng ký, nộp báo cáo, chấm điểm; xác định giai đoạn hiện tại từ thời gian hệ thống. | Giai đoạn 1 dành cho đề xuất và duyệt đề tài; chỉ sang giai đoạn 2 sinh viên mới được đăng ký. |
 | TRI-03 | Khóa thao tác theo thời gian | Dùng cùng một quy tắc thời gian tại phần xử lý nghiệp vụ cho đề xuất đề tài, tạo nhóm, chọn đề tài, gửi đăng ký và nộp báo cáo. | Gọi yêu cầu trực tiếp cũng không thể thực hiện thao tác ngoài thời gian cho phép. |
-| TRI-04 | Công bố danh sách đề tài | Thêm thao tác công bố đề tài đã duyệt; lọc danh sách sinh viên được xem; ẩn nút thêm đề tài tại trang chi tiết đợt khi không đúng vai trò hoặc giai đoạn. | Sinh viên chỉ thấy đề tài đã duyệt sau thời điểm công bố. |
+| TRI-04 | Hiển thị danh sách đề tài | Lọc danh sách đề tài đã duyệt cho sinh viên; ẩn nút thêm đề tài tại trang chi tiết đợt khi không đúng vai trò hoặc giai đoạn. | Sinh viên thấy đề tài đã duyệt từ lúc bắt đầu đăng ký sinh viên. |
 | TRI-05 | Biểu mẫu ngày giờ | Chỉ hiện các mốc phù hợp với từng loại đợt; dùng bộ chọn ngày giờ theo ngày/tháng/năm và kiểm tra lại dữ liệu ở phía máy chủ. | Ngày giờ hiển thị dễ hiểu, lưu đúng và không tạo được khoảng thời gian mâu thuẫn. |
 | TRI-06 | Điều hướng và tóm tắt đợt | Hiển thị tên, loại, giai đoạn, mốc gần nhất và việc cần làm; bổ sung đường dẫn điều hướng dạng `Trang chủ > Tên đợt > Màn hình`. | Người dùng luôn biết đang ở đợt nào, giai đoạn nào và có thể thực hiện việc gì. |
 

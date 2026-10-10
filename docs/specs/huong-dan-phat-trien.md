@@ -43,6 +43,12 @@ yarn dev
 ./mvnw spring-boot:run
 ```
 
+`yarn dev` theo dõi source CSS/JS bằng polling để hoạt động ổn định trong dev container.
+`spring-boot:run` đọc trực tiếp template và asset từ `src/main/resources`, nên chỉ cần tải
+lại trang sau khi lưu thay đổi giao diện; không cần chạy Maven để chép sang `target/classes`.
+Khi thay đổi Java, cần biên dịch lại để Spring DevTools khởi động lại ứng dụng.
+Sau khi thay đổi cấu hình `pom.xml` hoặc `vite.config.js`, hãy khởi động lại hai lệnh trên một lần.
+
 Các lệnh kiểm tra trước khi bàn giao:
 
 ```bash

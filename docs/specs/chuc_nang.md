@@ -27,7 +27,7 @@ Ký hiệu: **Xem** = xem dữ liệu; **QL** = tạo/sửa/xóa hoặc thực h
 | Tài khoản người dùng | QL | — | — | — |
 | Thông báo nội bộ | QL | QL | Xem theo đối tượng | Xem theo đối tượng |
 | Đợt đăng ký | QL | QL | Xem | Xem đợt đang tham gia |
-| Duyệt/công bố đề tài | QL | QL | — | — |
+| Duyệt đề tài | QL | QL | — | — |
 | Đề xuất đề tài | QL | Xem | QL đề tài của mình | — |
 | Nhóm sinh viên | Xem/QL thay mặt | Xem | Xem nhóm thuộc đề tài mình phụ trách | QL nhóm của mình khi là trưởng nhóm; Xem nhóm của mình |
 | Đăng ký đề tài | Xem/QL thay mặt | Xem | Duyệt/từ chối đề tài mình phụ trách | Tạo/rút/đổi khi là trưởng nhóm và còn thời hạn; Xem nhóm mình |

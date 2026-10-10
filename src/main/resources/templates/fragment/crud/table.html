@@ -49,7 +49,7 @@
                      <span th:text="#{crud.table.delete_selected}"></span>
                   </button>
                   <a
-                     th:if="${table.canCreate}"
+                     th:if="${table.canCreate and (tableCanCreate == null or tableCanCreate)}"
                      th:href="${table.baseUrl + '/new'}"
                      class="btn btn-primary btn-sm"
                   >

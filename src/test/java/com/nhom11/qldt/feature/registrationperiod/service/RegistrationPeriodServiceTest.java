@@ -51,13 +51,29 @@ class RegistrationPeriodServiceTest {
         .contains(RegistrationPeriodValidationError.COUNCIL_DATE);
   }
 
+  @Test
+  void studentRegistrationMayStartImmediatelyAfterLecturerRegistrationEnds() {
+    RegistrationPeriod period = validKltnPeriod();
+    period.setStudentRegistrationStart(period.getLecturerRegistrationEnd().plusMinutes(1));
+
+    assertThat(service.validationErrors(period)).isEmpty();
+  }
+
+  @Test
+  void studentRegistrationMustStartAfterLecturerRegistrationEnds() {
+    RegistrationPeriod period = validKltnPeriod();
+    period.setStudentRegistrationStart(period.getLecturerRegistrationEnd());
+
+    assertThat(service.validationErrors(period))
+        .contains(RegistrationPeriodValidationError.TIMELINE);
+  }
+
   private RegistrationPeriod validKltnPeriod() {
     LocalDateTime start = LocalDateTime.now().plusDays(1);
     RegistrationPeriod period = new RegistrationPeriod();
     period.setPeriodType(PeriodType.KLTN);
     period.setLecturerRegistrationStart(start);
     period.setLecturerRegistrationEnd(start.plusDays(1));
-    period.setTopicPublicationAt(start.plusDays(2));
     period.setStudentRegistrationStart(start.plusDays(3));
     period.setStudentRegistrationEnd(start.plusDays(4));
     period.setReportDeadline(start.plusDays(5));

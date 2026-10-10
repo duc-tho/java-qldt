@@ -74,7 +74,7 @@
             ></legend>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                <th:block
-                  th:each="field : ${ {'lecturerRegistrationStart', 'lecturerRegistrationEnd', 'topicPublicationAt', 'studentRegistrationStart', 'studentRegistrationEnd'} }"
+                  th:each="field : ${ {'lecturerRegistrationStart', 'lecturerRegistrationEnd', 'studentRegistrationStart', 'studentRegistrationEnd'} }"
                >
                   <div class="form-control">
                      <label
@@ -83,12 +83,14 @@
                         th:text="#{registration-periods.field.__${field}__}"
                      ></label>
                      <input
-                        type="datetime-local"
+                        type="text"
+                        readonly
+                        data-date-picker
+                        placeholder="dd/MM/yyyy HH:mm"
                         th:field="*{__${field}__}"
                         class="input w-full"
                         th:classappend="${#fields.hasErrors(field)} ? ' input-error'"
-                        th:readonly="${form.readonly}"
-                        th:attr="validate-data=${form.validationRules.get(field)}"
+                        th:attr="validate-data=${form.validationRules.get(field)}, data-date-picker-mode=${form.readonly} ? 'display' : 'edit'"
                      />
                      <div th:id="|${field}-error|">
                         <span
@@ -120,12 +122,14 @@
                         th:text="#{registration-periods.field.__${field}__}"
                      ></label>
                      <input
-                        type="datetime-local"
+                        type="text"
+                        readonly
+                        data-date-picker
+                        placeholder="dd/MM/yyyy HH:mm"
                         th:field="*{__${field}__}"
                         class="input w-full"
                         th:classappend="${#fields.hasErrors(field)} ? ' input-error'"
-                        th:readonly="${form.readonly}"
-                        th:attr="validate-data=${form.validationRules.get(field)}, x-effect=${field == 'reviewerDeadline'} ? '$el.disabled = !(periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;)' : (${field == 'councilDate'} ? '$el.disabled = periodType !== &quot;KLTN&quot;' : null)"
+                        th:attr="validate-data=${form.validationRules.get(field)}, data-date-picker-mode=${form.readonly} ? 'display' : 'edit', x-effect=${field == 'reviewerDeadline'} ? '$el.disabled = !(periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;)' : (${field == 'councilDate'} ? '$el.disabled = periodType !== &quot;KLTN&quot;' : null)"
                      />
                      <div th:id="|${field}-error|">
                         <span

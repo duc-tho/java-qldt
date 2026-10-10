@@ -21,7 +21,6 @@ Trưởng khoa tạo và quản lý đợt đăng ký. Mỗi đợt luôn có c�
 
 - Tên đợt và loại đợt.
 - Thời gian bắt đầu/kết thúc để giảng viên đề xuất đề tài.
-- Thời điểm công bố đề tài.
 - Thời gian bắt đầu/kết thúc để sinh viên đăng ký đề tài.
 - Hạn nộp bài/báo cáo của sinh viên.
 
@@ -33,20 +32,19 @@ Trường hiển thị theo loại đợt:
 
 Thứ tự thời gian tối thiểu phải thỏa mãn:
 
-`GV đăng ký kết thúc < công bố đề tài < SV đăng ký bắt đầu <= SV đăng ký kết thúc < hạn nộp bài`.
+`GV đăng ký kết thúc < SV đăng ký bắt đầu <= SV đăng ký kết thúc < hạn nộp bài`.
 
 Với `TLCN`, hạn nộp bài phải không muộn hơn hạn GVPB nộp điểm về khoa. Với `KLTN`, ngày báo cáo hội đồng phải sau hạn nộp bài và hạn chốt điểm hội đồng phải không sớm hơn ngày báo cáo hội đồng.
 
 ## 3. Timeline nghiệp vụ
 
-### Giai đoạn 1 — Đề xuất và công bố đề tài
+### Giai đoạn 1 — Đề xuất và duyệt đề tài
 
 Diễn ra trong khoảng đăng ký của giảng viên.
 
 - Giảng viên tạo, chỉnh sửa và gửi đề xuất đề tài trong đợt.
 - Trưởng khoa duyệt hoặc từ chối từng đề tài; mọi từ chối phải có lý do.
-- Chỉ đề tài đã được duyệt mới được công bố tại thời điểm công bố đề tài.
-- Khi đề tài được công bố, hệ thống chuyển sang giai đoạn sinh viên đăng ký.
+- Đề tài đã được duyệt hiển thị cho sinh viên khi bắt đầu giai đoạn đăng ký sinh viên.
 
 ### Giai đoạn 2 — Nhóm sinh viên đăng ký đề tài
 

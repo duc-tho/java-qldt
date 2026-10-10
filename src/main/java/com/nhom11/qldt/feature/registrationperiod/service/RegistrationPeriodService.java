@@ -44,8 +44,7 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     List<RegistrationPeriodValidationError> errors = new ArrayList<>();
 
     if (period.getLecturerRegistrationStart().isAfter(period.getLecturerRegistrationEnd())
-        || !period.getLecturerRegistrationEnd().isBefore(period.getTopicPublicationAt())
-        || !period.getTopicPublicationAt().isBefore(period.getStudentRegistrationStart())
+        || !period.getLecturerRegistrationEnd().isBefore(period.getStudentRegistrationStart())
         || period.getStudentRegistrationStart().isAfter(period.getStudentRegistrationEnd())
         || !period.getStudentRegistrationEnd().isBefore(period.getReportDeadline())) {
       errors.add(RegistrationPeriodValidationError.TIMELINE);
