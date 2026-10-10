@@ -83,6 +83,11 @@
 
             <div class="border-t-2 border-dashed border-base-300"></div>
 
+            <div role="alert" class="alert alert-error alert-soft" th:if="${deleteError != null}">
+               <span class="iconify" data-icon="bi:exclamation-circle"></span>
+               <span th:text="#{__${deleteError}__}"></span>
+            </div>
+
             <th:block layout:fragment="page-content"></th:block>
          </div>
 

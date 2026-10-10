@@ -16,6 +16,7 @@ import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -26,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/registration-periods")
@@ -223,8 +225,12 @@ public class RegistrationPeriodController {
   }
 
   @PostMapping("/{id}/delete")
-  public String delete(@PathVariable Long id) {
-    service.delete(id);
+  public String delete(@PathVariable Long id, RedirectAttributes attributes) {
+    try {
+      service.delete(id);
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+    }
 
     return "redirect:/registration-periods";
   }

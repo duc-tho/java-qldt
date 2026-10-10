@@ -10,6 +10,7 @@ import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/topic-proposals")
@@ -86,7 +88,7 @@ public class TopicProposalController {
 
   @PostMapping("/{periodId}/topics/{topicId}")
   public String update(@PathVariable Long periodId, @PathVariable Long topicId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) {
-    if (principal == null) return "redirect:/login";
+    if (principal == null) return "redirect:/topic-proposals/" + periodId + "/topics";
     if (errors.hasErrors()) { prepare(model, periodId, topicId, form); return "fragment/page/topic-proposal/edit"; }
     try { topicService.updateProposal(topicId, periodId, currentUser(principal), form.toEntity(), form.getDepartmentId(), form.getAdviserIds()); }
     catch (IllegalArgumentException exception) { errors.reject(exception.getMessage()); prepare(model, periodId, topicId, form); return "fragment/page/topic-proposal/edit"; }
@@ -94,8 +96,19 @@ public class TopicProposalController {
   }
 
   @PostMapping("/{periodId}/topics/{topicId}/delete")
-  public String delete(@PathVariable Long periodId, @PathVariable Long topicId, @AuthenticationPrincipal UserDetails principal) {
-    if (principal != null) { try { topicService.deleteProposal(topicId, periodId, currentUser(principal)); } catch (IllegalArgumentException ignored) { } }
+  public String delete(
+      @PathVariable Long periodId,
+      @PathVariable Long topicId,
+      @AuthenticationPrincipal UserDetails principal,
+      RedirectAttributes attributes) {
+    if (principal == null) return "redirect:/login";
+    try {
+      topicService.deleteProposal(topicId, periodId, currentUser(principal));
+    } catch (IllegalArgumentException exception) {
+      attributes.addFlashAttribute("deleteError", exception.getMessage());
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+    }
     return "redirect:/topic-proposals/" + periodId + "/topics";
   }
 

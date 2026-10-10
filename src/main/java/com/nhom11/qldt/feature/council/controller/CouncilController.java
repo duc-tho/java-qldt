@@ -11,6 +11,7 @@ import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -216,6 +217,8 @@ public class CouncilController {
       councilService.deleteCouncil(periodId, councilId);
     } catch (IllegalArgumentException exception) {
       attributes.addFlashAttribute("error", exception.getMessage());
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
     return "redirect:/registration-periods/" + periodId + "/councils";
   }

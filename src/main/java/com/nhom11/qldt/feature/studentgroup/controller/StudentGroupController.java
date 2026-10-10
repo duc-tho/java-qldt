@@ -16,6 +16,7 @@ import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import jakarta.validation.Valid;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -151,6 +152,8 @@ public class StudentGroupController {
       studentGroupService.removeMember(groupId, currentUser(principal), memberId);
     } catch (IllegalArgumentException exception) {
       redirectAttributes.addFlashAttribute("error", exception.getMessage());
+    } catch (DataIntegrityViolationException exception) {
+      redirectAttributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
     return redirectDetail(periodId, groupId);
   }

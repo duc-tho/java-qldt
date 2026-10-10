@@ -13,6 +13,7 @@ import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -168,9 +169,14 @@ public class TopicController {
   }
 
   @PostMapping("/{id}/delete")
-  public String delete(@PathVariable Long periodId, @PathVariable Long id) {
+  public String delete(
+      @PathVariable Long periodId, @PathVariable Long id, RedirectAttributes redirectAttributes) {
     if (findTopic(periodId, id) != null) {
-      topicService.delete(id);
+      try {
+        topicService.delete(id);
+      } catch (DataIntegrityViolationException exception) {
+        redirectAttributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+      }
     }
     return periodDetailRedirect(periodId);
   }
@@ -178,12 +184,17 @@ public class TopicController {
   @PostMapping("/delete")
   public String deleteSelected(
       @PathVariable Long periodId,
-      @RequestParam(name = "ids", required = false) java.util.List<Long> ids) {
+      @RequestParam(name = "ids", required = false) java.util.List<Long> ids,
+      RedirectAttributes redirectAttributes) {
     if (findPeriod(periodId) == null) {
       return "redirect:/registration-periods";
     }
 
-    topicService.deleteAllByRegistrationPeriodId(ids, periodId);
+    try {
+      topicService.deleteAllByRegistrationPeriodId(ids, periodId);
+    } catch (DataIntegrityViolationException exception) {
+      redirectAttributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+    }
     return periodDetailRedirect(periodId);
   }
 
