@@ -113,36 +113,39 @@ public class UserController {
               "users.validation.password.required", null, LocaleContextHolder.getLocale()));
     }
 
-    if (bindingResult.hasErrors()) {
-      Map<String, String> validationRules =
-          validationRuleRenderer.render(
-              UserForm.class,
-              Map.of(
-                  "password",
-                  ClientValidationRuleRenderer.createPasswordRule(
-                      messageSource.getMessage(
-                          "users.validation.password.required",
-                          null,
-                          LocaleContextHolder.getLocale()))));
-      crudView.form(
-          model,
-          form,
-          BASE_URL,
-          FORM_METHOD_POST,
-          BASE_URL,
-          false,
-          TEMPLATE_USER_FIELDS,
-          validationRules);
-
-      model.addAttribute("pageTitle", "users.page.create.title");
-      model.addAttribute("pageIcon", "bi:person-plus");
-
-      return VIEW_USER_CREATE;
+    if (!bindingResult.hasErrors()) {
+      try {
+        userService.create(form.toEntity(), form.getRoleIds());
+        return "redirect:" + BASE_URL;
+      } catch (IllegalArgumentException exception) {
+        bindingResult.rejectValue("roleIds", exception.getMessage());
+      }
     }
 
-    userService.create(form.toEntity(), form.getRoleIds());
+    Map<String, String> validationRules =
+        validationRuleRenderer.render(
+            UserForm.class,
+            Map.of(
+                "password",
+                ClientValidationRuleRenderer.createPasswordRule(
+                    messageSource.getMessage(
+                        "users.validation.password.required",
+                        null,
+                        LocaleContextHolder.getLocale()))));
+    crudView.form(
+        model,
+        form,
+        BASE_URL,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
 
-    return "redirect:" + BASE_URL;
+    model.addAttribute("pageTitle", "users.page.create.title");
+    model.addAttribute("pageIcon", "bi:person-plus");
+
+    return VIEW_USER_CREATE;
   }
 
   @GetMapping("/{id}")
@@ -211,28 +214,32 @@ public class UserController {
       return "redirect:" + BASE_URL;
     }
 
-    if (bindingResult.hasErrors()) {
-      Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
-      crudView.form(
-          model,
-          form,
-          BASE_URL + "/" + id,
-          FORM_METHOD_POST,
-          BASE_URL,
-          false,
-          TEMPLATE_USER_FIELDS,
-          validationRules);
-
-      model.addAttribute("pageTitle", "users.page.edit.title");
-      model.addAttribute("pageIcon", "bi:person");
-
-      return VIEW_USER_DETAIL;
+    if (!bindingResult.hasErrors()) {
+      User updates = form.toEntity();
+      updates.setId(id);
+      try {
+        userService.update(updates, form.getRoleIds());
+        return "redirect:" + BASE_URL + "/" + id;
+      } catch (IllegalArgumentException exception) {
+        bindingResult.rejectValue("roleIds", exception.getMessage());
+      }
     }
 
-    User updates = form.toEntity();
-    updates.setId(id);
-    userService.update(updates, form.getRoleIds());
-    return "redirect:" + BASE_URL + "/" + id;
+    Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
+    crudView.form(
+        model,
+        form,
+        BASE_URL + "/" + id,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
+
+    model.addAttribute("pageTitle", "users.page.edit.title");
+    model.addAttribute("pageIcon", "bi:person");
+
+    return VIEW_USER_DETAIL;
   }
 
   @PostMapping("/{id}/delete")

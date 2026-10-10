@@ -75,7 +75,7 @@
                   <div
                      role="alert"
                      class="alert alert-warning"
-                     th:unless="${isOpen}"
+                     th:if="${isPending and !isOpen}"
                      th:text="#{student-groups.locked}"
                   ></div>
                </div>

@@ -6,3 +6,4 @@ import "./crud-table.js";
 import "./crud-delete-modal.js";
 import "./page-back.js";
 import "./date-picker.js";
+import "./user-role-selection.js";

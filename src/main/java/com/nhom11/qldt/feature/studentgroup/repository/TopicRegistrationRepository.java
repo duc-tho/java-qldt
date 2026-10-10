@@ -35,6 +35,21 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       """
       select distinct registration from TopicRegistration registration
       join fetch registration.studentGroup studentGroup
+      join fetch studentGroup.registrationPeriod
+      join fetch registration.topic topic
+      join fetch topic.department
+      join topic.advisers adviser
+      where adviser.id = :lecturerId and registration.status <> :excludedStatus
+      order by registration.updatedAt desc
+      """)
+  List<TopicRegistration> findAllByAdviserIdExcludingStatus(
+      @Param("lecturerId") Long lecturerId,
+      @Param("excludedStatus") TopicRegistrationStatus excludedStatus);
+
+  @Query(
+      """
+      select distinct registration from TopicRegistration registration
+      join fetch registration.studentGroup studentGroup
       join fetch registration.topic topic
       where topic.reviewer.id = :lecturerId and registration.status = :status
       order by registration.updatedAt desc

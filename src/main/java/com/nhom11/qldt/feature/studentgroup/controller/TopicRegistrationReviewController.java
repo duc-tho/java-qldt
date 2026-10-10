@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
 import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import jakarta.validation.Valid;
+import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -32,10 +34,22 @@ public class TopicRegistrationReviewController {
   }
 
   @GetMapping
-  public String list(@AuthenticationPrincipal UserDetails principal, Model model) {
+  public String list(
+      @AuthenticationPrincipal UserDetails principal,
+      @RequestParam(required = false) TopicRegistrationStatus status,
+      Model model) {
     if (principal == null) return "redirect:/login";
-    model.addAttribute(
-        "registrations", studentGroupService.adviserRegistrations(currentUser(principal)));
+    List<TopicRegistration> registrations =
+        studentGroupService.adviserRegistrations(currentUser(principal));
+    if (status != null) {
+      registrations = registrations.stream().filter(item -> item.getStatus() == status).toList();
+    }
+    model.addAttribute("registrations", registrations);
+    model.addAttribute("selectedStatus", status);
+    model.addAttribute("reviewStatuses", List.of(
+        TopicRegistrationStatus.PENDING,
+        TopicRegistrationStatus.APPROVED,
+        TopicRegistrationStatus.REJECTED));
     model.addAttribute("pageTitle", "topic-registrations.page.list.title");
     model.addAttribute("pageIcon", "bi:journal-check");
     return "fragment/page/topic-registration/list";

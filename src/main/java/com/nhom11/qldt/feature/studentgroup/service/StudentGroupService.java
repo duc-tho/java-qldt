@@ -226,8 +226,8 @@ public class StudentGroupService {
   }
 
   public List<TopicRegistration> adviserRegistrations(User lecturer) {
-    return topicRegistrationRepository.findAllByAdviserIdAndStatus(
-        lecturer.getId(), TopicRegistrationStatus.PENDING);
+    return topicRegistrationRepository.findAllByAdviserIdExcludingStatus(
+        lecturer.getId(), TopicRegistrationStatus.DRAFT);
   }
 
   public List<TopicRegistration> registrations(Long periodId) {
@@ -237,7 +237,7 @@ public class StudentGroupService {
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {
     return topicRegistrationRepository
         .findByIdAndAdviserId(registrationId, lecturer.getId())
-        .filter(registration -> registration.getStatus() == TopicRegistrationStatus.PENDING)
+        .filter(registration -> registration.getStatus() != TopicRegistrationStatus.DRAFT)
         .orElse(null);
   }
 

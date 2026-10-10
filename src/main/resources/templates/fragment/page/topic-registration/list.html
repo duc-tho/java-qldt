@@ -2,6 +2,20 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="page-content">
+         <form method="get" th:action="@{/topic-registrations}" class="mb-4">
+            <fieldset class="fieldset">
+               <legend class="fieldset-legend" th:text="#{topic-registrations.filter.status}"></legend>
+               <select class="select select-sm" name="status" onchange="this.form.submit()">
+                  <option value="" th:selected="${selectedStatus == null}" th:text="#{topic-registrations.filter.all}"></option>
+                  <option
+                     th:each="reviewStatus : ${reviewStatuses}"
+                     th:value="${reviewStatus.name()}"
+                     th:selected="${selectedStatus == reviewStatus}"
+                     th:text="#{__${'topic-registrations.status.' + reviewStatus.name()}__}"
+                  ></option>
+               </select>
+            </fieldset>
+         </form>
          <div
             class="card card-border border-base-300 shadow-sm overflow-x-auto"
          >
@@ -29,16 +43,19 @@
                      <td>
                         <span
                            class="badge badge-soft"
-                           th:classappend="badge-warning"
+                           th:classappend="${registration.status.name() == 'PENDING'} ? ' badge-warning' : (${registration.status.name() == 'APPROVED'} ? ' badge-success' : ' badge-error')"
                            th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"
                         ></span>
                      </td>
                      <td>
                         <a
-                           class="btn btn-primary btn-sm"
+                           class="btn btn-sm"
+                           th:classappend="${registration.status.name() == 'PENDING'} ? ' btn-primary' : ' btn-outline'"
                            th:href="@{/topic-registrations/{id}(id=${registration.id})}"
-                           th:text="#{topic-registrations.action.review}"
-                        ></a>
+                        >
+                           <span th:if="${registration.status.name() == 'PENDING'}" th:text="#{topic-registrations.action.review}"></span>
+                           <span th:unless="${registration.status.name() == 'PENDING'}" th:text="#{topic-registrations.action.detail}"></span>
+                        </a>
                      </td>
                   </tr>
                </tbody>
