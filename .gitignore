@@ -46,3 +46,5 @@ yeu_cau
 skills-lock.json
 .claude
 .codegraph
+src/main/resources/static/assets/*.css
+src/main/resources/static/assets/*.js

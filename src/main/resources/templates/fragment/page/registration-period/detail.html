@@ -83,10 +83,11 @@
                th:replace="~{fragment/page/registration-period/registrations :: registrations(${registrations})}"
             ></div>
          </section>
-         <div
-            th:if="${form.readonly}"
-            th:replace="~{fragment/page/council/result-publication :: result-publication(${form.data})}"
-         ></div>
+         <th:block th:if="${form.readonly}">
+            <div
+               th:replace="~{fragment/page/council/result-publication :: result-publication(${form.data})}"
+            ></div>
+         </th:block>
       </th:block>
    </body>
 </html>

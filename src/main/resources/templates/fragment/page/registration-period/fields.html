@@ -1,7 +1,11 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
    <th:block th:fragment="form-fields">
-      <div class="flex flex-col gap-6">
+      <div
+         class="flex flex-col gap-6"
+         x-data="{ periodType: '' }"
+         x-init="periodType = $el.querySelector('#periodType').value"
+      >
          <fieldset class="fieldset">
             <legend
                class="fieldset-legend"
@@ -40,6 +44,7 @@
                   ><select
                      id="periodType"
                      th:field="*{periodType}"
+                     x-model="periodType"
                      class="select w-full"
                      th:classappend="${#fields.hasErrors('periodType')} ? ' select-error'"
                      th:disabled="${form.readonly}"
@@ -105,7 +110,10 @@
                <th:block
                   th:each="field : ${ {'reportDeadline', 'reviewerDeadline', 'councilDate'} }"
                >
-                  <div class="form-control">
+                  <div
+                     class="form-control"
+                     th:attr="x-show=${field == 'reviewerDeadline'} ? 'periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;' : (${field == 'councilDate'} ? 'periodType === &quot;KLTN&quot;' : null)"
+                  >
                      <label
                         class="label"
                         th:for="${field}"
@@ -117,7 +125,7 @@
                         class="input w-full"
                         th:classappend="${#fields.hasErrors(field)} ? ' input-error'"
                         th:readonly="${form.readonly}"
-                        th:attr="validate-data=${form.validationRules.get(field)}"
+                        th:attr="validate-data=${form.validationRules.get(field)}, x-effect=${field == 'reviewerDeadline'} ? '$el.disabled = !(periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;)' : (${field == 'councilDate'} ? '$el.disabled = periodType !== &quot;KLTN&quot;' : null)"
                      />
                      <div th:id="|${field}-error|">
                         <span
