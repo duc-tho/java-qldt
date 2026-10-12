@@ -36,11 +36,82 @@
   --noise: 0;
 }
 
+@layer base {
+  * {
+    --scrollbar-thumb: color-mix(in oklch, var(--color-primary) 50%, transparent);
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--color-base-200);
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-track {
+    background: var(--color-base-200);
+  }
+
+  *::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: var(--scrollbar-thumb);
+  }
+
+  *::-webkit-scrollbar-button {
+    display: none;
+  }
+
+  ::selection {
+    background: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+}
+
 @layer components {
+  .sidebar-item-label {
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    opacity: 1;
+    visibility: visible;
+    transition: max-width 200ms ease, opacity 200ms ease, visibility 200ms;
+  }
+
+  .drawer-toggle:not(:checked) ~ .drawer-side .sidebar-item-label {
+    max-width: 0;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+  }
+
   .btn:focus-visible,
   .input:focus-visible,
   .textarea:focus-visible,
   .select:focus-visible {
     outline-color: var(--color-primary) !important;
+  }
+}
+
+@layer utilities {
+  .sidebar-toggle-closed {
+    display: none;
+  }
+
+  .drawer-toggle:not(:checked) ~ .drawer-content .sidebar-toggle-open {
+    display: none;
+  }
+
+  .drawer-toggle:not(:checked) ~ .drawer-content .sidebar-toggle-closed {
+    display: inline-flex;
+  }
+
+  .drawer-side {
+    scrollbar-color: var(--scrollbar-thumb) var(--color-base-200);
+  }
+
+  @media (min-width: 64rem) {
+    .drawer-toggle:not(:checked) ~ .drawer-side:has(.tooltip:hover, .tooltip:focus-visible) {
+      z-index: 40;
+    }
   }
 }

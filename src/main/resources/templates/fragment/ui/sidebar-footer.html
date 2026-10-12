@@ -1,0 +1,12 @@
+<footer class="w-full border-t border-base-300 px-2 py-3" th:if="${currentUser != null}">
+   <form method="post" th:action="@{/logout}">
+      <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+      <button
+         type="submit"
+         class="btn btn-ghost w-full justify-center gap-2 text-error transition-[gap] duration-200 is-drawer-close:gap-0"
+      >
+         <span class="iconify shrink-0 text-lg" data-icon="bi:box-arrow-right" aria-hidden="true"></span>
+         <span class="sidebar-item-label" th:text="#{navigation.action.logout}"></span>
+      </button>
+   </form>
+</footer>

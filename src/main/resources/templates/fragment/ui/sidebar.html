@@ -2,9 +2,10 @@
    <li
       sec:authorize="hasRole('ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title is-drawer-close:hidden"
+      class="menu-title pointer-events-none h-9"
    >
-      <span th:text="#{navigation.group.overview}"></span>
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.overview}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li
       sec:authorize="hasRole('ADMIN')"
@@ -20,7 +21,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.home}"
          ></span
       ></a>
@@ -28,63 +29,60 @@
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
+      class="menu-title pointer-events-none mt-4 h-9"
    >
-      <span th:text="#{navigation.group.topic-management}"></span>
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.topic-management}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <details
-         th:open="${#strings.startsWith(currentPath, '/registration-periods')}"
+      <a
+         href="/registration-periods"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.registration-periods}"
+         th:classappend="${currentPath == '/registration-periods'} ? ' menu-active'"
       >
-         <summary
-            class="flex btn btn-ghost text-left justify-start items-center"
-         >
-            <span
-               class="iconify block shrink-0"
-               data-icon="bi:folder2-open"
-               data-width="18"
-            ></span>
-            <span
-               class="is-drawer-close:hidden"
-               th:text="#{navigation.group.topic-management}"
-            ></span>
-         </summary>
-         <ul>
-            <li>
-               <a
-                  href="/registration-periods"
-                  th:classappend="${currentPath == '/registration-periods'} ? ' menu-active'"
-                  ><span
-                     th:text="#{navigation.item.registration-periods}"
-                  ></span
-               ></a>
-            </li>
-            <li>
-               <a
-                  href="/registration-periods/topics"
-                  th:classappend="${#strings.contains(currentPath, '/topics')} ? ' menu-active'"
-                  ><span th:text="#{navigation.item.topics}"></span
-               ></a>
-            </li>
-            <li>
-               <a
-                  href="/registration-periods/groups"
-                  th:classappend="${#strings.contains(currentPath, '/groups')} ? ' menu-active'"
-                  ><span th:text="#{navigation.item.groups}"></span
-               ></a>
-            </li>
-         </ul>
-      </details>
+         <span class="iconify block shrink-0" data-icon="bi:calendar-range" data-width="18"></span>
+         <span class="sidebar-item-label" th:text="#{navigation.item.registration-periods}"></span>
+      </a>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/registration-periods/topics"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.topics}"
+         th:classappend="${#strings.contains(currentPath, '/topics')} ? ' menu-active'"
+      >
+         <span class="iconify block shrink-0" data-icon="bi:journal-text" data-width="18"></span>
+         <span class="sidebar-item-label" th:text="#{navigation.item.topics}"></span>
+      </a>
+   </li>
+   <li
+      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/registration-periods/groups"
+         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
+         th:attr="data-tip=#{navigation.item.groups}"
+         th:classappend="${#strings.contains(currentPath, '/groups')} ? ' menu-active'"
+      >
+         <span class="iconify block shrink-0" data-icon="bi:people" data-width="18"></span>
+         <span class="sidebar-item-label" th:text="#{navigation.item.groups}"></span>
+      </a>
    </li>
    <li
       sec:authorize="hasRole('LECTURER')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
+      class="menu-title pointer-events-none mt-4 h-9"
    >
-      <span th:text="#{navigation.group.lecturer}"></span>
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.lecturer}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li
       sec:authorize="hasRole('LECTURER')"
@@ -100,7 +98,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.registration-periods}"
          ></span>
       </a>
@@ -118,7 +116,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.topic-registrations}"
          ></span
       ></a>
@@ -137,7 +135,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.council-workspace}"
          ></span
       ></a>
@@ -155,7 +153,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.topic-proposals}"
          ></span
       ></a>
@@ -163,9 +161,10 @@
    <li
       sec:authorize="hasRole('STUDENT')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
+      class="menu-title pointer-events-none mt-4 h-9"
    >
-      <span th:text="#{navigation.group.student}"></span>
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.student}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li
       sec:authorize="hasRole('STUDENT')"
@@ -180,7 +179,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.student-groups}"
          ></span
       ></a>
@@ -199,7 +198,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.departments}"
          ></span
       ></a>
@@ -207,9 +206,10 @@
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
+      class="menu-title pointer-events-none mt-4 h-9"
    >
-      <span th:text="#{navigation.group.information}"></span>
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.information}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
@@ -225,13 +225,14 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.announcements}"
          ></span
       ></a>
    </li>
-   <li class="menu-title mt-4 is-drawer-close:hidden">
-      <span th:text="#{navigation.group.system}"></span>
+   <li class="menu-title pointer-events-none mt-4 h-9">
+      <span class="is-drawer-close:hidden" th:text="#{navigation.group.system}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
    </li>
    <li>
       <a
@@ -245,7 +246,7 @@
             data-width="18"
          ></span>
          <span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.account}"
          ></span>
       </a>
@@ -262,7 +263,7 @@
             data-width="18"
          ></span>
          <span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.settings}"
          ></span>
       </a>
@@ -281,7 +282,7 @@
             data-width="18"
          ></span
          ><span
-            class="is-drawer-close:hidden"
+            class="sidebar-item-label"
             th:text="#{navigation.item.users}"
          ></span
       ></a>

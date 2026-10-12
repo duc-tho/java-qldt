@@ -1,16 +1,6 @@
-<section class="border-t border-base-300 bg-base-200 text-base-content">
-   <footer class="footer sm:footer-horizontal max-w-(--breakpoint-2xl) mx-auto gap-4 px-3 py-6 sm:items-center sm:justify-between sm:px-4 xl:px-8">
-      <aside class="gap-2">
-         <p class="flex items-center gap-2 font-semibold">
-            <span class="iconify inline text-lg" data-icon="bi:house" aria-hidden="true"></span>
-            <span th:text="#{footer.university}"></span>
-         </p>
-         <p class="text-base-content/70" th:text="#{application.title}"></p>
-      </aside>
-      <address class="text-sm not-italic text-base-content/70 sm:text-right">
-         <p class="mb-1 font-medium text-base-content" th:text="#{footer.address.label}"></p>
-         <p th:text="#{footer.address}"></p>
-         <p th:text="#{footer.phone}"></p>
-      </address>
+<section class="bg-base-200 text-base-content">
+   <footer class="footer sm:footer-horizontal gap-4 px-3 py-6 sm:items-center sm:justify-between sm:px-4 xl:px-8">
+      <p class="font-semibold" th:text="#{footer.system}"></p>
+      <p class="text-sm text-base-content/70 sm:text-right" th:text="#{footer.copyright}"></p>
    </footer>
 </section>

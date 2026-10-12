@@ -1,27 +1,59 @@
-<div class="navbar bg-base-200">
-   <div class="navbar-start">
+<div class="navbar relative z-30 bg-base-200">
+   <div class="navbar-start gap-1">
+      <label
+         for="my-drawer-4"
+         th:aria-label="#{navigation.action.close-sidebar}"
+         class="sidebar-toggle-open btn btn-square btn-ghost drawer-button"
+      >
+         <span class="iconify" data-icon="bi:arrow-bar-left" data-width="20" aria-hidden="true"></span>
+      </label>
       <label
          for="my-drawer-4"
          th:aria-label="#{navigation.action.open-sidebar}"
-         class="btn btn-square btn-ghost drawer-button"
-         ><span
-            class="iconify inline"
-            data-icon="bi:list"
-            data-width="20"
-         ></span
-      ></label>
+         class="sidebar-toggle-closed btn btn-square btn-ghost drawer-button"
+      >
+         <span class="iconify" data-icon="bi:arrow-bar-right" data-width="20" aria-hidden="true"></span>
+      </label>
+      <a href="/" class="btn btn-ghost gap-2 px-3" th:aria-label="#{navigation.item.home}">
+         <span class="iconify" data-icon="bi:house" data-width="20" aria-hidden="true"></span>
+         <span th:text="#{navigation.item.home}"></span>
+      </a>
    </div>
-   <div class="navbar-center">
-      <a href="/" class="btn btn-ghost text-xl">QLĐT</a>
-   </div>
-   <div class="navbar-end">
+   <div class="navbar-end gap-1">
+      <a
+         href="/announcements"
+         class="btn btn-square btn-ghost"
+         sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+         xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+         th:aria-label="#{navigation.action.notifications}"
+      >
+         <span class="iconify" data-icon="bi:bell" data-width="20" aria-hidden="true"></span>
+      </a>
+      <span
+         class="flex size-10 items-center justify-center text-base-content/70"
+         role="img"
+         sec:authorize="!hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+         xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+         th:aria-label="#{navigation.action.notifications}"
+      >
+         <span class="iconify" data-icon="bi:bell" data-width="20" aria-hidden="true"></span>
+      </span>
       <details class="dropdown dropdown-end" th:if="${currentUser != null}">
          <summary
-            class="btn btn-ghost btn-circle"
+            class="btn btn-ghost h-auto min-h-10 gap-2 px-2 py-1"
             th:aria-label="#{navigation.item.account}"
          >
+            <span class="hidden min-w-0 max-w-40 text-right sm:block">
+               <span class="block truncate text-sm font-semibold" th:text="${currentUser.fullName}"></span>
+               <span class="block truncate text-xs text-base-content/60">
+                  <span
+                     th:each="role, iter : ${currentUser.roles}"
+                     th:text="|#{roles.__${role.name}__}${iter.last ? '' : ' / '}|"
+                  ></span>
+               </span>
+            </span>
             <div class="avatar avatar-placeholder">
-               <div class="flex w-9 items-center justify-center rounded-full bg-primary text-primary-content">
+               <div class="flex size-9 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
                   <span
                      th:text="${#strings.substring(currentUser.fullName, 0, 1)}"
                   ></span>
@@ -29,7 +61,7 @@
             </div>
          </summary>
          <ul
-            class="dropdown-content menu z-10 mt-3 w-64 rounded-box bg-base-100 p-2 shadow-lg"
+            class="dropdown-content menu z-50 mt-3 w-64 rounded-box bg-base-100 p-2 shadow-lg"
          >
             <li class="menu-title">
                <span th:text="${currentUser.fullName}"></span>
