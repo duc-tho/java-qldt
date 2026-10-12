@@ -17,6 +17,10 @@ public interface ActionDef {
     return false;
   }
 
+  default boolean isReject() {
+    return false;
+  }
+
   default boolean isVisible(Object item) {
     return true;
   }
@@ -71,6 +75,28 @@ public interface ActionDef {
       implements ActionDef {
     @Override
     public boolean isPost() {
+      return true;
+    }
+
+    @Override
+    public boolean isVisible(Object item) {
+      return visiblePredicate.test(item);
+    }
+
+    @Override
+    public String getUrl(Object item) {
+      return urlExtractor.apply(item);
+    }
+  }
+
+  record Reject(
+      String label,
+      String icon,
+      Function<Object, String> urlExtractor,
+      java.util.function.Predicate<Object> visiblePredicate)
+      implements ActionDef {
+    @Override
+    public boolean isReject() {
       return true;
     }
 

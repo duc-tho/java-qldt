@@ -6,22 +6,47 @@
             <th:block
                th:if="${actionStat.count <= 3 and action.isVisible(item)}"
             >
-               <form
+               <button
                   th:if="${action.isPost()}"
-                  th:action="${action.getUrl(item)}"
-                  method="post"
+                  type="submit"
+                  class="btn btn-ghost btn-xs"
+                  th:attr="formaction=${action.getUrl(item)}, formmethod='post'"
                >
-                  <button type="submit" class="btn btn-ghost btn-xs">
                      <span
                         class="iconify"
                         th:attr="data-icon=${action.icon()}"
                         data-width="14"
                      ></span>
                      <span th:text="${#messages.msg(action.label())}"></span>
+               </button>
+               <th:block th:if="${action.isReject()}">
+                  <button
+                     type="button"
+                     class="btn btn-ghost btn-xs text-error"
+                     th:attr="onclick=|document.getElementById('reject_item_${item.id}').showModal()|"
+                  >
+                     <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                     <span th:text="${#messages.msg(action.label())}"></span>
                   </button>
-               </form>
+                  <dialog th:id="|reject_item_${item.id}|" class="modal">
+                     <div class="modal-box">
+                        <form method="post" th:action="${action.getUrl(item)}">
+                           <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
+                           <label class="form-control mt-4">
+                              <span class="label" th:text="#{topics.field.rejection-reason}"></span>
+                              <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
+                           </label>
+                           <div class="modal-action">
+                              <button class="btn btn-error" th:text="#{topics.action.reject}"></button>
+                              <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
+                           </div>
+                        </form>
+                     </div>
+                     <form method="dialog" class="modal-backdrop"><button>close</button></form>
+                  </dialog>
+               </th:block>
                <a
-                  th:if="${!action.isDelete() and !action.isPost()}"
+                  th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}"
                   th:href="${action.getUrl(item)}"
                   class="btn btn-ghost btn-xs"
                >
@@ -49,40 +74,71 @@
             </th:block>
          </th:block>
 
-         <details
+         <div
             th:if="${#lists.size(actions) > 3}"
-            class="dropdown dropdown-end"
+            class="dropdown"
          >
-            <summary class="btn btn-ghost btn-xs btn-square">
+            <button
+               type="button"
+               class="btn btn-ghost btn-xs btn-square"
+               th:attr="popovertarget=|more_action_menu_${item.id}|, style=|anchor-name: --more_action_${item.id};|"
+            >
                <span
                   class="iconify"
                   data-icon="bi:three-dots"
                   data-width="14"
                ></span>
-            </summary>
+            </button>
             <ul
-               class="menu dropdown-content bg-base-100 rounded-box z-10 w-40 p-2 shadow"
+               class="dropdown menu bg-base-100 rounded-box w-40 p-2 shadow"
+               popover
+               th:id="|more_action_menu_${item.id}|"
+               th:attr="style=|position-anchor: --more_action_${item.id};|"
             >
                <li
                   th:each="action, actionStat : ${actions}"
                   th:if="${actionStat.count > 3 and action.isVisible(item)}"
                >
-                  <form
+                  <button
                      th:if="${action.isPost()}"
-                     th:action="${action.getUrl(item)}"
-                     method="post"
+                     type="submit"
+                     th:attr="formaction=${action.getUrl(item)}, formmethod='post'"
                   >
-                     <button type="submit">
                         <span
                            class="iconify"
                            th:attr="data-icon=${action.icon()}"
                            data-width="14"
                         ></span>
                         <span th:text="${#messages.msg(action.label())}"></span>
+                  </button>
+                  <th:block th:if="${action.isReject()}">
+                     <button
+                        type="button"
+                        class="text-error"
+                        th:attr="onclick=|document.getElementById('reject_item_${item.id}').showModal()|"
+                     >
+                        <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
+                        <span th:text="${#messages.msg(action.label())}"></span>
                      </button>
-                  </form>
+                     <dialog th:id="|reject_item_${item.id}|" class="modal">
+                        <div class="modal-box">
+                           <form method="post" th:action="${action.getUrl(item)}">
+                              <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
+                              <label class="form-control mt-4">
+                                 <span class="label" th:text="#{topics.field.rejection-reason}"></span>
+                                 <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
+                              </label>
+                              <div class="modal-action">
+                                 <button class="btn btn-error" th:text="#{topics.action.reject}"></button>
+                                 <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
+                              </div>
+                           </form>
+                        </div>
+                        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+                     </dialog>
+                  </th:block>
                   <a
-                     th:if="${!action.isDelete() and !action.isPost()}"
+                     th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}"
                      th:href="${action.getUrl(item)}"
                   >
                      <span
@@ -108,7 +164,7 @@
                   </button>
                </li>
             </ul>
-         </details>
+         </div>
       </div>
    </th:block>
 </html>

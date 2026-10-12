@@ -49,6 +49,7 @@
                      <span th:text="#{crud.table.delete_selected}"></span>
                   </button>
                   <a
+                     th:if="${table.canCreate and (tableCanCreate == null or tableCanCreate)}"
                      th:href="${table.baseUrl + '/new'}"
                      class="btn btn-primary btn-sm"
                   >
@@ -63,7 +64,7 @@
             </div>
 
             <div class="overflow-x-auto rounded-box border-2 border-base-300">
-               <table class="table table-zebra w-full">
+               <table class="table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32">
                   <thead class="bg-base-200">
                      <tr>
                         <th th:if="${table.bulkDeleteEnabled}" class="w-10">
@@ -119,7 +120,7 @@
                            </th>
                         </th:block>
                         <th
-                           class="text-right"
+                           class="text-right min-w-fit"
                            th:text="#{crud.table.actions}"
                         ></th>
                      </tr>
@@ -174,7 +175,7 @@
                               <span
                                  th:if="${col.field == 'status'}"
                                  class="badge badge-soft"
-                                 th:classappend="${item.status.name() == 'PUBLISHED' or item.status.name() == 'APPROVED'} ? ' badge-success' : (${item.status.name() == 'WITHDRAWN'} ? ' badge-neutral' : ' badge-warning')"
+                                 th:classappend="${item.status.name() == 'PUBLISHED' or item.status.name() == 'APPROVED'} ? ' badge-success' : (${item.status.name() == 'WITHDRAWN'} ? ' badge-neutral' : (${item.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning'))"
                                  th:text="${col.getValue(item)}"
                               ></span>
                               <a

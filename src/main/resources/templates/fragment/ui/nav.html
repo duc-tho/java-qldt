@@ -21,7 +21,7 @@
             th:aria-label="#{navigation.item.account}"
          >
             <div class="avatar avatar-placeholder">
-               <div class="w-9 rounded-full bg-primary text-primary-content">
+               <div class="flex w-9 items-center justify-center rounded-full bg-primary text-primary-content">
                   <span
                      th:text="${#strings.substring(currentUser.fullName, 0, 1)}"
                   ></span>
@@ -55,7 +55,7 @@
                      type="hidden"
                      th:name="${_csrf.parameterName}"
                      th:value="${_csrf.token}"
-                  /><button type="submit">
+                  /><button type="submit" class="flex w-full items-center gap-2 text-left">
                      <span class="iconify" data-icon="bi:box-arrow-right"></span
                      ><span th:text="#{navigation.action.logout}"></span>
                   </button>

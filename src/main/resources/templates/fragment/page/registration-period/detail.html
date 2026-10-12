@@ -4,6 +4,8 @@
       <th:block layout:fragment="actions">
          <a
             th:if="${form.readonly}"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
             th:href="${form.actionUrl + '/edit'}"
             class="btn btn-primary btn-sm"
          >
@@ -14,8 +16,30 @@
             ></span>
             <span th:text="#{registration_periods.action.edit}"></span>
          </a>
+         <a
+            th:if="${form.readonly and form.data.periodType.name() == 'KLTN'}"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+            th:href="@{/registration-periods/{id}/councils(id=${form.data.id})}"
+            class="btn btn-outline btn-sm"
+         >
+            <span class="iconify inline" data-icon="bi:people-fill" data-width="16"></span>
+            <span th:text="#{councils.page.list.title}"></span>
+         </a>
+         <a
+            th:if="${form.readonly and form.data.periodType.name() == 'TLCN'}"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+            th:href="@{/registration-periods/{id}/reviewer-assignments(id=${form.data.id})}"
+            class="btn btn-outline btn-sm"
+         >
+            <span class="iconify inline" data-icon="bi:person-check" data-width="16"></span>
+            <span th:text="#{reviewer-assignments.page.title}"></span>
+         </a>
          <button
             th:if="${form.readonly}"
+            sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+            xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
             type="button"
             class="btn btn-error btn-outline btn-sm"
             x-data
@@ -59,6 +83,11 @@
                th:replace="~{fragment/page/registration-period/registrations :: registrations(${registrations})}"
             ></div>
          </section>
+         <th:block th:if="${form.readonly}">
+            <div
+               th:replace="~{fragment/page/council/result-publication :: result-publication(${form.data})}"
+            ></div>
+         </th:block>
       </th:block>
    </body>
 </html>

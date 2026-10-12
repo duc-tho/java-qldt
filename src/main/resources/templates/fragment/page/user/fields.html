@@ -48,6 +48,8 @@
          <div
             class="form-control flex items-center gap-4 border p-3 rounded-lg border-gray-300"
             th:unless="${form.readonly}"
+            th:classappend="${#fields.hasErrors('roleIds')} ? ' border-error'"
+            x-data="userRoleSelection"
          >
             <span class="label font-bold" th:text="#{users.field.roles}"></span>
             <label class="label justify-start gap-3" th:each="role : ${roles}">
@@ -56,7 +58,9 @@
                   name="roleIds"
                   class="checkbox"
                   th:value="${role.id}"
+                  th:attr="data-role-name=${role.name}"
                   th:checked="${data.roleIds != null and data.roleIds.contains(role.id)}"
+                  x-on:change="select($el)"
                />
                <span
                   class="label-text"
@@ -64,6 +68,11 @@
                ></span>
             </label>
          </div>
+         <span
+            class="text-error text-sm"
+            th:if="${#fields.hasErrors('roleIds')}"
+            th:errors="*{roleIds}"
+         ></span>
 
          <div class="form-control">
             <label class="label" for="email">

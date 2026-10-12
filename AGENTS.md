@@ -1,8 +1,8 @@
 Always response to user with vietnamese and use English when coding
 
-## UI Design Source of Truth
+## UI Guidelines
 
-For every UI, Tailwind, daisyUI, Thymeleaf template, or shared layout task, read and follow the root [`DESIGN.md`](DESIGN.md) before proposing or editing code. It defines QLDT's approved Forest Ledger design system, product hierarchy, shared component contracts, and visual-change boundaries.
+For UI, Tailwind, daisyUI, Thymeleaf template, or shared layout tasks, follow the existing project themes, shared components, and layout conventions. Read the daisyUI skill and relevant component guides before implementing UI changes.
 
 # Master concept
 

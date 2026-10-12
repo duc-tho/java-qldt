@@ -21,8 +21,8 @@ Trong mỗi đợt đăng ký:
 
 - Hệ thống mở cho phép đăng ký đề tài theo đúng thời gian quy định.
 - Các đợt đăng ký được tổ chức theo hai giai đoạn riêng biệt.
-  - Giai đoạn thứ nhất nhằm xây dựng và công bố danh sách đề tài.
-  - Giai đoạn thứ hai cho phép các nhóm SV đăng ký thực hiện một đề tài cụ thể trong danh sách đề tài đã được công bố.
+  - Giai đoạn thứ nhất nhằm xây dựng và duyệt danh sách đề tài.
+  - Giai đoạn thứ hai cho phép các nhóm SV đăng ký thực hiện một đề tài đã được duyệt; danh sách hiển thị khi bắt đầu đăng ký sinh viên.
 
 Trưởng khoa sẽ là người tạo đợt đăng ký bao gồm các thông tin:
 
@@ -40,7 +40,7 @@ Mỗi đề tài thuộc một bộ môn cụ thể, có nội dung rõ ràng v�
 1. SV tham gia thực hiện đề tài theo hình thức nhóm. Mỗi nhóm có tối đa 03 thành viên, trong đó
    có một nhóm trưởng.
 2. Mỗi SV chỉ được tham gia duy nhất một nhóm trong suốt quá trình thực hiện đề tài.
-3. Mỗi nhóm chỉ được đăng ký duy nhất một đề tài từ danh sách đề tài đã được công bố.
+3. Mỗi nhóm chỉ được đăng ký duy nhất một đề tài từ danh sách đề tài đã được duyệt.
 4. Sau khi đăng ký và được chấp thuận, nhóm tiến hành thực hiện đề tài theo sự hướng dẫn của GV
    được phân công.
 5. Việc nộp báo cáo đề tài chỉ được thực hiện bởi nhóm trưởng.

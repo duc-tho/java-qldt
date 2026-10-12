@@ -10,6 +10,8 @@ import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -41,6 +43,10 @@ public class UserService extends BaseCrudService<User, Long> {
 
   public List<User> findAllLecturers() {
     return userRepository.findAllLecturers();
+  }
+
+  public List<User> searchLecturers(String search) {
+    return userRepository.searchLecturers(search == null || search.isBlank() ? null : search.trim(), PageRequest.of(0, 10));
   }
 
   @Override
@@ -96,9 +102,19 @@ public class UserService extends BaseCrudService<User, Long> {
 
   private void assignRoles(User user, Set<Long> roleIds) {
     Set<Role> roles = roleIds == null ? Set.of() : Set.copyOf(roleRepository.findAllById(roleIds));
-    if (roles.size() != (roleIds == null ? 0 : roleIds.size())) {
-      throw new IllegalArgumentException("Role not found");
+    if (roles.size() != (roleIds == null ? 0 : roleIds.size()) || roles.isEmpty()) {
+      throw new IllegalArgumentException("users.validation.roles.invalid");
     }
+
+    Set<String> roleNames = roles.stream().map(Role::getName).collect(Collectors.toSet());
+    boolean validPair =
+        roles.size() == 2
+            && roleNames.contains("ADMIN")
+            && (roleNames.contains("LECTURER") || roleNames.contains("HEAD_OF_FACULTY"));
+    if (roles.size() != 1 && !validPair) {
+      throw new IllegalArgumentException("users.validation.roles.invalid");
+    }
+
     user.setRoles(roles);
   }
 }

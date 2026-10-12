@@ -91,6 +91,25 @@
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
       <a
+         href="/registration-periods"
+         class="flex btn btn-ghost text-left justify-start items-center"
+         th:classappend="${#strings.startsWith(currentPath, '/registration-periods')} ? ' menu-active'"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:calendar-range"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.registration-periods}"
+         ></span>
+      </a>
+   </li>
+   <li
+      sec:authorize="hasRole('LECTURER')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
          href="/topic-registrations"
          class="flex btn btn-ghost text-left justify-start items-center"
          ><span
@@ -101,6 +120,25 @@
          ><span
             class="is-drawer-close:hidden"
             th:text="#{navigation.item.topic-registrations}"
+         ></span
+      ></a>
+   </li>
+   <li
+      sec:authorize="hasRole('LECTURER')"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   >
+      <a
+         href="/council-workspace"
+         class="flex btn btn-ghost text-left justify-start items-center"
+         th:classappend="${#strings.startsWith(currentPath, '/council-workspace')} ? ' menu-active'"
+         ><span
+            class="iconify block shrink-0"
+            data-icon="bi:clipboard2-check"
+            data-width="18"
+         ></span
+         ><span
+            class="is-drawer-close:hidden"
+            th:text="#{navigation.item.council-workspace}"
          ></span
       ></a>
    </li>

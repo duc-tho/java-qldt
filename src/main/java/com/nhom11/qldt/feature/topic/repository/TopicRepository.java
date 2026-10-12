@@ -26,9 +26,21 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
 
   Optional<Topic> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 
+  @Query(
+      """
+      select distinct topic from Topic topic
+      left join fetch topic.department
+      left join fetch topic.advisers
+      where topic.registrationPeriod.id = :periodId
+      order by topic.title
+      """)
+  List<Topic> findAllWithDetailsByRegistrationPeriodId(@Param("periodId") Long periodId);
+
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);
 
   boolean existsByDepartmentId(Long departmentId);
+
+  boolean existsByCouncilId(Long councilId);
 
   @Query(
       """

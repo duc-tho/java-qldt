@@ -15,7 +15,8 @@ public record TableModel<T>(
     List<Integer> pageSizeOptions,
     List<ColumnDef> columns,
     List<ActionDef> actions,
-    boolean bulkDeleteEnabled) {
+    boolean bulkDeleteEnabled,
+    boolean canCreate) {
 
   public List<ColumnDef> searchableColumns() {
     return columns.stream().filter(column -> column.searchable).toList();

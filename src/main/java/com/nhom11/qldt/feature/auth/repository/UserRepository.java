@@ -5,6 +5,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -31,4 +32,7 @@ public interface UserRepository extends BaseRepository<User, Long> {
       order by user.fullName
       """)
   List<User> findAllLecturers();
+
+  @Query("select distinct user from User user join user.roles role where role.name = 'LECTURER' and (:search is null or lower(user.fullName) like lower(concat('%', :search, '%')) or lower(user.userCode) like lower(concat('%', :search, '%'))) order by user.fullName")
+  List<User> searchLecturers(@Param("search") String search, Pageable pageable);
 }

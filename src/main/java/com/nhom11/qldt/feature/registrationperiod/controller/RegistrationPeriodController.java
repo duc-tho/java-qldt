@@ -4,6 +4,8 @@ import com.nhom11.qldt.core.table.TableQuery;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.council.model.dto.PublicationRevocationForm;
+import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.registrationperiod.model.dto.RegistrationPeriodForm;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
@@ -13,6 +15,8 @@ import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -23,6 +27,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/registration-periods")
@@ -35,6 +40,7 @@ public class RegistrationPeriodController {
   private final TopicService topicService;
   private final TopicTableDefinition topicTable;
   private final StudentGroupService studentGroupService;
+  private final CouncilService councilService;
 
   public RegistrationPeriodController(
       RegistrationPeriodService service,
@@ -44,7 +50,8 @@ public class RegistrationPeriodController {
       ClientValidationRuleRenderer validation,
       TopicService topicService,
       TopicTableDefinition topicTable,
-      StudentGroupService studentGroupService) {
+      StudentGroupService studentGroupService,
+      CouncilService councilService) {
     this.service = service;
     this.table = table;
     this.users = users;
@@ -53,6 +60,7 @@ public class RegistrationPeriodController {
     this.topicService = topicService;
     this.topicTable = topicTable;
     this.studentGroupService = studentGroupService;
+    this.councilService = councilService;
   }
 
   @GetMapping
@@ -145,8 +153,9 @@ public class RegistrationPeriodController {
 
     form(
         model, form, "/registration-periods/" + id, true, "registration_periods.page.detail.title");
-    addTopicsTable(model, id, topicQuery);
+    addTopicsTable(model, item, topicQuery);
     addRegistrations(model, id);
+    addResultPublication(model, id);
 
     return "fragment/page/registration-period/detail";
   }
@@ -161,7 +170,7 @@ public class RegistrationPeriodController {
     form.fromEntity(item);
 
     form(model, form, "/registration-periods/" + id, false, "registration_periods.page.edit.title");
-    addTopicsTable(model, id, topicQuery);
+    addTopicsTable(model, item, topicQuery);
     addRegistrations(model, id);
 
     return "fragment/page/registration-period/detail";
@@ -186,7 +195,8 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, id, topicQuery);
+      addTopicsTable(model, old, topicQuery);
+      addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
     }
@@ -203,7 +213,8 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, id, topicQuery);
+      addTopicsTable(model, old, topicQuery);
+      addRegistrations(model, id);
 
       return "fragment/page/registration-period/detail";
     }
@@ -214,8 +225,12 @@ public class RegistrationPeriodController {
   }
 
   @PostMapping("/{id}/delete")
-  public String delete(@PathVariable Long id) {
-    service.delete(id);
+  public String delete(@PathVariable Long id, RedirectAttributes attributes) {
+    try {
+      service.delete(id);
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+    }
 
     return "redirect:/registration-periods";
   }
@@ -242,13 +257,28 @@ public class RegistrationPeriodController {
     service.validationErrors(period).forEach(error -> errors.reject(error.messageCode()));
   }
 
-  private void addTopicsTable(Model model, Long periodId, TableQuery topicQuery) {
+  private void addTopicsTable(Model model, RegistrationPeriod period, TableQuery topicQuery) {
+    Long periodId = period.getId();
     view.table(
         model,
         topicService.findAllByRegistrationPeriodId(periodId, topicQuery, topicTable),
         "/registration-periods/" + periodId + "/topics",
         topicQuery,
         topicTable);
+
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    LocalDateTime now = LocalDateTime.now();
+    boolean isLecturerRegistrationOpen =
+        !now.isBefore(period.getLecturerRegistrationStart())
+            && !now.isAfter(period.getLecturerRegistrationEnd());
+    boolean canCreateTopic =
+        authentication != null
+            && authentication.getAuthorities().stream()
+                .anyMatch(authority ->
+                    authority.getAuthority().equals("ROLE_ADMIN")
+                        || (authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY")
+                            && isLecturerRegistrationOpen));
+    model.addAttribute("tableCanCreate", canCreateTopic);
   }
 
   private String periodSelection(Model model, String target) {
@@ -261,5 +291,12 @@ public class RegistrationPeriodController {
 
   private void addRegistrations(Model model, Long periodId) {
     model.addAttribute("registrations", studentGroupService.registrations(periodId));
+  }
+
+  private void addResultPublication(Model model, Long periodId) {
+    model.addAttribute("latestPublication", councilService.latestPublication(periodId));
+    model.addAttribute("publicationHistory", councilService.publicationHistory(periodId));
+    model.addAttribute("canPublishResults", councilService.canPublishResults(periodId));
+    model.addAttribute("revocationForm", new PublicationRevocationForm());
   }
 }

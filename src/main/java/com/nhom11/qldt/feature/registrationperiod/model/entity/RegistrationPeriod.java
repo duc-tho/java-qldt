@@ -25,7 +25,6 @@ public class RegistrationPeriod extends SoftDeleteEntity {
 
   private LocalDateTime lecturerRegistrationStart;
   private LocalDateTime lecturerRegistrationEnd;
-  private LocalDateTime topicPublicationAt;
   private LocalDateTime studentRegistrationStart;
   private LocalDateTime studentRegistrationEnd;
   private LocalDateTime reportDeadline;

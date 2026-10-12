@@ -1,0 +1,78 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <a class="btn btn-outline btn-sm" th:href="@{/registration-periods/{id}(id=${period.id})}">
+            <span class="iconify" data-icon="bi:arrow-left"></span>
+            <span th:text="#{crud.form.back}"></span>
+         </a>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <section class="space-y-6">
+            <div>
+               <p class="text-sm text-base-content/60" th:text="${period.name}"></p>
+               <h2 class="text-xl font-semibold" th:text="#{reviewer-assignments.section.title}"></h2>
+               <p class="mt-1 text-sm text-base-content/60" th:text="#{reviewer-assignments.description}"></p>
+            </div>
+
+            <div role="alert" class="alert alert-error alert-soft" th:if="${error != null}">
+               <span class="iconify" data-icon="bi:exclamation-circle"></span>
+               <span th:text="#{__${error}__}"></span>
+            </div>
+
+            <div role="alert" class="alert alert-info alert-soft" th:unless="${managementOpen}">
+               <span class="iconify" data-icon="bi:info-circle"></span>
+               <span th:text="#{reviewer-assignments.management-closed}"></span>
+            </div>
+
+            <div role="alert" class="alert alert-info alert-soft" th:if="${#lists.isEmpty(topics)}">
+               <span class="iconify" data-icon="bi:info-circle"></span>
+               <span th:text="#{reviewer-assignments.empty}"></span>
+            </div>
+
+            <div class="overflow-x-auto rounded-box border border-base-300" th:unless="${#lists.isEmpty(topics)}">
+               <table class="table table-sm">
+                  <thead class="bg-base-200">
+                     <tr>
+                        <th th:text="#{councils.column.topic}"></th>
+                        <th th:text="#{topics.field.advisers}"></th>
+                        <th th:text="#{reviewer-assignments.field.reviewer}"></th>
+                        <th class="text-right" th:if="${managementOpen}" th:text="#{crud.table.actions}"></th>
+                     </tr>
+                  </thead>
+                  <tbody>
+                     <tr th:each="topic : ${topics}">
+                        <td class="font-medium" th:text="${topic.title}"></td>
+                        <td>
+                           <span th:each="adviser, status : ${topic.advisers}">
+                              <span th:text="${adviser.fullName}"></span><span th:unless="${status.last}">, </span>
+                           </span>
+                        </td>
+                        <td th:text="${topic.reviewer != null ? topic.reviewer.fullName : '—'}"></td>
+                        <td class="text-right" th:if="${managementOpen}">
+                           <form class="flex justify-end gap-2" method="post" th:action="@{/registration-periods/{periodId}/reviewer-assignments/topics/{topicId}(periodId=${period.id},topicId=${topic.id})}">
+                              <select class="select select-sm" name="reviewerId" required>
+                                 <option value="" th:text="#{reviewer-assignments.select-reviewer}"></option>
+                                 <option
+                                    th:each="lecturer : ${lecturers}"
+                                    th:value="${lecturer.id}"
+                                    th:text="${lecturer.fullName}"
+                                    th:selected="${topic.reviewer != null and topic.reviewer.id == lecturer.id}"
+                                    th:disabled="${topic.advisers.contains(lecturer)}"
+                                 ></option>
+                              </select>
+                              <button class="btn btn-primary btn-sm" type="submit">
+                                 <span class="iconify" data-icon="bi:person-check"></span>
+                                 <span th:text="#{reviewer-assignments.action.assign}"></span>
+                              </button>
+                           </form>
+                        </td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+         </section>
+      </th:block>
+   </body>
+</html>

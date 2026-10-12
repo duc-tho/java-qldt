@@ -44,9 +44,9 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     List<RegistrationPeriodValidationError> errors = new ArrayList<>();
 
     if (period.getLecturerRegistrationStart().isAfter(period.getLecturerRegistrationEnd())
-        || !period.getLecturerRegistrationEnd().isBefore(period.getTopicPublicationAt())
-        || !period.getTopicPublicationAt().isBefore(period.getStudentRegistrationStart())
-        || period.getStudentRegistrationStart().isAfter(period.getStudentRegistrationEnd())) {
+        || !period.getLecturerRegistrationEnd().isBefore(period.getStudentRegistrationStart())
+        || period.getStudentRegistrationStart().isAfter(period.getStudentRegistrationEnd())
+        || !period.getStudentRegistrationEnd().isBefore(period.getReportDeadline())) {
       errors.add(RegistrationPeriodValidationError.TIMELINE);
     }
 
@@ -54,18 +54,19 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
         period.getPeriodType() == PeriodType.TLCN || period.getPeriodType() == PeriodType.KLTN;
 
     if (reviewerRequired != (period.getReviewerDeadline() != null)
-        || period.getPeriodType() == PeriodType.KLTN
+        || reviewerRequired
             && period.getReviewerDeadline() != null
-            && !period.getStudentRegistrationEnd().isBefore(period.getReviewerDeadline())) {
+            && period.getReportDeadline().isAfter(period.getReviewerDeadline())) {
       errors.add(RegistrationPeriodValidationError.REVIEWER_DEADLINE);
     }
 
     boolean councilRequired = period.getPeriodType() == PeriodType.KLTN;
     if (councilRequired != (period.getCouncilDate() != null)
         || councilRequired
-            && (!period.getStudentRegistrationEnd().isBefore(period.getCouncilDate())
+            && (period.getCouncilDate() == null
+                || !period.getReportDeadline().isBefore(period.getCouncilDate())
                 || period.getReviewerDeadline() == null
-                || !period.getReviewerDeadline().isBefore(period.getCouncilDate()))) {
+                || period.getCouncilDate().isAfter(period.getReviewerDeadline()))) {
       errors.add(RegistrationPeriodValidationError.COUNCIL_DATE);
     }
 

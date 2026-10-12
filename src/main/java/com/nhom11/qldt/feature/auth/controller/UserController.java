@@ -11,6 +11,7 @@ import com.nhom11.qldt.feature.auth.view.UserTableDefinition;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/users")
@@ -111,36 +113,39 @@ public class UserController {
               "users.validation.password.required", null, LocaleContextHolder.getLocale()));
     }
 
-    if (bindingResult.hasErrors()) {
-      Map<String, String> validationRules =
-          validationRuleRenderer.render(
-              UserForm.class,
-              Map.of(
-                  "password",
-                  ClientValidationRuleRenderer.createPasswordRule(
-                      messageSource.getMessage(
-                          "users.validation.password.required",
-                          null,
-                          LocaleContextHolder.getLocale()))));
-      crudView.form(
-          model,
-          form,
-          BASE_URL,
-          FORM_METHOD_POST,
-          BASE_URL,
-          false,
-          TEMPLATE_USER_FIELDS,
-          validationRules);
-
-      model.addAttribute("pageTitle", "users.page.create.title");
-      model.addAttribute("pageIcon", "bi:person-plus");
-
-      return VIEW_USER_CREATE;
+    if (!bindingResult.hasErrors()) {
+      try {
+        userService.create(form.toEntity(), form.getRoleIds());
+        return "redirect:" + BASE_URL;
+      } catch (IllegalArgumentException exception) {
+        bindingResult.rejectValue("roleIds", exception.getMessage());
+      }
     }
 
-    userService.create(form.toEntity(), form.getRoleIds());
+    Map<String, String> validationRules =
+        validationRuleRenderer.render(
+            UserForm.class,
+            Map.of(
+                "password",
+                ClientValidationRuleRenderer.createPasswordRule(
+                    messageSource.getMessage(
+                        "users.validation.password.required",
+                        null,
+                        LocaleContextHolder.getLocale()))));
+    crudView.form(
+        model,
+        form,
+        BASE_URL,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
 
-    return "redirect:" + BASE_URL;
+    model.addAttribute("pageTitle", "users.page.create.title");
+    model.addAttribute("pageIcon", "bi:person-plus");
+
+    return VIEW_USER_CREATE;
   }
 
   @GetMapping("/{id}")
@@ -209,46 +214,60 @@ public class UserController {
       return "redirect:" + BASE_URL;
     }
 
-    if (bindingResult.hasErrors()) {
-      Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
-      crudView.form(
-          model,
-          form,
-          BASE_URL + "/" + id,
-          FORM_METHOD_POST,
-          BASE_URL,
-          false,
-          TEMPLATE_USER_FIELDS,
-          validationRules);
-
-      model.addAttribute("pageTitle", "users.page.edit.title");
-      model.addAttribute("pageIcon", "bi:person");
-
-      return VIEW_USER_DETAIL;
+    if (!bindingResult.hasErrors()) {
+      User updates = form.toEntity();
+      updates.setId(id);
+      try {
+        userService.update(updates, form.getRoleIds());
+        return "redirect:" + BASE_URL + "/" + id;
+      } catch (IllegalArgumentException exception) {
+        bindingResult.rejectValue("roleIds", exception.getMessage());
+      }
     }
 
-    User updates = form.toEntity();
-    updates.setId(id);
-    userService.update(updates, form.getRoleIds());
-    return "redirect:" + BASE_URL + "/" + id;
+    Map<String, String> validationRules = validationRuleRenderer.render(UserForm.class);
+    crudView.form(
+        model,
+        form,
+        BASE_URL + "/" + id,
+        FORM_METHOD_POST,
+        BASE_URL,
+        false,
+        TEMPLATE_USER_FIELDS,
+        validationRules);
+
+    model.addAttribute("pageTitle", "users.page.edit.title");
+    model.addAttribute("pageIcon", "bi:person");
+
+    return VIEW_USER_DETAIL;
   }
 
   @PostMapping("/{id}/delete")
-  public String delete(@PathVariable Long id, @RequestParam(defaultValue = "0") int force) {
-
-    if (force == FORCE_DELETE_PERMANENTLY) {
-      userService.deletePermanently(id);
-    } else {
-      userService.delete(id);
+  public String delete(
+      @PathVariable Long id,
+      @RequestParam(defaultValue = "0") int force,
+      RedirectAttributes attributes) {
+    try {
+      if (force == FORCE_DELETE_PERMANENTLY) {
+        userService.deletePermanently(id);
+      } else {
+        userService.delete(id);
+      }
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
 
     return "redirect:" + BASE_URL;
   }
 
   @PostMapping("/delete")
-  public String batchDelete(@RequestParam("ids") List<Long> ids) {
-
-    userService.softDeleteAll(ids);
+  public String batchDelete(
+      @RequestParam("ids") List<Long> ids, RedirectAttributes attributes) {
+    try {
+      userService.softDeleteAll(ids);
+    } catch (DataIntegrityViolationException exception) {
+      attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
+    }
 
     return "redirect:" + BASE_URL;
   }

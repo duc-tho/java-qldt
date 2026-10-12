@@ -75,7 +75,7 @@
                   <div
                      role="alert"
                      class="alert alert-warning"
-                     th:unless="${isOpen}"
+                     th:if="${isPending and !isOpen}"
                      th:text="#{student-groups.locked}"
                   ></div>
                </div>
@@ -109,8 +109,9 @@
                         th:text="#{topic-registrations.action.reject}"
                      ></button
                      ><button
+                        type="button"
                         class="btn"
-                        formmethod="dialog"
+                        onclick="reject_registration.close()"
                         th:text="#{crud.form.cancel}"
                      ></button>
                   </div>
