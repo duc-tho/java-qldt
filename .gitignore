@@ -46,3 +46,6 @@ yeu_cau
 skills-lock.json
 .claude
 .codegraph
+
+# ignore static resources
+src\main\resources\static
