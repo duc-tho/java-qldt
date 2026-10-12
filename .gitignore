@@ -48,4 +48,4 @@ skills-lock.json
 .codegraph
 
 # ignore static resources
-src\main\resources\static
+src/main/resources/static
