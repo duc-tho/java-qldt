@@ -7,10 +7,12 @@
          x-init="periodType = $el.querySelector('#periodType').value"
       >
          <fieldset class="fieldset">
-            <legend
-               class="fieldset-legend"
-               th:text="#{registration-periods.section.general}"
-            ></legend>
+            <legend class="fieldset-legend">
+               <span th:text="#{registration-periods.section.general}"></span>
+               <span class="tooltip tooltip-right ml-1" tabindex="0" th:attr="data-tip=#{registration-periods.help.stages}" th:aria-label="#{registration-periods.help.stages}">
+                  <span class="iconify text-primary" data-icon="bi:exclamation-circle"></span>
+               </span>
+            </legend>
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
                <div class="form-control">
                   <label
@@ -24,6 +26,7 @@
                      class="input w-full"
                      th:classappend="${#fields.hasErrors('name')} ? ' input-error'"
                      th:field="*{name}"
+                     th:placeholder="#{registration-periods.placeholder.name}"
                      th:readonly="${form.readonly}"
                      th:attr="validate-data=${form.validationRules.name}"
                   />
@@ -50,7 +53,7 @@
                      th:disabled="${form.readonly}"
                      th:attr="validate-data=${form.validationRules.periodType}"
                   >
-                     <option value=""></option>
+                     <option value="" th:text="#{registration-periods.placeholder.type}"></option>
                      <option
                         th:each="type : ${periodTypes}"
                         th:value="${type}"
@@ -77,11 +80,12 @@
                   th:each="field : ${ {'lecturerRegistrationStart', 'lecturerRegistrationEnd', 'studentRegistrationStart', 'studentRegistrationEnd'} }"
                >
                   <div class="form-control">
-                     <label
-                        class="label"
-                        th:for="${field}"
-                        th:text="#{registration-periods.field.__${field}__}"
-                     ></label>
+                     <div class="flex items-center gap-1">
+                        <label class="label" th:for="${field}" th:text="#{registration-periods.field.__${field}__}"></label>
+                        <span class="tooltip tooltip-right" tabindex="0" th:attr="data-tip=#{registration-periods.help.__${field}__}" th:aria-label="#{registration-periods.help.__${field}__}">
+                           <span class="iconify text-primary" data-icon="bi:exclamation-circle"></span>
+                        </span>
+                     </div>
                      <input
                         type="text"
                         readonly
@@ -116,11 +120,12 @@
                      class="form-control"
                      th:attr="x-show=${field == 'reviewerDeadline'} ? 'periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;' : (${field == 'councilDate'} ? 'periodType === &quot;KLTN&quot;' : null)"
                   >
-                     <label
-                        class="label"
-                        th:for="${field}"
-                        th:text="#{registration-periods.field.__${field}__}"
-                     ></label>
+                     <div class="flex items-center gap-1">
+                        <label class="label" th:for="${field}" th:text="#{registration-periods.field.__${field}__}"></label>
+                        <span class="tooltip tooltip-right" tabindex="0" th:attr="data-tip=#{registration-periods.help.__${field}__}" th:aria-label="#{registration-periods.help.__${field}__}">
+                           <span class="iconify text-primary" data-icon="bi:exclamation-circle"></span>
+                        </span>
+                     </div>
                      <input
                         type="text"
                         readonly

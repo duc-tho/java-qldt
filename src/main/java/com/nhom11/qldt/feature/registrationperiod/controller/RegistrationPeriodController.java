@@ -5,6 +5,7 @@ import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.model.dto.PublicationRevocationForm;
+import com.nhom11.qldt.feature.council.model.enums.ResultPublicationAction;
 import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.registrationperiod.model.dto.RegistrationPeriodForm;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
@@ -69,6 +70,7 @@ public class RegistrationPeriodController {
 
     view.table(model, data, "/registration-periods", query, table);
     model.addAttribute("pageTitle", "registration_periods.page.list.title");
+    model.addAttribute("pageDesc", "registration_periods.page.list.description");
     model.addAttribute("pageIcon", "bi:calendar-range");
 
     return "fragment/page/registration-period/list";
@@ -102,7 +104,7 @@ public class RegistrationPeriodController {
     if (period == null) return "redirect:/registration-periods/groups";
 
     model.addAttribute("period", period);
-    model.addAttribute("registrations", studentGroupService.registrations(id));
+    model.addAttribute("groupSummaries", studentGroupService.groupSummaries(id));
     model.addAttribute("pageTitle", "student-groups.page.list.title");
     model.addAttribute("pageIcon", "bi:people");
     model.addAttribute("breadcrumbParentUrl", "/registration-periods/" + id);
@@ -156,12 +158,14 @@ public class RegistrationPeriodController {
     addTopicsTable(model, item, topicQuery);
     addRegistrations(model, id);
     addResultPublication(model, id);
+    addPeriodOverview(model, item);
+    model.addAttribute("pageHeading", item.getName());
 
     return "fragment/page/registration-period/detail";
   }
 
   @GetMapping("/{id}/edit")
-  public String edit(@PathVariable Long id, @ModelAttribute TableQuery topicQuery, Model model) {
+  public String edit(@PathVariable Long id, Model model) {
     RegistrationPeriod item = service.findById(id);
 
     if (item == null) return "redirect:/registration-periods";
@@ -170,8 +174,6 @@ public class RegistrationPeriodController {
     form.fromEntity(item);
 
     form(model, form, "/registration-periods/" + id, false, "registration_periods.page.edit.title");
-    addTopicsTable(model, item, topicQuery);
-    addRegistrations(model, id);
 
     return "fragment/page/registration-period/detail";
   }
@@ -181,7 +183,6 @@ public class RegistrationPeriodController {
       @PathVariable Long id,
       @Valid @ModelAttribute("data") RegistrationPeriodForm form,
       BindingResult errors,
-      @ModelAttribute TableQuery topicQuery,
       Model model) {
 
     RegistrationPeriod old = service.findById(id);
@@ -195,9 +196,6 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, old, topicQuery);
-      addRegistrations(model, id);
-
       return "fragment/page/registration-period/detail";
     }
 
@@ -213,9 +211,6 @@ public class RegistrationPeriodController {
           "/registration-periods/" + id,
           false,
           "registration_periods.page.edit.title");
-      addTopicsTable(model, old, topicQuery);
-      addRegistrations(model, id);
-
       return "fragment/page/registration-period/detail";
     }
 
@@ -243,14 +238,17 @@ public class RegistrationPeriodController {
         action,
         "post",
         "/registration-periods",
-        "w-full max-w-4xl mx-auto",
+        "w-full",
         readonly,
         "fragment/page/registration-period/fields",
         validation.render(RegistrationPeriodForm.class));
 
     model.addAttribute("periodTypes", PeriodType.values());
     model.addAttribute("pageTitle", pageTitle);
+    model.addAttribute("pageDesc", pageTitle.replace(".title", ".description"));
     model.addAttribute("pageIcon", "bi:calendar-range");
+    model.addAttribute("breadcrumbParentUrl", "/registration-periods");
+    model.addAttribute("breadcrumbParentLabel", "registration_periods.page.list.title");
   }
 
   private void addBusinessValidationErrors(RegistrationPeriod period, BindingResult errors) {
@@ -290,13 +288,69 @@ public class RegistrationPeriodController {
   }
 
   private void addRegistrations(Model model, Long periodId) {
-    model.addAttribute("registrations", studentGroupService.registrations(periodId));
+    model.addAttribute("groupSummaries", studentGroupService.groupSummaries(periodId));
   }
 
   private void addResultPublication(Model model, Long periodId) {
-    model.addAttribute("latestPublication", councilService.latestPublication(periodId));
+    var latestPublication = councilService.latestPublication(periodId);
+    model.addAttribute("latestPublication", latestPublication);
+    model.addAttribute(
+        "resultsPublished",
+        latestPublication != null && latestPublication.getAction() == ResultPublicationAction.PUBLISHED);
     model.addAttribute("publicationHistory", councilService.publicationHistory(periodId));
     model.addAttribute("canPublishResults", councilService.canPublishResults(periodId));
     model.addAttribute("revocationForm", new PublicationRevocationForm());
+  }
+
+  private void addPeriodOverview(Model model, RegistrationPeriod period) {
+    LocalDateTime now = LocalDateTime.now();
+    model.addAttribute("period", period);
+    model.addAttribute("periodStage", service.stage(period, now));
+    model.addAttribute("now", now);
+    int currentStep;
+    if (now.isBefore(period.getLecturerRegistrationStart())) {
+      currentStep = 1;
+    } else if (now.isBefore(period.getStudentRegistrationStart())) {
+      currentStep = 2;
+    } else if (now.isBefore(period.getStudentRegistrationEnd())) {
+      currentStep = 3;
+    } else if (now.isBefore(period.getReportDeadline())) {
+      currentStep = 4;
+    } else {
+      currentStep = 0;
+    }
+    model.addAttribute("currentStep", currentStep);
+    if (now.isBefore(period.getLecturerRegistrationStart())) {
+      model.addAttribute("nextDeadline", period.getLecturerRegistrationStart());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.proposal-open");
+    } else if (now.isBefore(period.getLecturerRegistrationEnd())) {
+      model.addAttribute("nextDeadline", period.getLecturerRegistrationEnd());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.proposal");
+    } else if (now.isBefore(period.getStudentRegistrationStart())) {
+      model.addAttribute("nextDeadline", period.getStudentRegistrationStart());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.student-open");
+    } else if (now.isBefore(period.getStudentRegistrationEnd())) {
+      model.addAttribute("nextDeadline", period.getStudentRegistrationEnd());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.student");
+    } else if (now.isBefore(period.getReportDeadline())) {
+      model.addAttribute("nextDeadline", period.getReportDeadline());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.report");
+    } else if (period.getCouncilDate() != null && now.isBefore(period.getCouncilDate())) {
+      model.addAttribute("nextDeadline", period.getCouncilDate());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.council");
+    } else if (period.getReviewerDeadline() != null
+        && now.isBefore(period.getReviewerDeadline())) {
+      model.addAttribute("nextDeadline", period.getReviewerDeadline());
+      model.addAttribute("nextDeadlineLabel", "registration_periods.deadline.review");
+    }
+    if (period.getPeriodType() == PeriodType.KLTN) {
+      var councils = councilService.councils(period.getId());
+      model.addAttribute("councils", councils);
+      model.addAttribute("councilSummaries", councilService.councilSummaries(period.getId(), councils));
+      model.addAttribute("councilCount", councils.size());
+      model.addAttribute("evaluationAssignmentOpen", councilService.isCouncilManagementOpen(period.getId()));
+    } else if (period.getPeriodType() == PeriodType.TLCN) {
+      model.addAttribute("evaluationAssignmentOpen", councilService.isReviewerAssignmentOpen(period.getId()));
+    }
   }
 }

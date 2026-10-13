@@ -8,30 +8,38 @@ import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.department.model.entity.Department;
 import com.nhom11.qldt.feature.department.repository.DepartmentRepository;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodStage;
+import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class TopicService extends BaseCrudService<Topic, Long> {
+  public static final String REGISTRATION_STAGE_CLOSED = "topics.error.lecturer-registration-closed";
 
   private final TopicRepository topicRepository;
   private final DepartmentRepository departmentRepository;
   private final UserRepository userRepository;
+  private final RegistrationPeriodService registrationPeriodService;
 
   public TopicService(
       TopicRepository topicRepository,
       DepartmentRepository departmentRepository,
-      UserRepository userRepository) {
+      UserRepository userRepository,
+      RegistrationPeriodService registrationPeriodService) {
     this.topicRepository = topicRepository;
     this.departmentRepository = departmentRepository;
     this.userRepository = userRepository;
+    this.registrationPeriodService = registrationPeriodService;
   }
 
   @Override
@@ -102,6 +110,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       Long departmentId,
       Set<Long> adviserIds) {
     Topic existing = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
+    requireLecturerRegistrationOpen(existing.getRegistrationPeriod());
     requireProposalOwner(existing, proposer);
     assignRelations(topic, existing.getRegistrationPeriod(), departmentId, adviserIds);
     topic.setId(existing.getId());
@@ -114,6 +123,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   @Transactional
   public void deleteProposal(Long topicId, Long periodId, User proposer) {
     Topic topic = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
+    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
     requireProposalOwner(topic, proposer);
     topicRepository.softDelete(topic);
   }
@@ -124,6 +134,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         topicRepository
             .findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
     if (topic.getStatus() != TopicStatus.PROPOSED) {
       throw new IllegalArgumentException("topics.error.approval-state");
     }
@@ -137,6 +148,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         topicRepository
             .findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
     if (topic.getStatus() != TopicStatus.PROPOSED) {
       throw new IllegalArgumentException("topics.error.rejection-state");
     }
@@ -165,6 +177,12 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       return;
     }
 
+    RegistrationPeriod period = registrationPeriodService.findById(registrationPeriodId);
+    if (period == null) {
+      throw new IllegalArgumentException("topics.error.not-found");
+    }
+    requireLecturerRegistrationOpen(period);
+
     topicRepository.softDeleteAll(
         topicRepository.findAllByIdInAndRegistrationPeriodId(ids, registrationPeriodId));
   }
@@ -179,10 +197,16 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     validateRegistrationPeriod(topic);
   }
 
+  @Override
+  protected void beforeDelete(Topic topic) {
+    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
+  }
+
   private void validateRegistrationPeriod(Topic topic) {
     if (topic.getRegistrationPeriod() == null) {
       throw new IllegalArgumentException("Topic registration period is required");
     }
+    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
   }
 
   private void assignRelations(
@@ -208,11 +232,31 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     }
   }
 
+  public boolean isTopicManagementAllowed(RegistrationPeriod registrationPeriod) {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    boolean isAdmin =
+        authentication != null
+            && authentication.getAuthorities().stream()
+                .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
+    return isAdmin
+        || registrationPeriodService.stage(registrationPeriod, LocalDateTime.now())
+            == RegistrationPeriodStage.TOPIC_PROPOSAL;
+  }
+
+  public boolean canManageTopicsAsStaff(RegistrationPeriod registrationPeriod) {
+    var authentication = SecurityContextHolder.getContext().getAuthentication();
+    return authentication != null
+        && authentication.getAuthorities().stream()
+            .anyMatch(
+                authority ->
+                    authority.getAuthority().equals("ROLE_ADMIN")
+                        || authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY"))
+        && isTopicManagementAllowed(registrationPeriod);
+  }
+
   private void requireLecturerRegistrationOpen(RegistrationPeriod registrationPeriod) {
-    java.time.LocalDateTime now = java.time.LocalDateTime.now();
-    if (now.isBefore(registrationPeriod.getLecturerRegistrationStart())
-        || now.isAfter(registrationPeriod.getLecturerRegistrationEnd())) {
-      throw new IllegalArgumentException("topics.error.lecturer-registration-closed");
+    if (!isTopicManagementAllowed(registrationPeriod)) {
+      throw new IllegalArgumentException(REGISTRATION_STAGE_CLOSED);
     }
   }
 

@@ -35,7 +35,7 @@
                      <li th:if="${breadcrumbParentUrl != null}">
                         <a
                            th:href="${breadcrumbParentUrl}"
-                           th:text="${breadcrumbParentLabel}"
+                           th:text="${#messages.msgOrNull(breadcrumbParentLabel) ?: breadcrumbParentLabel}"
                         ></a>
                      </li>
                      <li th:text="${#messages.msg(pageTitle)}"></li>
@@ -45,35 +45,41 @@
             <div
                class="flex flex-wrap items-center justify-between gap-4 gap-y-3"
             >
-               <div class="flex items-center gap-3">
-                  <div
-                     th:if="${pageIcon}"
-                     class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
-                  >
-                     <span
-                        class="iconify"
-                        th:attr="data-icon=${pageIcon}"
-                        data-width="22"
-                     ></span>
-                  </div>
-                  <div>
-                     <div class="flex items-center gap-2">
-                        <h1
-                           class="text-2xl font-bold"
-                           th:text="${#messages.msg(pageTitle)}"
-                        ></h1>
+               <div class="min-w-0">
+                  <div class="flex items-center gap-3">
+                     <div
+                        th:if="${pageIcon}"
+                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
+                     >
                         <span
-                           th:if="${table != null}"
-                           class="badge badge-primary badge-soft"
-                           th:text="${table.data.totalElements}"
+                           class="iconify"
+                           th:attr="data-icon=${pageIcon}"
+                           data-width="22"
                         ></span>
                      </div>
-                     <p
-                        th:if="${pageDesc}"
-                        class="mt-1 text-sm text-base-content/60"
-                        th:text="${#messages.msg(pageDesc)}"
-                     ></p>
+                     <div>
+                        <div class="flex items-center gap-2">
+                           <h1
+                              class="text-2xl font-bold"
+                              th:text="${pageHeading != null ? pageHeading : #messages.msg(pageTitle)}"
+                           ></h1>
+                           <span
+                              th:if="${table != null}"
+                              class="badge badge-primary badge-soft"
+                              th:with="countUnit=${#messages.msgOrNull(pageTitle.replace('.title', '.unit'))}"
+                              th:text="|${table.data.totalElements} ${countUnit != null ? countUnit : #messages.msg('page.count.default')}|"
+                           ></span>
+                        </div>
+                        <th:block th:with="descriptionKey=${pageDesc != null ? pageDesc : pageTitle.replace('.title', '.description')}">
+                           <p
+                              th:if="${#messages.msgOrNull(descriptionKey) != null}"
+                              class="mt-1 text-sm text-base-content/60"
+                              th:text="${#messages.msg(descriptionKey)}"
+                           ></p>
+                        </th:block>
+                     </div>
                   </div>
+                  <th:block layout:fragment="page-meta"></th:block>
                </div>
 
                <div class="flex items-center gap-2">

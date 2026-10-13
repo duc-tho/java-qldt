@@ -4,6 +4,8 @@ import com.nhom11.qldt.core.table.ActionDef;
 import com.nhom11.qldt.core.table.BaseTableDefinition;
 import com.nhom11.qldt.core.table.ColumnDef;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -14,9 +16,12 @@ import org.springframework.stereotype.Component;
 public class RegistrationPeriodTableDefinition extends BaseTableDefinition<RegistrationPeriod> {
 
   private final MessageSource messageSource;
+  private final RegistrationPeriodService service;
 
-  public RegistrationPeriodTableDefinition(MessageSource messageSource) {
+  public RegistrationPeriodTableDefinition(
+      MessageSource messageSource, RegistrationPeriodService service) {
     this.messageSource = messageSource;
+    this.service = service;
   }
 
   @Override
@@ -42,7 +47,14 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
             item -> periodTypeLabel((RegistrationPeriod) item),
             false,
             false,
-            true));
+            true),
+        new ColumnDef(
+            "stage",
+            "registration_periods.column.stage",
+            item -> stageLabel((RegistrationPeriod) item),
+            false,
+            false,
+            false));
   }
 
   @Override
@@ -55,6 +67,10 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
               item -> baseUrl + "/" + ((RegistrationPeriod) item).getId()));
     }
     return List.of(
+        new ActionDef.Link(
+            "registration_periods.action.view",
+            "bi:eye",
+            item -> baseUrl + "/" + ((RegistrationPeriod) item).getId()),
         new ActionDef.Link(
             "registration_periods.action.edit",
             "bi:pencil-square",
@@ -82,5 +98,12 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
   private String periodTypeLabel(RegistrationPeriod period) {
     return messageSource.getMessage(
         "period-types." + period.getPeriodType().name(), null, LocaleContextHolder.getLocale());
+  }
+
+  private String stageLabel(RegistrationPeriod period) {
+    return messageSource.getMessage(
+        "registration_periods.stage." + service.stage(period, LocalDateTime.now()).name(),
+        null,
+        LocaleContextHolder.getLocale());
   }
 }

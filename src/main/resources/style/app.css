@@ -93,6 +93,10 @@
 }
 
 @layer utilities {
+  .table thead {
+    background-color: color-mix(in oklab, var(--color-primary) 8%, var(--color-base-100));
+  }
+
   .sidebar-toggle-closed {
     display: none;
   }

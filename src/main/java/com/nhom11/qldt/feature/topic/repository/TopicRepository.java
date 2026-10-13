@@ -11,6 +11,9 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TopicRepository extends BaseRepository<Topic, Long> {
+  @Query("select topic.council.id, count(topic) from Topic topic where topic.registrationPeriod.id = :periodId and topic.council is not null group by topic.council.id")
+  List<Object[]> countByCouncilInPeriod(@Param("periodId") Long periodId);
+
   @Query(
       """
       select topic from Topic topic

@@ -2,9 +2,12 @@ package com.nhom11.qldt.feature.registrationperiod.service;
 
 import com.nhom11.qldt.core.repository.BaseRepository;
 import com.nhom11.qldt.core.service.BaseCrudService;
+import com.nhom11.qldt.feature.council.model.enums.ResultPublicationAction;
+import com.nhom11.qldt.feature.council.repository.ResultPublicationRepository;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
 import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodValidationError;
+import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodStage;
 import com.nhom11.qldt.feature.registrationperiod.repository.RegistrationPeriodRepository;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -14,9 +17,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class RegistrationPeriodService extends BaseCrudService<RegistrationPeriod, Long> {
   private final RegistrationPeriodRepository repository;
+  private final ResultPublicationRepository publicationRepository;
 
-  public RegistrationPeriodService(RegistrationPeriodRepository repository) {
+  public RegistrationPeriodService(
+      RegistrationPeriodRepository repository, ResultPublicationRepository publicationRepository) {
     this.repository = repository;
+    this.publicationRepository = publicationRepository;
   }
 
   @Override
@@ -43,9 +49,9 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
   public List<RegistrationPeriodValidationError> validationErrors(RegistrationPeriod period) {
     List<RegistrationPeriodValidationError> errors = new ArrayList<>();
 
-    if (period.getLecturerRegistrationStart().isAfter(period.getLecturerRegistrationEnd())
+    if (!period.getLecturerRegistrationStart().isBefore(period.getLecturerRegistrationEnd())
         || !period.getLecturerRegistrationEnd().isBefore(period.getStudentRegistrationStart())
-        || period.getStudentRegistrationStart().isAfter(period.getStudentRegistrationEnd())
+        || !period.getStudentRegistrationStart().isBefore(period.getStudentRegistrationEnd())
         || !period.getStudentRegistrationEnd().isBefore(period.getReportDeadline())) {
       errors.add(RegistrationPeriodValidationError.TIMELINE);
     }
@@ -83,5 +89,25 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
 
   public List<RegistrationPeriod> findAll() {
     return repository.findAll();
+  }
+
+  public RegistrationPeriodStage stage(RegistrationPeriod period, LocalDateTime now) {
+    if (now.isBefore(period.getLecturerRegistrationStart())) {
+      return RegistrationPeriodStage.UPCOMING;
+    }
+    if (!now.isAfter(period.getLecturerRegistrationEnd())) {
+      return RegistrationPeriodStage.TOPIC_PROPOSAL;
+    }
+    if (now.isBefore(period.getStudentRegistrationStart())) {
+      return RegistrationPeriodStage.AWAITING_STUDENT_REGISTRATION;
+    }
+    if (now.isBefore(period.getReportDeadline())) {
+      return RegistrationPeriodStage.TOPIC_EXECUTION;
+    }
+    return publicationRepository
+        .findFirstByRegistrationPeriodIdOrderByIdDesc(period.getId())
+        .filter(publication -> publication.getAction() == ResultPublicationAction.PUBLISHED)
+        .map(publication -> RegistrationPeriodStage.CLOSED)
+        .orElse(RegistrationPeriodStage.EVALUATION_AND_PUBLICATION);
   }
 }

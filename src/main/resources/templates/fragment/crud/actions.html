@@ -4,7 +4,7 @@
       <div class="flex items-center justify-end gap-1">
          <th:block th:each="action, actionStat : ${actions}">
             <th:block
-               th:if="${actionStat.count <= 3 and action.isVisible(item)}"
+               th:if="${actionStat.count <= T(com.nhom11.qldt.core.table.ActionDef).INLINE_ACTION_LIMIT and action.isVisible(item)}"
             >
                <button
                   th:if="${action.isPost()}"
@@ -75,7 +75,7 @@
          </th:block>
 
          <div
-            th:if="${#lists.size(actions) > 3}"
+            th:if="${T(com.nhom11.qldt.core.table.ActionDef).hasVisibleOverflow(actions, item)}"
             class="dropdown"
          >
             <button
@@ -97,7 +97,7 @@
             >
                <li
                   th:each="action, actionStat : ${actions}"
-                  th:if="${actionStat.count > 3 and action.isVisible(item)}"
+                  th:if="${actionStat.count > T(com.nhom11.qldt.core.table.ActionDef).INLINE_ACTION_LIMIT and action.isVisible(item)}"
                >
                   <button
                      th:if="${action.isPost()}"

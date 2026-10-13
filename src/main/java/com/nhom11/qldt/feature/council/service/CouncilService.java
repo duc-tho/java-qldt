@@ -4,6 +4,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.council.model.dto.CouncilForm;
 import com.nhom11.qldt.feature.council.model.dto.CouncilLecturerOption;
+import com.nhom11.qldt.feature.council.model.dto.CouncilSummary;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.dto.FinalResultForm;
 import com.nhom11.qldt.feature.council.model.entity.Council;
@@ -36,6 +37,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,6 +85,25 @@ public class CouncilService {
   public List<Council> councils(Long periodId) {
     requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
     return councilRepository.findAllByRegistrationPeriodId(periodId);
+  }
+
+  public List<CouncilSummary> councilSummaries(Long periodId, List<Council> councils) {
+    if (councils.isEmpty()) return List.of();
+
+    var councilIds = councils.stream().map(Council::getId).toList();
+    Map<Long, List<CouncilMember>> membersByCouncil = councilMemberRepository.findAllByCouncilIdIn(councilIds)
+        .stream().collect(Collectors.groupingBy(member -> member.getCouncil().getId()));
+    Map<Long, Long> assignedCounts = topicRepository.countByCouncilInPeriod(periodId).stream()
+        .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+
+    return councils.stream().map(council -> {
+      var members = membersByCouncil.getOrDefault(council.getId(), List.of());
+      String chairpersonName = members.stream()
+          .filter(member -> member.getMemberRole() == CouncilMemberRole.CHAIRPERSON)
+          .map(member -> member.getLecturer().getFullName()).findFirst().orElse("");
+      return new CouncilSummary(council, chairpersonName, members.size(),
+          assignedCounts.getOrDefault(council.getId(), 0L));
+    }).toList();
   }
 
   public Council findCouncil(Long periodId, Long councilId) {
@@ -366,7 +387,7 @@ public class CouncilService {
 
   public FinalResult publishedResult(Long groupId) {
     TopicRegistration registration = registrationRepository.findByStudentGroupId(groupId).orElse(null);
-    if (registration == null || !publicationRepository.findFirstByRegistrationPeriodIdOrderByPerformedAtDesc(registration.getTopic().getRegistrationPeriod().getId()).map(item -> item.getAction() == ResultPublicationAction.PUBLISHED).orElse(false)) return null;
+    if (registration == null || !publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(registration.getTopic().getRegistrationPeriod().getId()).map(item -> item.getAction() == ResultPublicationAction.PUBLISHED).orElse(false)) return null;
     return finalResultRepository.findByTopicRegistrationId(registration.getId()).orElse(null);
   }
 
@@ -393,7 +414,7 @@ public class CouncilService {
 
   public List<ResultPublication> publicationHistory(Long periodId) {
     periodRepository.findById(periodId).orElseThrow();
-    return publicationRepository.findAllByRegistrationPeriodIdOrderByPerformedAtDesc(periodId);
+    return publicationRepository.findAllByRegistrationPeriodIdOrderByIdDesc(periodId);
   }
 
   public boolean canPublishResults(Long periodId) {
@@ -412,7 +433,7 @@ public class CouncilService {
   }
 
   public ResultPublication latestPublication(Long periodId) {
-    return publicationRepository.findFirstByRegistrationPeriodIdOrderByPerformedAtDesc(periodId).orElse(null);
+    return publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(periodId).orElse(null);
   }
 
   public TopicRegistration workspaceRegistration(Long registrationId, User member) {

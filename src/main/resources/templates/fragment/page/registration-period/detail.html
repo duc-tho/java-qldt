@@ -1,6 +1,18 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
+      <th:block layout:fragment="page-meta">
+         <div class="mt-3 ml-14 flex flex-wrap gap-2" th:if="${form.readonly}">
+            <span
+               class="badge badge-primary badge-soft"
+               th:text="#{period-types.__${period.periodType.name()}__}"
+            ></span>
+            <span
+               class="badge badge-primary badge-soft"
+               th:text="#{registration_periods.stage.__${periodStage.name()}__}"
+            ></span>
+         </div>
+      </th:block>
       <th:block layout:fragment="actions">
          <a
             th:if="${form.readonly}"
@@ -23,7 +35,11 @@
             th:href="@{/registration-periods/{id}/councils(id=${form.data.id})}"
             class="btn btn-outline btn-sm"
          >
-            <span class="iconify inline" data-icon="bi:people-fill" data-width="16"></span>
+            <span
+               class="iconify inline"
+               data-icon="bi:people-fill"
+               data-width="16"
+            ></span>
             <span th:text="#{councils.page.list.title}"></span>
          </a>
          <a
@@ -33,7 +49,11 @@
             th:href="@{/registration-periods/{id}/reviewer-assignments(id=${form.data.id})}"
             class="btn btn-outline btn-sm"
          >
-            <span class="iconify inline" data-icon="bi:person-check" data-width="16"></span>
+            <span
+               class="iconify inline"
+               data-icon="bi:person-check"
+               data-width="16"
+            ></span>
             <span th:text="#{reviewer-assignments.page.title}"></span>
          </a>
          <button
@@ -55,34 +75,413 @@
          </button>
       </th:block>
       <th:block layout:fragment="page-content">
-         <div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div>
-
-         <section class="mt-8 max-w-4xl w-full mx-auto">
-            <h2
-               class="text-xl font-semibold"
-               th:text="#{topics.section.title}"
-            ></h2>
-            <div
-               class="mt-4"
-               th:replace="~{fragment/crud/table :: crud-table(${table})}"
-            ></div>
-         </section>
-         <section class="mt-8 max-w-4xl w-full mx-auto">
-            <div class="flex items-center justify-between gap-3">
-               <h2
-                  class="text-xl font-semibold"
-                  th:text="#{student-groups.section.registrations}"
-               ></h2>
-               <a
-                  class="btn btn-ghost btn-sm"
-                  th:href="@{/registration-periods/{id}/groups(id=${form.data.id})}"
-                  th:text="#{student-groups.action.view-all}"
-               ></a>
+         <div
+            class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]"
+         >
+            <div class="min-w-0 space-y-6">
+               <div
+                  role="alert"
+                  class="alert alert-warning alert-soft"
+                  th:if="${form.readonly and nextDeadline != null}"
+               >
+                  <span class="iconify text-xl" data-icon="bi:alarm"></span>
+                  <div>
+                     <p
+                        class="font-semibold"
+                        th:text="|#{registration_periods.deadline.next}: #{__${nextDeadlineLabel}__} · ${#temporals.format(nextDeadline, 'dd/MM/yyyy HH:mm')}|"
+                     ></p>
+                     <p
+                        class="text-sm"
+                        th:text="#{registration_periods.deadline.description}"
+                     ></p>
+                  </div>
+               </div>
+               <div
+                  th:replace="~{fragment/crud/form :: crud-form(${form})}"
+               ></div>
             </div>
-            <div
-               th:replace="~{fragment/page/registration-period/registrations :: registrations(${registrations})}"
-            ></div>
+            <section
+               class="card card-border border-base-300 bg-base-100"
+               th:if="${form.readonly}"
+            >
+               <div class="card-body gap-5">
+                  <div class="flex items-center gap-2">
+                     <span
+                        class="iconify text-primary"
+                        data-icon="bi:calendar-week"
+                     ></span>
+                     <h2
+                        class="card-title"
+                        th:text="#{registration_periods.timeline.title}"
+                     ></h2>
+                  </div>
+                  <div class="space-y-4">
+                     <details
+                        class="collapse collapse-arrow rounded-box border border-base-300"
+                        th:attr="open=${now.isBefore(period.studentRegistrationStart)} ? 'open' : null"
+                     >
+                        <summary
+                           class="collapse-title text-sm font-semibold text-primary"
+                           th:text="#{registration_periods.timeline.phase-one}"
+                        ></summary>
+                        <div class="collapse-content space-y-3">
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${currentStep == 1} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-one}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.open}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 text-sm text-base-content/60"
+                                 th:text="${#temporals.format(period.lecturerRegistrationStart, 'dd/MM/yyyy HH:mm')}"
+                              ></p>
+                           </div>
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${currentStep == 2} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-two}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.proposal}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 flex flex-wrap justify-center gap-x-1 text-sm text-base-content/60"
+                              >
+                                 <span
+                                    class="whitespace-nowrap"
+                                    th:text="|${#temporals.format(period.lecturerRegistrationStart, 'dd/MM/yyyy HH:mm')} –|"
+                                 ></span>
+                                 <span
+                                    class="whitespace-nowrap"
+                                    th:text="${#temporals.format(period.lecturerRegistrationEnd, 'dd/MM/yyyy HH:mm')}"
+                                 ></span>
+                              </p>
+                           </div>
+                        </div>
+                     </details>
+                     <details
+                        class="collapse collapse-arrow rounded-box border border-base-300"
+                        th:attr="open=${!now.isBefore(period.studentRegistrationStart) and now.isBefore(period.reportDeadline)} ? 'open' : null"
+                     >
+                        <summary
+                           class="collapse-title text-sm font-semibold text-primary"
+                           th:text="#{registration_periods.timeline.phase-two}"
+                        ></summary>
+                        <div class="collapse-content space-y-3">
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${currentStep == 3} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-three}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.student}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 flex flex-wrap justify-center gap-x-1 text-sm text-base-content/60"
+                              >
+                                 <span
+                                    class="whitespace-nowrap"
+                                    th:text="|${#temporals.format(period.studentRegistrationStart, 'dd/MM/yyyy HH:mm')} –|"
+                                 ></span>
+                                 <span
+                                    class="whitespace-nowrap"
+                                    th:text="${#temporals.format(period.studentRegistrationEnd, 'dd/MM/yyyy HH:mm')}"
+                                 ></span>
+                              </p>
+                           </div>
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${currentStep == 4} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-four}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.report}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 text-sm text-base-content/60"
+                                 th:text="|#{registration_periods.timeline.deadline}: ${#temporals.format(period.reportDeadline, 'dd/MM/yyyy HH:mm')}|"
+                              ></p>
+                           </div>
+                        </div>
+                     </details>
+                     <details
+                        class="collapse collapse-arrow rounded-box border border-base-300"
+                        th:attr="open=${!now.isBefore(period.reportDeadline) and !resultsPublished} ? 'open' : null"
+                     >
+                        <summary
+                           class="collapse-title text-sm font-semibold text-primary"
+                           th:text="#{registration_periods.timeline.phase-three}"
+                        ></summary>
+                        <div class="collapse-content space-y-3">
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${!now.isBefore(period.reportDeadline) and !canPublishResults} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-five}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.evaluation}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 text-sm text-base-content/60"
+                                 th:text="#{registration_periods.timeline.evaluation-description}"
+                              ></p>
+                              <span
+                                 class="badge badge-success badge-soft badge-sm mt-2"
+                                 th:if="${canPublishResults}"
+                                 th:text="#{registration_periods.timeline.completed}"
+                              ></span>
+                           </div>
+                           <div
+                              class="rounded-box border p-4 text-center"
+                              th:classappend="${!now.isBefore(period.reportDeadline) and canPublishResults and !resultsPublished} ? ' border-primary bg-primary/5' : ' border-base-300'"
+                           >
+                              <div class="flex flex-col items-center gap-2">
+                                 <span
+                                    class="badge badge-primary badge-soft badge-sm shrink-0"
+                                    th:text="#{registration_periods.timeline.step-six}"
+                                 ></span>
+                                 <p
+                                    class="min-w-0 font-semibold"
+                                    th:text="#{registration_periods.timeline.publication}"
+                                 ></p>
+                              </div>
+                              <p
+                                 class="mt-1 text-sm text-base-content/60"
+                                 th:text="#{registration_periods.timeline.publication-description}"
+                              ></p>
+                              <span
+                                 class="badge badge-success badge-soft badge-sm mt-2"
+                                 th:if="${resultsPublished}"
+                                 th:text="#{registration_periods.timeline.completed}"
+                              ></span>
+                           </div>
+                        </div>
+                     </details>
+                  </div>
+               </div>
+            </section>
+         </div>
+
+         <section
+            class="card card-border mt-8 w-full border-base-300 bg-base-100"
+            th:if="${form.readonly}"
+         >
+            <div class="card-body min-w-0">
+               <div class="flex items-center gap-2 border-b border-base-300 pb-4">
+                  <span class="iconify text-primary" data-icon="bi:journal-text"></span>
+                  <h2
+                     class="card-title text-base"
+                     th:text="#{topics.section.title}"
+                  ></h2>
+               </div>
+               <div
+                  class="min-w-0"
+                  th:replace="~{fragment/crud/table :: crud-table(${table})}"
+               ></div>
+            </div>
          </section>
+         <div
+            class="mt-8 grid grid-cols-1 items-stretch gap-5 xl:grid-cols-2"
+            th:if="${form.readonly}"
+         >
+            <section
+               class="card card-border min-h-80 border-base-300 bg-base-100 xl:only:col-span-2"
+            >
+               <div class="card-body">
+                  <div
+                     class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-4"
+                  >
+                     <div class="flex items-center gap-2">
+                        <span
+                           class="iconify text-primary"
+                           data-icon="bi:people"
+                        ></span>
+                        <h2
+                           class="card-title text-base"
+                           th:text="#{student-groups.section.period-groups}"
+                        ></h2>
+                        <span
+                           class="badge badge-primary badge-soft badge-sm"
+                           th:text="|${#lists.size(groupSummaries)} #{registration_periods.count.groups}|"
+                        ></span>
+                     </div>
+                     <a
+                        class="btn btn-ghost btn-sm"
+                        th:href="@{/registration-periods/{id}/groups(id=${period.id})}"
+                        th:text="#{student-groups.action.view-all}"
+                     ></a>
+                  </div>
+                  <div
+                     th:if="${#lists.isEmpty(groupSummaries)}"
+                     class="flex min-h-52 grow flex-col items-center justify-center gap-2 text-center"
+                  >
+                     <span
+                        class="iconify text-3xl text-base-content/40"
+                        data-icon="bi:people"
+                     ></span>
+                     <p
+                        class="font-medium grow-0"
+                        th:text="#{registration_periods.groups.empty}"
+                     ></p>
+                     <p
+                        class="text-sm text-base-content/60 grow-0"
+                        th:if="${now.isBefore(period.studentRegistrationStart)}"
+                        th:text="|#{registration_periods.groups.opens}: ${#temporals.format(period.studentRegistrationStart, 'dd/MM/yyyy HH:mm')}|"
+                     ></p>
+                     <p
+                        class="text-sm text-base-content/60"
+                        th:unless="${now.isBefore(period.studentRegistrationStart)}"
+                        th:text="#{registration_periods.groups.description}"
+                     ></p>
+                  </div>
+                  <th:block th:unless="${#lists.isEmpty(groupSummaries)}">
+                     <div
+                        th:replace="~{fragment/page/registration-period/registrations :: registrations(${groupSummaries})}"
+                     ></div>
+                  </th:block>
+               </div>
+            </section>
+            <section
+               class="card card-border min-h-80 border-base-300 bg-base-100"
+               th:if="${period.periodType.name() == 'KLTN' or period.periodType.name() == 'TLCN'}"
+               sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+               xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+            >
+               <div class="card-body">
+                  <div
+                     class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-4"
+                  >
+                     <div class="flex items-center gap-2">
+                        <span
+                           class="iconify text-primary"
+                           data-icon="bi:person-badge"
+                        ></span>
+                        <h2
+                           class="card-title text-base"
+                           th:text="${period.periodType.name() == 'KLTN'} ? #{councils.page.list.title} : #{reviewer-assignments.page.title}"
+                        ></h2>
+                        <span
+                           class="badge badge-primary badge-soft badge-sm"
+                           th:if="${period.periodType.name() == 'KLTN'}"
+                           th:text="|${councilCount} #{registration_periods.count.councils}|"
+                        ></span>
+                     </div>
+                     <div class="flex flex-wrap items-center gap-2">
+                        <a
+                           class="btn btn-ghost btn-sm"
+                           th:if="${period.periodType.name() == 'KLTN'}"
+                           th:href="@{/registration-periods/{id}/councils(id=${period.id})}"
+                           th:text="#{student-groups.action.view-all}"
+                        ></a>
+                        <a
+                           class="btn btn-ghost btn-sm"
+                           th:if="${period.periodType.name() == 'TLCN'}"
+                           th:href="@{/registration-periods/{id}/reviewer-assignments(id=${period.id})}"
+                           th:text="#{student-groups.action.view-all}"
+                        ></a>
+                        <a
+                           class="btn btn-primary btn-sm"
+                           th:if="${evaluationAssignmentOpen and period.periodType.name() == 'KLTN' and councilCount == 0}"
+                           th:href="@{/registration-periods/{id}/councils/new(id=${period.id})}"
+                           th:text="#{councils.action.create}"
+                        ></a>
+                        <a
+                           class="btn btn-primary btn-sm"
+                           th:if="${evaluationAssignmentOpen and period.periodType.name() == 'KLTN' and councilCount > 0}"
+                           th:href="@{/registration-periods/{id}/councils(id=${period.id})}"
+                           th:text="#{reviewer-assignments.action.assign}"
+                        ></a>
+                        <a
+                           class="btn btn-primary btn-sm"
+                           th:if="${evaluationAssignmentOpen and period.periodType.name() == 'TLCN'}"
+                           th:href="@{/registration-periods/{id}/reviewer-assignments(id=${period.id})}"
+                           th:text="#{reviewer-assignments.action.assign}"
+                        ></a>
+                     </div>
+                  </div>
+                  <div
+                     class="mt-4 min-h-0 grow overflow-x-auto rounded-box border border-base-300"
+                     th:if="${period.periodType.name() == 'KLTN' and councilCount > 0}"
+                  >
+                     <table class="table table-zebra w-full">
+                        <thead class="bg-base-200">
+                           <tr>
+                              <th th:text="#{councils.field.name}"></th>
+                              <th th:text="#{councils.column.assignments}"></th>
+                              <th class="text-right" th:text="#{crud.table.actions}"></th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr th:each="summary : ${councilSummaries}">
+                              <td>
+                                 <div class="font-medium" th:text="${summary.council.name}"></div>
+                                 <div class="text-xs text-base-content/60" th:text="#{councils.summary.chairperson(${summary.chairpersonName})}"></div>
+                                 <div class="text-xs text-base-content/60" th:text="#{councils.summary.members(${summary.memberCount})}"></div>
+                              </td>
+                              <td><span class="badge badge-soft badge-sm" th:classappend="${summary.assignedCount > 0} ? 'badge-success' : 'badge-ghost'" th:text="${summary.assignedCount}"></span></td>
+                              <td class="text-right">
+                                 <a
+                                    class="btn btn-ghost btn-xs"
+                                    th:href="@{/registration-periods/{periodId}/councils/{id}(periodId=${period.id},id=${summary.council.id})}"
+                                    th:text="#{councils.action.view}"
+                                 ></a>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+                  <div
+                     class="flex min-h-52 grow flex-col items-center justify-center gap-2 text-center"
+                     th:if="${period.periodType.name() == 'TLCN' or councilCount == 0}"
+                  >
+                     <span
+                        class="iconify text-3xl text-base-content/40"
+                        data-icon="bi:person-badge"
+                     ></span>
+                     <p
+                        class="font-medium grow-0"
+                        th:text="${period.periodType.name() == 'KLTN'} ? #{registration_periods.councils.empty} : #{registration_periods.reviewers.summary}"
+                     ></p>
+                     <p
+                        class="text-sm text-base-content/60 grow-0"
+                        th:text="#{registration_periods.evaluation.description}"
+                     ></p>
+                  </div>
+               </div>
+            </section>
+         </div>
          <th:block th:if="${form.readonly}">
             <div
                th:replace="~{fragment/page/council/result-publication :: result-publication(${form.data})}"

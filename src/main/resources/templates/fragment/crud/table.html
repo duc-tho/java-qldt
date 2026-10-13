@@ -64,7 +64,9 @@
             </div>
 
             <div class="overflow-x-auto rounded-box border-2 border-base-300">
-               <table class="table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32">
+               <table
+                  class="table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32"
+               >
                   <thead class="bg-base-200">
                      <tr>
                         <th th:if="${table.bulkDeleteEnabled}" class="w-10">
@@ -148,7 +150,7 @@
                                  class="input input-sm w-full"
                                  th:name="|filters[${col.field}]|"
                                  th:value="${table.filters[col.field]}"
-                                 th:placeholder="${#messages.msg(col.label)}"
+                                 th:placeholder="${'Tìm kiếm theo ' + #messages.msg(col.label)}"
                                  x-on:change="submitQuery(0)"
                               />
                            </th>
@@ -178,8 +180,13 @@
                                  th:classappend="${item.status.name() == 'PUBLISHED' or item.status.name() == 'APPROVED'} ? ' badge-success' : (${item.status.name() == 'WITHDRAWN'} ? ' badge-neutral' : (${item.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning'))"
                                  th:text="${col.getValue(item)}"
                               ></span>
+                              <span
+                                 th:if="${col.field == 'stage'}"
+                                 class="badge badge-primary badge-soft"
+                                 th:text="${col.getValue(item)}"
+                              ></span>
                               <a
-                                 th:unless="${col.field == 'status'}"
+                                 th:unless="${col.field == 'status' or col.field == 'stage'}"
                                  th:href="${table.baseUrl + '/' + item.id}"
                                  class="block"
                                  th:text="${col.getValue(item)}"

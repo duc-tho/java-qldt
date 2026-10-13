@@ -4,6 +4,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.studentgroup.model.dto.GroupSummary;
 import com.nhom11.qldt.feature.studentgroup.model.entity.GroupMember;
 import com.nhom11.qldt.feature.studentgroup.model.entity.StudentGroup;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
@@ -16,6 +17,8 @@ import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -232,6 +235,24 @@ public class StudentGroupService {
 
   public List<TopicRegistration> registrations(Long periodId) {
     return topicRegistrationRepository.findAllByRegistrationPeriodId(periodId);
+  }
+
+  public List<GroupSummary> groupSummaries(Long periodId) {
+    var groups = studentGroupRepository.findAllByRegistrationPeriodIdOrderByName(periodId);
+    if (groups.isEmpty()) return List.of();
+
+    var groupIds = groups.stream().map(StudentGroup::getId).toList();
+    Map<Long, List<GroupMember>> membersByGroup = groupMemberRepository.findAllByStudentGroupIdIn(groupIds)
+        .stream().collect(Collectors.groupingBy(member -> member.getStudentGroup().getId()));
+    Map<Long, TopicRegistration> registrationsByGroup = registrations(periodId).stream()
+        .collect(Collectors.toMap(registration -> registration.getStudentGroup().getId(), registration -> registration));
+
+    return groups.stream().map(group -> {
+      var members = membersByGroup.getOrDefault(group.getId(), List.of());
+      String leaderName = members.stream().filter(GroupMember::isLeader)
+          .map(member -> member.getStudent().getFullName()).findFirst().orElse("");
+      return new GroupSummary(group, leaderName, members.size(), registrationsByGroup.get(group.getId()));
+    }).toList();
   }
 
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {

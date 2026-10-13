@@ -57,7 +57,8 @@ public class TopicController {
 
   @GetMapping
   public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query, Model model) {
-    if (findPeriod(periodId) == null) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null) {
       return "redirect:/registration-periods";
     }
 
@@ -69,6 +70,7 @@ public class TopicController {
         tableDefinition);
     model.addAttribute("pageTitle", "topics.page.list.title");
     model.addAttribute("pageIcon", "bi:journal-text");
+    model.addAttribute("tableCanCreate", topicService.canManageTopicsAsStaff(period));
     addBreadcrumbParent(model, periodId);
 
     return "fragment/page/topic/list";
@@ -102,7 +104,11 @@ public class TopicController {
     try {
       topicService.create(form.toEntity(), period, form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
-      errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      if (TopicService.REGISTRATION_STAGE_CLOSED.equals(exception.getMessage())) {
+        errors.reject(exception.getMessage());
+      } else {
+        errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      }
       prepare(model, form, baseUrl(periodId), false, "topics.page.create.title", periodId);
       return "fragment/page/topic/create";
     }
@@ -159,7 +165,11 @@ public class TopicController {
       topicService.update(
           topic, old.getRegistrationPeriod(), form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
-      errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      if (TopicService.REGISTRATION_STAGE_CLOSED.equals(exception.getMessage())) {
+        errors.reject(exception.getMessage());
+      } else {
+        errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
+      }
       prepare(model, form, topicUrl(periodId, id), false, "topics.page.edit.title", periodId);
       model.addAttribute("topic", old);
       model.addAttribute("rejectForm", new RejectTopicForm());
@@ -174,6 +184,8 @@ public class TopicController {
     if (findTopic(periodId, id) != null) {
       try {
         topicService.delete(id);
+      } catch (IllegalArgumentException exception) {
+        redirectAttributes.addFlashAttribute("deleteError", exception.getMessage());
       } catch (DataIntegrityViolationException exception) {
         redirectAttributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
       }
@@ -192,6 +204,8 @@ public class TopicController {
 
     try {
       topicService.deleteAllByRegistrationPeriodId(ids, periodId);
+    } catch (IllegalArgumentException exception) {
+      redirectAttributes.addFlashAttribute("deleteError", exception.getMessage());
     } catch (DataIntegrityViolationException exception) {
       redirectAttributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
@@ -242,6 +256,10 @@ public class TopicController {
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("departments", departmentService.findAll());
     model.addAttribute("lecturers", userService.findAllLecturers());
+    RegistrationPeriod period = findPeriod(periodId);
+    model.addAttribute(
+        "canManageTopic",
+        period != null && topicService.canManageTopicsAsStaff(period));
     addBreadcrumbParent(model, periodId);
   }
 

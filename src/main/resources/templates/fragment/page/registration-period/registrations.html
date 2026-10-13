@@ -1,8 +1,8 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-   <th:block th:fragment="registrations(registrations)">
-      <div class="mt-4 overflow-x-auto rounded-box border-2 border-base-300">
-         <table class="table table-zebra min-w-max [&_th]:min-w-32 [&_td]:min-w-32">
+   <th:block th:fragment="registrations(groupSummaries)">
+      <div class="mt-4 min-h-0 grow overflow-x-auto rounded-box border-2 border-base-300">
+         <table class="table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32">
             <thead class="bg-base-200">
                <tr>
                   <th th:text="#{student-groups.field.name}"></th>
@@ -11,14 +11,24 @@
                </tr>
             </thead>
             <tbody>
-               <tr th:each="registration : ${registrations}">
-                  <td th:text="${registration.studentGroup.name}"></td>
-                  <td th:text="${registration.topic.title}"></td>
-                  <td
-                     th:text="#{topic-registrations.status.__${registration.status.name()}__}"
-                  ></td>
+               <tr th:each="summary : ${groupSummaries}">
+                  <td>
+                     <div class="font-medium" th:text="${summary.group.name}"></div>
+                     <div class="text-xs text-base-content/60" th:text="#{student-groups.summary.leader(${summary.leaderName})}"></div>
+                     <div class="text-xs text-base-content/60" th:text="#{student-groups.summary.members(${summary.memberCount})}"></div>
+                  </td>
+                  <td th:text="${summary.registration != null} ? ${summary.registration.topic.title} : #{student-groups.topic.empty}"></td>
+                  <td>
+                     <span class="badge badge-ghost badge-soft badge-sm"
+                        th:if="${summary.registration == null}"
+                        th:text="#{student-groups.registration.empty}"></span>
+                     <span class="badge badge-soft badge-sm"
+                        th:if="${summary.registration != null}"
+                        th:classappend="${summary.registration.status.name() == 'APPROVED'} ? 'badge-success' : (${summary.registration.status.name() == 'REJECTED'} ? 'badge-error' : (${summary.registration.status.name() == 'PENDING'} ? 'badge-warning' : 'badge-ghost'))"
+                        th:text="#{topic-registrations.status.__${summary.registration.status.name()}__}"></span>
+                  </td>
                </tr>
-               <tr th:if="${#lists.isEmpty(registrations)}">
+               <tr th:if="${#lists.isEmpty(groupSummaries)}">
                   <td
                      colspan="3"
                      class="text-center text-base-content/50"

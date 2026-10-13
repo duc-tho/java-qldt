@@ -3,7 +3,7 @@
    <body>
       <th:block layout:fragment="actions">
          <form
-            th:if="${form.readonly and topic.status.name() == 'PROPOSED'}"
+            th:if="${form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}"
             th:action="${form.actionUrl + '/approve'}"
             method="post"
          >
@@ -13,7 +13,7 @@
             </button>
          </form>
          <button
-            th:if="${form.readonly and topic.status.name() == 'PROPOSED'}"
+            th:if="${form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}"
             type="button"
             class="btn btn-error btn-outline btn-sm"
             onclick="reject_topic.showModal()"
@@ -22,7 +22,7 @@
             <span th:text="#{topics.action.reject}"></span>
          </button>
          <a
-            th:if="${form.readonly}"
+            th:if="${form.readonly and canManageTopic}"
             th:href="${form.actionUrl + '/edit'}"
             class="btn btn-primary btn-sm"
          >
@@ -34,7 +34,7 @@
             <span th:text="#{topics.action.edit}"></span>
          </a>
          <button
-            th:if="${form.readonly}"
+            th:if="${form.readonly and canManageTopic}"
             type="button"
             class="btn btn-error btn-outline btn-sm"
             x-data

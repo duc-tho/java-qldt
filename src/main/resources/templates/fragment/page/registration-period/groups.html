@@ -11,7 +11,7 @@
       <th:block layout:fragment="page-content">
          <p class="mb-4 text-base-content/60" th:text="${period.name}"></p>
          <div
-            th:replace="~{fragment/page/registration-period/registrations :: registrations(${registrations})}"
+            th:replace="~{fragment/page/registration-period/registrations :: registrations(${groupSummaries})}"
          ></div>
       </th:block>
    </body>
