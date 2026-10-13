@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
 import com.nhom11.qldt.feature.topic.model.dto.RejectTopicForm;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
@@ -37,6 +38,7 @@ public class TopicController {
   private final RegistrationPeriodService registrationPeriodService;
   private final DepartmentService departmentService;
   private final UserService userService;
+  private final StudentGroupService studentGroupService;
 
   public TopicController(
       TopicService topicService,
@@ -45,7 +47,8 @@ public class TopicController {
       ClientValidationRuleRenderer validationRuleRenderer,
       RegistrationPeriodService registrationPeriodService,
       DepartmentService departmentService,
-      UserService userService) {
+      UserService userService,
+      StudentGroupService studentGroupService) {
     this.topicService = topicService;
     this.tableDefinition = tableDefinition;
     this.crudView = crudView;
@@ -53,6 +56,7 @@ public class TopicController {
     this.registrationPeriodService = registrationPeriodService;
     this.departmentService = departmentService;
     this.userService = userService;
+    this.studentGroupService = studentGroupService;
   }
 
   @GetMapping
@@ -364,6 +368,7 @@ public class TopicController {
     form.fromEntity(topic);
     prepare(model, form, topicUrl(periodId, topic.getId()), true, "topics.page.detail.title", periodId);
     model.addAttribute("topic", topic);
+    model.addAttribute("groupRegistrations", studentGroupService.registrationsForTopic(topic.getId()));
     if (!model.containsAttribute("rejectForm")) {
       model.addAttribute("rejectForm", new RejectTopicForm());
     }

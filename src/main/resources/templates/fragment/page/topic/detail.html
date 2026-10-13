@@ -58,6 +58,7 @@
             </div>
          </div>
          <div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div>
+         <section class="card card-border border-base-300 mt-5" th:if="${groupRegistrations != null}"><div class="card-body"><h2 class="card-title" th:text="#{student-groups.section.period-groups}"></h2><p class="text-sm text-base-content/60" th:if="${#lists.isEmpty(groupRegistrations)}" th:text="#{crud.table.empty}"></p><ul class="space-y-2" th:unless="${#lists.isEmpty(groupRegistrations)}"><li th:each="registration : ${groupRegistrations}"><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${topic.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a><span class="badge badge-soft badge-sm ml-2" th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"></span></li></ul></div></section>
          <dialog id="reject_topic" class="modal">
             <div class="modal-box">
                <form th:action="${form.actionUrl + '/reject'}" th:object="${rejectForm}" method="post">

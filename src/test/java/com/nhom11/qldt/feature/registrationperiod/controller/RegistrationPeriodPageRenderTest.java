@@ -155,8 +155,8 @@ class RegistrationPeriodPageRenderTest {
     registration.setTopic(topic);
     registration.setStatus(TopicRegistrationStatus.APPROVED);
     when(studentGroupService.groupSummaries(1L)).thenReturn(List.of(
-        new GroupSummary(group, "Student A", 2, null),
-        new GroupSummary(registeredGroup, "Student B", 3, registration)));
+        new GroupSummary(group, "Student A", "SVA", 2, List.of(), null),
+        new GroupSummary(registeredGroup, "Student B", "SVB", 3, List.of(), registration)));
 
     mockMvc.perform(get("/registration-periods/1"))
         .andExpect(status().isOk())

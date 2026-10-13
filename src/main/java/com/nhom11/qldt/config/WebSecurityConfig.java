@@ -41,6 +41,10 @@ public class WebSecurityConfig {
                     // --------
                     .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*/reports/files/*")
                     .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*")
+                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*/topic")
+                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
                     .requestMatchers("/registration-periods/*/student-group/**")
                     .hasRole("STUDENT")
                     .requestMatchers("/student-groups/**")

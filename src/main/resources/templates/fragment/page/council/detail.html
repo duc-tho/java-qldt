@@ -72,7 +72,7 @@
                      <tbody>
                         <tr th:each="registration : ${eligibleRegistrations}">
                            <td class="font-medium" th:text="${registration.topic.title}"></td>
-                           <td th:text="${registration.studentGroup.name}"></td>
+                           <td><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a></td>
                            <td class="text-right">
                               <form method="post" th:action="@{/registration-periods/{periodId}/councils/{councilId}/topics/{topicId}(periodId=${council.registrationPeriod.id},councilId=${council.id},topicId=${registration.topic.id})}">
                                  <button class="btn btn-outline btn-sm" type="submit">
@@ -106,7 +106,7 @@
                      <tbody>
                         <tr th:each="registration : ${assignedRegistrations}">
                            <td class="font-medium" th:text="${registration.topic.title}"></td>
-                           <td th:text="${registration.studentGroup.name}"></td>
+                           <td><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a></td>
                            <td>
                               <span class="badge badge-success badge-soft" th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"></span>
                            </td>

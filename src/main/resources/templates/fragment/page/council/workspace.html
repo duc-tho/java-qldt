@@ -27,7 +27,7 @@
                            th:text="${registration.topic.registrationPeriod.name}"
                         ></p>
                         <h2 class="card-title text-xl" th:text="${registration.topic.title}"></h2>
-                        <p th:text="${registration.studentGroup.name}"></p>
+                        <a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a>
                      </div>
                      <span
                         class="badge badge-success badge-soft"

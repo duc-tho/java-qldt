@@ -11,10 +11,7 @@
          <div class="grid gap-5 lg:grid-cols-2">
             <section class="card card-border">
                <div class="card-body">
-                  <h2
-                     class="card-title"
-                     th:text="${registration.studentGroup.name}"
-                  ></h2>
+                  <h2 class="card-title"><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a></h2>
                   <h3
                      class="font-semibold"
                      th:text="${registration.topic.title}"
@@ -81,6 +78,7 @@
                </div>
             </section>
          </div>
+         <section class="card card-border mt-5"><div class="card-body" th:insert="~{fragment/page/student-group/activity :: timeline(${activities})}"></div></section>
          <dialog id="reject_registration" class="modal">
             <div class="modal-box">
                <form

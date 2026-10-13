@@ -26,4 +26,7 @@ public interface GroupMemberRepository extends BaseRepository<GroupMember, Long>
       """)
   Optional<GroupMember> findByStudentIdAndPeriodId(
       @Param("studentId") Long studentId, @Param("periodId") Long periodId);
+
+  @EntityGraph(attributePaths = {"studentGroup", "studentGroup.registrationPeriod"})
+  List<GroupMember> findAllByStudentIdOrderByCreatedAtDesc(Long studentId);
 }

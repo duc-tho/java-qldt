@@ -34,7 +34,7 @@
                </thead>
                <tbody>
                   <tr th:each="registration : ${registrations}">
-                     <td th:text="${registration.studentGroup.name}"></td>
+                     <td><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a></td>
                      <td
                         th:text="${registration.studentGroup.registrationPeriod.name}"
                      ></td>

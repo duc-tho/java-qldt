@@ -16,7 +16,9 @@ import com.nhom11.qldt.feature.studentgroup.repository.GroupMemberRepository;
 import com.nhom11.qldt.feature.studentgroup.repository.StudentGroupRepository;
 import com.nhom11.qldt.feature.studentgroup.repository.TopicRegistrationRepository;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
+import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,6 +38,7 @@ class StudentGroupServiceTest {
   @Mock private TopicRepository topicRepository;
   @Mock private UserRepository userRepository;
   @Mock private RegistrationPeriodService registrationPeriodService;
+  @Mock private GroupActivityService groupActivityService;
 
   @InjectMocks private StudentGroupService service;
 
@@ -49,12 +52,13 @@ class StudentGroupServiceTest {
     period.setStudentRegistrationEnd(LocalDateTime.now().plusMinutes(1));
 
     group = new StudentGroup();
+    group.setId(GROUP_ID);
     group.setRegistrationPeriod(period);
 
     leader = new User();
     leader.setId(LEADER_ID);
 
-    when(studentGroupRepository.findById(GROUP_ID)).thenReturn(Optional.of(group));
+    when(studentGroupRepository.findByIdForUpdate(GROUP_ID)).thenReturn(Optional.of(group));
   }
 
   @Test
@@ -62,11 +66,62 @@ class StudentGroupServiceTest {
     stubLeaderMembership();
     TopicRegistration registration = new TopicRegistration();
     registration.setStatus(TopicRegistrationStatus.DRAFT);
+    registration.setTopic(new Topic());
+    registration.setStudentGroup(group);
     when(topicRegistrationRepository.findByStudentGroupId(GROUP_ID)).thenReturn(Optional.of(registration));
+    when(groupMemberRepository.findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(GROUP_ID))
+        .thenReturn(List.of(new GroupMember(), new GroupMember(), new GroupMember()));
 
     service.requestRegistrationApproval(GROUP_ID, leader);
 
     assertThat(registration.getStatus()).isEqualTo(TopicRegistrationStatus.PENDING);
+  }
+
+  @Test
+  void requestRegistrationApprovalRejectsGroupsWithFewerThanThreeMembers() {
+    stubLeaderMembership();
+    TopicRegistration registration = new TopicRegistration();
+    registration.setStatus(TopicRegistrationStatus.DRAFT);
+    when(topicRegistrationRepository.findByStudentGroupId(GROUP_ID)).thenReturn(Optional.of(registration));
+    when(groupMemberRepository.findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(GROUP_ID))
+        .thenReturn(List.of(new GroupMember(), new GroupMember()));
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> service.requestRegistrationApproval(GROUP_ID, leader))
+        .withMessage("student-groups.error.member-count");
+  }
+
+  @Test
+  void requestRegistrationApprovalAcceptsFiveMembers() {
+    stubLeaderMembership();
+    TopicRegistration registration = new TopicRegistration();
+    registration.setStatus(TopicRegistrationStatus.DRAFT);
+    registration.setTopic(new Topic());
+    registration.setStudentGroup(group);
+    when(topicRegistrationRepository.findByStudentGroupId(GROUP_ID)).thenReturn(Optional.of(registration));
+    when(groupMemberRepository.findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(GROUP_ID))
+        .thenReturn(List.of(new GroupMember(), new GroupMember(), new GroupMember(), new GroupMember(), new GroupMember()));
+
+    service.requestRegistrationApproval(GROUP_ID, leader);
+
+    assertThat(registration.getStatus()).isEqualTo(TopicRegistrationStatus.PENDING);
+  }
+
+  @Test
+  void lecturerCannotApproveRegistrationAfterGroupDropsBelowThreeMembers() {
+    TopicRegistration registration = new TopicRegistration();
+    registration.setStudentGroup(group);
+    registration.setStatus(TopicRegistrationStatus.PENDING);
+    when(topicRegistrationRepository.findGroupIdByIdAndAdviserId(11L, LEADER_ID))
+        .thenReturn(Optional.of(GROUP_ID));
+    when(topicRegistrationRepository.findByIdAndAdviserId(11L, LEADER_ID))
+        .thenReturn(Optional.of(registration));
+    when(groupMemberRepository.findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(GROUP_ID))
+        .thenReturn(List.of(new GroupMember(), new GroupMember()));
+
+    assertThatIllegalArgumentException()
+        .isThrownBy(() -> service.approveRegistration(11L, leader))
+        .withMessage("student-groups.error.member-count");
   }
 
   @Test

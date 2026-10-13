@@ -6,6 +6,7 @@ import com.nhom11.qldt.feature.studentgroup.model.dto.RejectTopicRegistrationFor
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
 import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
+import com.nhom11.qldt.feature.studentgroup.service.GroupActivityService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -26,11 +27,14 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class TopicRegistrationReviewController {
   private final StudentGroupService studentGroupService;
   private final UserService userService;
+  private final GroupActivityService groupActivityService;
 
   public TopicRegistrationReviewController(
-      StudentGroupService studentGroupService, UserService userService) {
+      StudentGroupService studentGroupService, UserService userService,
+      GroupActivityService groupActivityService) {
     this.studentGroupService = studentGroupService;
     this.userService = userService;
+    this.groupActivityService = groupActivityService;
   }
 
   @GetMapping
@@ -108,6 +112,7 @@ public class TopicRegistrationReviewController {
     model.addAttribute("registration", registration);
     model.addAttribute(
         "members", studentGroupService.members(registration.getStudentGroup().getId()));
+    model.addAttribute("activities", groupActivityService.history(registration.getStudentGroup().getId()));
     model.addAttribute(
         "isOpen",
         studentGroupService.isOpen(registration.getStudentGroup().getRegistrationPeriod()));

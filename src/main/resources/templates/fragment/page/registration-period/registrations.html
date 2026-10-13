@@ -13,7 +13,7 @@
             <tbody>
                <tr th:each="summary : ${groupSummaries}">
                   <td>
-                     <div class="font-medium" th:text="${summary.group.name}"></div>
+                     <a class="link link-primary font-medium" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${period.id},groupId=${summary.group.id})}" th:text="${summary.group.name}"></a>
                      <div class="text-xs text-base-content/60" th:text="#{student-groups.summary.leader(${summary.leaderName})}"></div>
                      <div class="text-xs text-base-content/60" th:text="#{student-groups.summary.members(${summary.memberCount})}"></div>
                   </td>

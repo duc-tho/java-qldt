@@ -11,6 +11,8 @@ import com.nhom11.qldt.feature.reportsubmission.model.enums.ReportSubmissionStat
 import com.nhom11.qldt.feature.reportsubmission.repository.ReportFileRepository;
 import com.nhom11.qldt.feature.reportsubmission.repository.ReportSubmissionRepository;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
+import com.nhom11.qldt.feature.studentgroup.model.enums.GroupActivityType;
+import com.nhom11.qldt.feature.studentgroup.service.GroupActivityService;
 import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.repository.GroupMemberRepository;
 import com.nhom11.qldt.feature.studentgroup.repository.TopicRegistrationRepository;
@@ -41,6 +43,7 @@ public class ReportSubmissionService {
   private final GroupMemberRepository groupMemberRepository;
   private final CouncilMemberRepository councilMemberRepository;
   private final ReportStorageProperties storageProperties;
+  private final GroupActivityService groupActivityService;
 
   public ReportSubmissionService(
       ReportSubmissionRepository submissionRepository,
@@ -48,13 +51,15 @@ public class ReportSubmissionService {
       TopicRegistrationRepository registrationRepository,
       GroupMemberRepository groupMemberRepository,
       CouncilMemberRepository councilMemberRepository,
-      ReportStorageProperties storageProperties) {
+      ReportStorageProperties storageProperties,
+      GroupActivityService groupActivityService) {
     this.submissionRepository = submissionRepository;
     this.fileRepository = fileRepository;
     this.registrationRepository = registrationRepository;
     this.groupMemberRepository = groupMemberRepository;
     this.councilMemberRepository = councilMemberRepository;
     this.storageProperties = storageProperties;
+    this.groupActivityService = groupActivityService;
   }
 
   @Transactional
@@ -102,6 +107,7 @@ public class ReportSubmissionService {
         reportFile.setBytes(file.getSize());
         fileRepository.save(reportFile);
       }
+      groupActivityService.record(registration.getStudentGroup(), actor, null, GroupActivityType.REPORT_SUBMITTED, null);
       return submission;
     } catch (IOException exception) {
       storedPaths.forEach(this::deleteQuietly);

@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}"><body>
+<th:block layout:fragment="actions"><a class="btn btn-outline btn-sm" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${group.registrationPeriod.id},groupId=${group.id})}" th:text="#{student-groups.action.open}"></a></th:block>
+<th:block layout:fragment="page-content"><section class="card card-border border-base-300"><div class="card-body gap-5">
+  <div class="flex flex-wrap gap-2"><span class="badge badge-outline" th:text="|#{student-groups.topic-code} #${topic.id}|"></span><span class="badge badge-ghost" th:text="${topic.department.name}"></span><span class="badge badge-success badge-soft" th:text="#{__${'topics.status.' + topic.status.name()}__}"></span></div>
+  <p class="text-base-content/60" th:text="${group.registrationPeriod.name}"></p>
+  <div class="grid gap-3 md:grid-cols-2"><div class="rounded-box border border-base-300 bg-base-200/40 p-4" th:each="adviser : ${topic.advisers}"><p class="text-xs font-semibold uppercase" th:text="#{student-groups.adviser}"></p><p class="mt-2 font-medium" th:text="${adviser.fullName}"></p><p class="text-sm text-base-content/60" th:text="${adviser.userCode}"></p><p class="text-sm text-base-content/60" th:text="${adviser.email}"></p><p class="text-sm text-base-content/60" th:if="${adviser.phone != null}" th:text="${adviser.phone}"></p></div></div>
+  <div class="border-t border-base-300 pt-5"><h2 class="card-title" th:text="#{student-groups.topic.content}"></h2><p class="mt-3 whitespace-pre-line leading-relaxed" th:text="${topic.description}"></p></div>
+</div></section></th:block></body></html>

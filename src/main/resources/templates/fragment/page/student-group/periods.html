@@ -17,11 +17,10 @@
                      th:text="#{student-groups.period.end(${#temporals.format(period.studentRegistrationEnd, 'dd/MM/yyyy HH:mm')})}"
                   ></p>
                   <div class="card-actions justify-end">
-                     <a
-                        class="btn btn-primary"
-                        th:href="@{/registration-periods/{periodId}/student-group(periodId=${period.id})}"
-                        th:text="#{student-groups.action.open}"
-                     ></a>
+                     <th:block th:with="currentGroupId=${groupsByPeriod[period.id]}">
+                        <a th:if="${currentGroupId == null}" class="btn btn-primary" th:href="@{/registration-periods/{periodId}/student-group/new(periodId=${period.id})}" th:text="#{student-groups.action.create}"></a>
+                        <a th:if="${currentGroupId != null}" class="btn btn-outline" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${period.id},groupId=${currentGroupId})}" th:text="#{student-groups.action.open}"></a>
+                     </th:block>
                   </div>
                </div>
             </article>

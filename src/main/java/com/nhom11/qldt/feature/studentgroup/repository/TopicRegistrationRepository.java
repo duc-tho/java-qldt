@@ -10,6 +10,21 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TopicRegistrationRepository extends BaseRepository<TopicRegistration, Long> {
+  @EntityGraph(attributePaths = {"topic", "topic.department"})
+  List<TopicRegistration> findAllByStudentGroupIdIn(List<Long> groupIds);
+
+  @EntityGraph(attributePaths = {"studentGroup", "studentGroup.registrationPeriod"})
+  List<TopicRegistration> findAllByTopicId(Long topicId);
+
+  @Query(
+      """
+      select registration.studentGroup.id from TopicRegistration registration
+      join registration.topic.advisers adviser
+      where registration.id = :registrationId and adviser.id = :lecturerId
+      """)
+  Optional<Long> findGroupIdByIdAndAdviserId(
+      @Param("registrationId") Long registrationId, @Param("lecturerId") Long lecturerId);
+
   @EntityGraph(
       attributePaths = {
         "studentGroup",

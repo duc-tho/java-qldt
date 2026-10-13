@@ -40,7 +40,7 @@
                   <tbody>
                      <tr th:each="registration : ${registrations}">
                         <td class="font-medium" th:text="${registration.topic.title}"></td>
-                        <td th:text="${registration.studentGroup.name}"></td>
+                        <td><a class="link link-primary" th:href="@{/registration-periods/{periodId}/student-group/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a></td>
                         <td th:text="${registration.topic.registrationPeriod.name}"></td>
                         <td th:text="#{__${'period-types.' + registration.topic.registrationPeriod.periodType.name()}__}"></td>
                         <td class="text-right">

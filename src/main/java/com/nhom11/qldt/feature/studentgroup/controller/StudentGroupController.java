@@ -9,12 +9,17 @@ import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodServ
 import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
 import com.nhom11.qldt.feature.studentgroup.model.dto.AddGroupMemberForm;
 import com.nhom11.qldt.feature.studentgroup.model.dto.CreateStudentGroupForm;
+import com.nhom11.qldt.feature.studentgroup.model.entity.GroupActivity;
 import com.nhom11.qldt.feature.studentgroup.model.entity.GroupMember;
 import com.nhom11.qldt.feature.studentgroup.model.entity.StudentGroup;
 import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
+import com.nhom11.qldt.feature.studentgroup.model.enums.GroupActivityType;
 import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
+import com.nhom11.qldt.feature.studentgroup.service.GroupActivityService;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -39,6 +44,7 @@ public class StudentGroupController {
   private final DepartmentService departmentService;
   private final ReportSubmissionService reportSubmissionService;
   private final CouncilService councilService;
+  private final GroupActivityService groupActivityService;
 
   public StudentGroupController(
       StudentGroupService studentGroupService,
@@ -46,13 +52,15 @@ public class StudentGroupController {
       UserService userService,
       DepartmentService departmentService,
       ReportSubmissionService reportSubmissionService,
-      CouncilService councilService) {
+      CouncilService councilService,
+      GroupActivityService groupActivityService) {
     this.studentGroupService = studentGroupService;
     this.registrationPeriodService = registrationPeriodService;
     this.userService = userService;
     this.departmentService = departmentService;
     this.reportSubmissionService = reportSubmissionService;
     this.councilService = councilService;
+    this.groupActivityService = groupActivityService;
   }
 
   @GetMapping
@@ -100,6 +108,9 @@ public class StudentGroupController {
       model.addAttribute("pageTitle", "student-groups.page.create.title");
       model.addAttribute("pageIcon", "bi:people");
       return "fragment/page/student-group/create";
+    } catch (DataIntegrityViolationException exception) {
+      errors.reject("student-groups.error.already-member");
+      return createForm(periodId, model);
     }
   }
 
@@ -111,9 +122,7 @@ public class StudentGroupController {
       Model model) {
     if (principal == null) return "redirect:/login";
     StudentGroup group = studentGroupService.findGroup(groupId, periodId);
-    StudentGroup currentGroup =
-        studentGroupService.findCurrentGroup(periodId, currentUser(principal));
-    if (group == null || currentGroup == null || !currentGroup.getId().equals(groupId))
+    if (group == null || !studentGroupService.canViewGroup(group, currentUser(principal)))
       return "redirect:/registration-periods/" + periodId + "/student-group";
     populateDetail(model, group, currentUser(principal));
     return "fragment/page/student-group/detail";
@@ -133,10 +142,13 @@ public class StudentGroupController {
         studentGroupService.addMember(groupId, currentUser(principal), form.getStudentCode());
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
+    } catch (DataIntegrityViolationException exception) {
+      errors.reject("student-groups.error.already-member");
     }
     if (!errors.hasErrors()) return redirectDetail(periodId, groupId);
     StudentGroup group = studentGroupService.findGroup(groupId, periodId);
-    if (group == null) return "redirect:/registration-periods/" + periodId + "/student-group";
+    if (group == null || !studentGroupService.canViewGroup(group, currentUser(principal)))
+      return "redirect:/registration-periods/" + periodId + "/student-group";
     populateDetail(model, group, currentUser(principal));
     return "fragment/page/student-group/detail";
   }
@@ -219,6 +231,26 @@ public class StudentGroupController {
     return "fragment/page/student-group/topics";
   }
 
+  @GetMapping("/{groupId}/topic")
+  public String topicDetail(
+      @PathVariable Long periodId,
+      @PathVariable Long groupId,
+      @AuthenticationPrincipal UserDetails principal,
+      Model model) {
+    StudentGroup group = studentGroupService.findGroup(groupId, periodId);
+    if (group == null || principal == null || !studentGroupService.canViewGroup(group, currentUser(principal))) {
+      return "redirect:/student-groups";
+    }
+    TopicRegistration registration = studentGroupService.registration(groupId);
+    if (registration == null) return redirectDetail(periodId, groupId);
+    model.addAttribute("group", group);
+    model.addAttribute("topic", registration.getTopic());
+    model.addAttribute("pageTitle", "student-groups.action.topic-detail");
+    model.addAttribute("pageHeading", registration.getTopic().getTitle());
+    model.addAttribute("pageIcon", "bi:journal-text");
+    return "fragment/page/student-group/topic-detail";
+  }
+
   @PostMapping("/{groupId}/topics/{topicId}")
   public String selectTopic(
       @PathVariable Long periodId,
@@ -238,24 +270,71 @@ public class StudentGroupController {
     List<GroupMember> members = studentGroupService.members(group.getId());
     model.addAttribute("group", group);
     model.addAttribute("members", members);
+    model.addAttribute("leader", members.stream().filter(GroupMember::isLeader).findFirst().orElse(null));
+    List<GroupActivity> activities = groupActivityService.history(group.getId());
+    model.addAttribute("activities", activities);
     TopicRegistration registration = studentGroupService.registration(group.getId());
     model.addAttribute("registration", registration);
-    model.addAttribute("currentReport", registration == null ? null : reportSubmissionService.current(registration.getId()));
+    if (registration != null) {
+      LocalDateTime registrationUpdatedAt = registration.getUpdatedAt() == null ? null
+          : LocalDateTime.ofInstant(registration.getUpdatedAt(), ZoneId.systemDefault());
+      model.addAttribute("statusChangedAt", switch (registration.getStatus()) {
+        case DRAFT -> registrationUpdatedAt;
+        case PENDING -> activities.stream()
+            .filter(activity -> activity.getType() == GroupActivityType.APPROVAL_REQUESTED)
+            .map(GroupActivity::getOccurredAt)
+            .findFirst()
+            .orElse(registrationUpdatedAt);
+        case APPROVED, REJECTED -> registration.getReviewedAt();
+      });
+    }
+    var currentReport = registration == null ? null : reportSubmissionService.current(registration.getId());
+    boolean reportUploadClosed = reportSubmissionService.isUploadClosed(registration);
+    boolean reportUploadNotStarted = reportSubmissionService.isUploadNotStarted(registration);
+    boolean registrationOpen = studentGroupService.isOpen(group.getRegistrationPeriod());
+    model.addAttribute("currentReport", currentReport);
     model.addAttribute("reportHistory", registration == null ? List.of() : reportSubmissionService.history(registration.getId()));
     model.addAttribute("canUploadReport", registration != null && reportSubmissionService.canUpload(registration, viewer));
-    model.addAttribute("isReportUploadClosed", reportSubmissionService.isUploadClosed(registration));
-    model.addAttribute("isReportUploadNotStarted", reportSubmissionService.isUploadNotStarted(registration));
+    model.addAttribute("isReportUploadClosed", reportUploadClosed);
+    model.addAttribute("isReportUploadNotStarted", reportUploadNotStarted);
+    model.addAttribute("statusGuidanceKey", statusGuidanceKey(
+        registration, registrationOpen, members.size(), reportUploadClosed,
+        reportUploadNotStarted, currentReport != null));
     model.addAttribute("publishedResult", councilService.publishedResult(group.getId()));
     model.addAttribute(
         "isDraftRegistration",
         registration != null && registration.getStatus() == TopicRegistrationStatus.DRAFT);
     model.addAttribute("isLeader", isLeader(group.getId(), viewer));
-    model.addAttribute("isOpen", studentGroupService.isOpen(group.getRegistrationPeriod()));
+    model.addAttribute("canEditRegistration", registration == null || registration.getStatus() != TopicRegistrationStatus.APPROVED);
+    model.addAttribute("isOpen", registrationOpen);
     if (!model.containsAttribute("addMemberForm")) {
       model.addAttribute("addMemberForm", new AddGroupMemberForm());
     }
     model.addAttribute("pageTitle", "student-groups.page.detail.title");
+    model.addAttribute("pageHeading", group.getName());
     model.addAttribute("pageIcon", "bi:people");
+  }
+
+  private String statusGuidanceKey(
+      TopicRegistration registration, boolean registrationOpen, int memberCount,
+      boolean reportUploadClosed, boolean reportUploadNotStarted, boolean reportSubmitted) {
+    if (registration == null) {
+      return registrationOpen ? "student-groups.status.guide.NONE" : "student-groups.status.guide.NONE_CLOSED";
+    }
+
+    return switch (registration.getStatus()) {
+      case DRAFT -> !registrationOpen ? "student-groups.status.guide.DRAFT_CLOSED"
+          : memberCount < 3 ? "student-groups.status.guide.DRAFT_MEMBERS"
+          : "student-groups.status.guide.DRAFT";
+      case PENDING -> registrationOpen ? "student-groups.status.guide.PENDING"
+          : "student-groups.status.guide.PENDING_CLOSED";
+      case APPROVED -> reportUploadClosed ? "student-groups.status.guide.APPROVED_CLOSED"
+          : reportSubmitted ? "student-groups.status.guide.APPROVED_SUBMITTED"
+          : reportUploadNotStarted ? "student-groups.status.guide.APPROVED_NOT_STARTED"
+          : "student-groups.status.guide.APPROVED";
+      case REJECTED -> registrationOpen ? "student-groups.status.guide.REJECTED"
+          : "student-groups.status.guide.REJECTED_CLOSED";
+    };
   }
 
   private boolean isLeader(Long groupId, User user) {

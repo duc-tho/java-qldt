@@ -173,6 +173,7 @@
       <a
          href="/student-groups"
          class="flex btn btn-ghost text-left justify-start items-center"
+         th:classappend="${currentPath == '/student-groups' or #strings.contains(currentPath, '/student-group/')} ? ' menu-active'"
          ><span
             class="iconify block shrink-0"
             data-icon="bi:people"
@@ -183,6 +184,12 @@
             th:text="#{navigation.item.student-groups}"
          ></span
       ></a>
+   </li>
+   <li sec:authorize="hasRole('STUDENT')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <a href="/student-groups/periods" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right" th:attr="data-tip=#{navigation.item.student-periods}" th:classappend="${currentPath == '/student-groups/periods'} ? ' menu-active'">
+         <span class="iconify block shrink-0" data-icon="bi:calendar-plus" data-width="18"></span>
+         <span class="sidebar-item-label" th:text="#{navigation.item.student-periods}"></span>
+      </a>
    </li>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
