@@ -3,6 +3,7 @@ package com.nhom11.qldt.feature.topic.controller;
 import com.nhom11.qldt.core.table.TableQuery;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
+import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
@@ -11,9 +12,12 @@ import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
 import com.nhom11.qldt.feature.topic.model.dto.RejectTopicForm;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
+import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
+import com.nhom11.qldt.feature.council.model.dto.CouncilLecturerOption;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
 import jakarta.validation.Valid;
+import java.util.LinkedHashSet;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -24,6 +28,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -60,7 +65,10 @@ public class TopicController {
   }
 
   @GetMapping
-  public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query, Model model) {
+  public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query,
+      @RequestParam(required = false) Long departmentId,
+      @RequestParam(required = false) TopicStatus status,
+      @RequestParam(required = false) String adviserSearch, Model model) {
     RegistrationPeriod period = findPeriod(periodId);
     if (period == null) {
       return "redirect:/registration-periods";
@@ -68,23 +76,46 @@ public class TopicController {
 
     crudView.table(
         model,
-        topicService.findAllByRegistrationPeriodId(periodId, query, tableDefinition),
+        topicService.findAllByRegistrationPeriodId(periodId, query, tableDefinition,
+            departmentId, status, adviserSearch),
         baseUrl(periodId),
         query,
         tableDefinition);
     model.addAttribute("pageTitle", "topics.page.list.title");
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("tableCanCreate", topicService.canManageTopicsAsStaff(period));
+    model.addAttribute("departments", departmentService.findAll());
+    model.addAttribute("periods", registrationPeriodService.findAll());
+    model.addAttribute("statuses", TopicStatus.values());
+    model.addAttribute("departmentId", departmentId);
+    model.addAttribute("selectedStatus", status);
+    model.addAttribute("adviserSearch", adviserSearch);
+    model.addAttribute("topicFiltersEnabled", true);
+    model.addAttribute("periodId", periodId);
     addBreadcrumbParent(model, periodId);
 
     return "fragment/page/topic/list";
   }
 
+  @GetMapping("/lecturers")
+  @ResponseBody
+  public java.util.List<CouncilLecturerOption> lecturers(
+      @PathVariable Long periodId, @RequestParam(required = false) String search) {
+    if (findPeriod(periodId) == null || search == null || search.trim().length() < 2) {
+      return java.util.List.of();
+    }
+    return userService.searchLecturers(search).stream()
+        .map(user -> new CouncilLecturerOption(user.getId(), user.getFullName(), user.getUserCode()))
+        .toList();
+  }
+
   @GetMapping("/new")
   public String createForm(@PathVariable Long periodId, Model model) {
-    if (findPeriod(periodId) == null) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null) {
       return "redirect:/registration-periods";
     }
+    if (!topicService.canManageTopicsAsStaff(period)) return periodDetailRedirect(periodId);
 
     prepare(model, new TopicForm(), baseUrl(periodId), false, "topics.page.create.title", periodId);
     return "fragment/page/topic/create";
@@ -108,7 +139,8 @@ public class TopicController {
     try {
       topicService.create(form.toEntity(), period, form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
-      if (TopicService.REGISTRATION_STAGE_CLOSED.equals(exception.getMessage())) {
+      if (exception.getMessage().startsWith("topics.error.")
+          || exception.getMessage().startsWith("topics.validation.")) {
         errors.reject(exception.getMessage());
       } else {
         errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
@@ -133,6 +165,9 @@ public class TopicController {
   public String edit(@PathVariable Long periodId, @PathVariable Long id, Model model) {
     Topic topic = findTopic(periodId, id);
     if (topic == null) {
+      return periodDetailRedirect(periodId);
+    }
+    if (!topicService.canManageTopicsAsStaff(topic.getRegistrationPeriod())) {
       return periodDetailRedirect(periodId);
     }
 
@@ -169,7 +204,8 @@ public class TopicController {
       topicService.update(
           topic, old.getRegistrationPeriod(), form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
-      if (TopicService.REGISTRATION_STAGE_CLOSED.equals(exception.getMessage())) {
+      if (exception.getMessage().startsWith("topics.error.")
+          || exception.getMessage().startsWith("topics.validation.")) {
         errors.reject(exception.getMessage());
       } else {
         errors.rejectValue("adviserIds", "topics.validation.advisers.invalid");
@@ -253,13 +289,16 @@ public class TopicController {
         actionUrl,
         "post",
         "/registration-periods/" + periodId,
+        title.equals("topics.page.propose.title") ? "w-full" : "w-full max-w-3xl",
         readonly,
         "fragment/page/topic/fields",
         validationRuleRenderer.render(TopicForm.class));
     model.addAttribute("pageTitle", title);
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("departments", departmentService.findAll());
-    model.addAttribute("lecturers", userService.findAllLecturers());
+    model.addAttribute("selectedLecturers", form.getAdviserIds() == null ? java.util.List.of()
+        : userService.findAllLecturersByIds(form.getAdviserIds()));
+    model.addAttribute("lecturerSearchUrl", baseUrl(periodId) + "/lecturers");
     RegistrationPeriod period = findPeriod(periodId);
     model.addAttribute(
         "canManageTopic",
@@ -276,15 +315,15 @@ public class TopicController {
   }
 
   @GetMapping("/propose")
-  public String proposeForm(@PathVariable Long periodId, Model model) {
-    if (findPeriod(periodId) == null) return "redirect:/registration-periods";
-    prepare(
-        model,
-        new TopicForm(),
-        baseUrl(periodId) + "/propose",
-        false,
-        "topics.page.propose.title",
-        periodId);
+  public String proposeForm(
+      @PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal, Model model) {
+    RegistrationPeriod period = findPeriod(periodId);
+    if (period == null) return "redirect:/registration-periods";
+    if (!topicService.isProposalWindowOpen(period)) return periodDetailRedirect(periodId);
+    if (principal == null) return "redirect:/login";
+    TopicForm form = new TopicForm();
+    User proposer = userService.findByEmail(principal.getUsername()).orElseThrow();
+    prepareProposal(model, form, periodId, proposer);
     return "fragment/page/topic/create";
   }
 
@@ -297,14 +336,10 @@ public class TopicController {
       Model model) {
     RegistrationPeriod period = findPeriod(periodId);
     if (period == null || principal == null) return "redirect:/registration-periods";
+    if (!topicService.isProposalWindowOpen(period)) return periodDetailRedirect(periodId);
+    User proposer = userService.findByEmail(principal.getUsername()).orElseThrow();
     if (errors.hasErrors()) {
-      prepare(
-          model,
-          form,
-          baseUrl(periodId) + "/propose",
-          false,
-          "topics.page.propose.title",
-          periodId);
+      prepareProposal(model, form, periodId, proposer);
       return "fragment/page/topic/create";
     }
     try {
@@ -313,19 +348,21 @@ public class TopicController {
           period,
           form.getDepartmentId(),
           form.getAdviserIds(),
-          userService.findByEmail(principal.getUsername()).orElseThrow());
+          proposer);
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
-      prepare(
-          model,
-          form,
-          baseUrl(periodId) + "/propose",
-          false,
-          "topics.page.propose.title",
-          periodId);
+      prepareProposal(model, form, periodId, proposer);
       return "fragment/page/topic/create";
     }
     return "redirect:/topic-proposals";
+  }
+
+  private void prepareProposal(Model model, TopicForm form, Long periodId, User proposer) {
+    if (form.getAdviserIds() == null) form.setAdviserIds(new LinkedHashSet<>());
+    form.getAdviserIds().add(proposer.getId());
+    prepare(model, form, baseUrl(periodId) + "/propose", false,
+        "topics.page.propose.title", periodId);
+    model.addAttribute("requiredAdviserId", proposer.getId());
   }
 
   @PostMapping("/{id}/approve")

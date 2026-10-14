@@ -8,9 +8,9 @@ import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.department.model.entity.Department;
 import com.nhom11.qldt.feature.department.repository.DepartmentRepository;
 import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodStage;
 import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
+import com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary;
 import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import com.nhom11.qldt.feature.topic.view.TopicTableDefinition;
@@ -18,6 +18,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -57,13 +58,27 @@ public class TopicService extends BaseCrudService<Topic, Long> {
 
   public Page<Topic> findAllByRegistrationPeriodId(
       Long registrationPeriodId, TableQuery query, TopicTableDefinition definition) {
-    String search = query.getSearch();
+    return findAllByRegistrationPeriodId(registrationPeriodId, query, definition, null, null, null);
+  }
 
-    return topicRepository.findAllByRegistrationPeriodId(
+  public Page<Topic> findAllByRegistrationPeriodId(
+      Long registrationPeriodId, TableQuery query, TopicTableDefinition definition,
+      Long departmentId, TopicStatus status, String adviserSearch) {
+    String search = query.getSearch();
+    var filters = query.filterValues(definition);
+    Page<Topic> page = topicRepository.findAllByRegistrationPeriodId(
         registrationPeriodId,
         search == null || search.isBlank() ? null : search.trim(),
-        query.filterValues(definition).get("title"),
+        filters.get("title"),
+        departmentId,
+        status,
+        adviserSearch == null || adviserSearch.isBlank() ? null : adviserSearch.trim(),
         query.pageable(definition));
+    if (page.isEmpty()) return page;
+    var ids = page.getContent().stream().map(Topic::getId).toList();
+    var details = topicRepository.findAllWithAdvisersByIdIn(ids).stream()
+        .collect(java.util.stream.Collectors.toMap(Topic::getId, topic -> topic));
+    return new PageImpl<>(ids.stream().map(details::get).toList(), page.getPageable(), page.getTotalElements());
   }
 
   public Topic findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId) {
@@ -79,8 +94,13 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     return topicRepository.findAllWithDetailsByRegistrationPeriodId(registrationPeriodId);
   }
 
+  public List<TopicProposalSummary> findProposalSummariesByPeriodIds(List<Long> periodIds) {
+    return periodIds.isEmpty() ? List.of() : topicRepository.findProposalSummariesByPeriodIds(periodIds);
+  }
+
   public Topic create(
       Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
+    requireStaff(registrationPeriod);
     assignRelations(topic, registrationPeriod, departmentId, adviserIds);
     return create(topic);
   }
@@ -91,7 +111,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       Long departmentId,
       Set<Long> adviserIds,
       User lecturer) {
-    requireLecturerRegistrationOpen(registrationPeriod);
+    requireProposalWindow(registrationPeriod);
     if (adviserIds == null || !adviserIds.contains(lecturer.getId())) {
       throw new IllegalArgumentException("topics.validation.proposer-adviser");
     }
@@ -110,20 +130,25 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       Long departmentId,
       Set<Long> adviserIds) {
     Topic existing = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
-    requireLecturerRegistrationOpen(existing.getRegistrationPeriod());
+    requireProposalWindow(existing.getRegistrationPeriod());
     requireProposalOwner(existing, proposer);
+    if (adviserIds == null || !adviserIds.contains(proposer.getId())) {
+      throw new IllegalArgumentException("topics.validation.proposer-adviser");
+    }
     assignRelations(topic, existing.getRegistrationPeriod(), departmentId, adviserIds);
-    topic.setId(existing.getId());
-    topic.setStatus(TopicStatus.PROPOSED);
-    topic.setProposedBy(existing.getProposedBy());
-    topic.setRejectionReason(null);
-    topicRepository.save(topic);
+    validateAdviserChange(existing, adviserIds);
+    existing.setTitle(topic.getTitle());
+    existing.setDescription(topic.getDescription());
+    existing.setDepartment(topic.getDepartment());
+    existing.setAdvisers(topic.getAdvisers());
+    existing.setStatus(TopicStatus.PROPOSED);
+    existing.setRejectionReason(null);
   }
 
   @Transactional
   public void deleteProposal(Long topicId, Long periodId, User proposer) {
     Topic topic = topicRepository.findByIdAndRegistrationPeriodId(topicId, periodId).orElseThrow();
-    requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
+    requireProposalWindow(topic.getRegistrationPeriod());
     requireProposalOwner(topic, proposer);
     topicRepository.softDelete(topic);
   }
@@ -135,6 +160,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
             .findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
     requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
+    requireStaff(topic.getRegistrationPeriod());
     if (topic.getStatus() != TopicStatus.PROPOSED) {
       throw new IllegalArgumentException("topics.error.approval-state");
     }
@@ -149,6 +175,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
             .findByIdAndRegistrationPeriodId(topicId, registrationPeriodId)
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
     requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
+    requireStaff(topic.getRegistrationPeriod());
     if (topic.getStatus() != TopicStatus.PROPOSED) {
       throw new IllegalArgumentException("topics.error.rejection-state");
     }
@@ -156,12 +183,15 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     topic.setRejectionReason(reason.trim());
   }
 
+  @Transactional
   public Topic update(
       Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
     Topic existingTopic =
         topicRepository
             .findById(topic.getId())
             .orElseThrow(() -> new IllegalArgumentException("topics.error.not-found"));
+    requireStaff(existingTopic.getRegistrationPeriod());
+    validateAdviserChange(existingTopic, adviserIds);
     topic.setStatus(existingTopic.getStatus());
     topic.setRejectionReason(existingTopic.getRejectionReason());
     topic.setProposedBy(existingTopic.getProposedBy());
@@ -182,6 +212,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
       throw new IllegalArgumentException("topics.error.not-found");
     }
     requireLecturerRegistrationOpen(period);
+    requireStaff(period);
 
     topicRepository.softDeleteAll(
         topicRepository.findAllByIdInAndRegistrationPeriodId(ids, registrationPeriodId));
@@ -200,6 +231,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   @Override
   protected void beforeDelete(Topic topic) {
     requireLecturerRegistrationOpen(topic.getRegistrationPeriod());
+    requireStaff(topic.getRegistrationPeriod());
   }
 
   private void validateRegistrationPeriod(Topic topic) {
@@ -232,15 +264,35 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     }
   }
 
+  private void validateAdviserChange(Topic existing, Set<Long> adviserIds) {
+    Set<Long> currentIds = existing.getAdvisers().stream().map(User::getId)
+        .collect(java.util.stream.Collectors.toSet());
+    if (currentIds.equals(adviserIds)) return;
+    if (topicRepository.hasSubmittedEvaluation(existing.getId())) {
+      throw new IllegalArgumentException("topics.error.advisers-grading-locked");
+    }
+    if (existing.getReviewer() != null && adviserIds.contains(existing.getReviewer().getId())) {
+      throw new IllegalArgumentException("topics.error.adviser-reviewer-conflict");
+    }
+    if (existing.getCouncil() != null
+        && topicRepository.hasCouncilMemberIn(existing.getCouncil().getId(), adviserIds)) {
+      throw new IllegalArgumentException("topics.error.adviser-council-conflict");
+    }
+  }
+
   public boolean isTopicManagementAllowed(RegistrationPeriod registrationPeriod) {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     boolean isAdmin =
         authentication != null
             && authentication.getAuthorities().stream()
                 .anyMatch(authority -> authority.getAuthority().equals("ROLE_ADMIN"));
-    return isAdmin
-        || registrationPeriodService.stage(registrationPeriod, LocalDateTime.now())
-            == RegistrationPeriodStage.TOPIC_PROPOSAL;
+    return isAdmin || isProposalWindowOpen(registrationPeriod);
+  }
+
+  public boolean isProposalWindowOpen(RegistrationPeriod registrationPeriod) {
+    LocalDateTime now = LocalDateTime.now();
+    return !now.isBefore(registrationPeriod.getLecturerRegistrationStart())
+        && !now.isAfter(registrationPeriod.getLecturerRegistrationEnd());
   }
 
   public boolean canManageTopicsAsStaff(RegistrationPeriod registrationPeriod) {
@@ -257,6 +309,18 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   private void requireLecturerRegistrationOpen(RegistrationPeriod registrationPeriod) {
     if (!isTopicManagementAllowed(registrationPeriod)) {
       throw new IllegalArgumentException(REGISTRATION_STAGE_CLOSED);
+    }
+  }
+
+  private void requireProposalWindow(RegistrationPeriod registrationPeriod) {
+    if (!isProposalWindowOpen(registrationPeriod)) {
+      throw new IllegalArgumentException(REGISTRATION_STAGE_CLOSED);
+    }
+  }
+
+  private void requireStaff(RegistrationPeriod period) {
+    if (!canManageTopicsAsStaff(period)) {
+      throw new IllegalArgumentException("topics.error.staff-required");
     }
   }
 

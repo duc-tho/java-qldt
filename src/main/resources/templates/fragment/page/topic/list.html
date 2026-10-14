@@ -2,6 +2,33 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="page-content">
+          <label class="fieldset mb-4 max-w-sm"><span class="label"
+             th:text="#{topic-registrations.field.registration-period}"></span>
+             <select class="select w-full" x-on:change="window.location.assign($el.value)">
+                <option th:each="period : ${periods}" th:value="@{/registration-periods/{id}/topics(id=${period.id})}"
+                   th:selected="${period.id == periodId}" th:text="${period.name}"></option>
+             </select>
+          </label>
+          <form method="get" th:action="@{/registration-periods/{id}/topics(id=${periodId})}"
+             class="mb-5 grid gap-3 rounded-box border border-base-300 bg-base-100 p-4 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]">
+             <label class="fieldset"><span class="label" th:text="#{topics.field.department}"></span>
+                <select class="select w-full" name="departmentId">
+                   <option value="" th:text="#{topic-filters.all-departments}"></option>
+                   <option th:each="department : ${departments}" th:value="${department.id}"
+                      th:selected="${department.id == departmentId}" th:text="${department.name}"></option>
+                </select></label>
+             <label class="fieldset"><span class="label" th:text="#{topics.column.status}"></span>
+                <select class="select w-full" name="status">
+                   <option value="" th:text="#{topic-filters.all-statuses}"></option>
+                   <option th:each="topicStatus : ${statuses}" th:value="${topicStatus.name()}"
+                      th:selected="${topicStatus == selectedStatus}"
+                      th:text="#{__${'topics.status.' + topicStatus.name()}__}"></option>
+                </select></label>
+             <label class="fieldset"><span class="label" th:text="#{topics.field.advisers}"></span>
+                <input class="input w-full" type="search" name="adviserSearch" th:value="${adviserSearch}"
+                   th:placeholder="#{topics.advisers.search}" /></label>
+             <button class="btn btn-outline self-end" type="submit" th:text="#{topic-filters.apply}"></button>
+          </form>
          <div th:replace="~{fragment/crud/table :: crud-table(${table})}"></div>
       </th:block>
    </body>

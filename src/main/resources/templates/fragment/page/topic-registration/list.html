@@ -43,7 +43,7 @@
                      <td>
                         <span
                            class="badge badge-soft"
-                           th:classappend="${registration.status.name() == 'PENDING'} ? ' badge-warning' : (${registration.status.name() == 'APPROVED'} ? ' badge-success' : ' badge-error')"
+                            th:classappend="${registration.status.name() == 'PENDING'} ? ' badge-warning' : (${registration.status.name() == 'APPROVED'} ? ' badge-success' : (${registration.status.name() == 'DRAFT'} ? ' badge-info' : ' badge-error'))"
                            th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"
                         ></span>
                      </td>

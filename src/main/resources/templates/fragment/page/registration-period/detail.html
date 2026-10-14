@@ -305,6 +305,12 @@
                      class="card-title text-base"
                      th:text="#{topics.section.title}"
                   ></h2>
+                   <a class="btn btn-primary btn-sm ml-auto"
+                      sec:authorize="hasRole('LECTURER')"
+                      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+                      th:if="${isLecturerRegistrationOpen}"
+                      th:href="@{/registration-periods/{id}/topics/propose(id=${period.id})}"
+                      th:text="#{topics.action.propose}"></a>
                </div>
                <div
                   class="min-w-0"

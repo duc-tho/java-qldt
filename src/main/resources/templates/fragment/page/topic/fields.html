@@ -74,26 +74,19 @@
             </div>
          </div>
          <div class="form-control">
-            <label class="label" for="adviserIds">
+             <label class="label" for="adviserIds" th:if="${form.readonly}">
                <span
                   class="font-bold"
                   th:text="#{topics.field.advisers}"
                ></span>
             </label>
-            <select
-               th:field="*{adviserIds}"
-               multiple
-               class="select w-full min-h-28"
-               th:classappend="${#fields.hasErrors('adviserIds')} ? ' select-error'"
-               th:disabled="${form.readonly}"
-            >
-               <option
-                  th:each="lecturer : ${lecturers}"
-                  th:value="${lecturer.id}"
-                  th:text="${lecturer.fullName}"
-               ></option>
-            </select>
-            <span class="label" th:text="#{topics.field.advisers.hint}"></span>
+             <div th:if="${form.readonly}" class="flex flex-wrap gap-2">
+                <span class="badge badge-outline" th:each="lecturer : ${selectedLecturers}"
+                   th:text="|${lecturer.fullName} (${lecturer.userCode})|"></span>
+             </div>
+             <th:block th:unless="${form.readonly}">
+                <div th:replace="~{fragment/page/topic/adviser-picker :: picker}"></div>
+             </th:block>
             <span
                class="text-error text-sm mt-1 block"
                th:if="${#fields.hasErrors('adviserIds')}"

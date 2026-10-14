@@ -265,10 +265,7 @@ public class RegistrationPeriodController {
         topicTable);
 
     var authentication = SecurityContextHolder.getContext().getAuthentication();
-    LocalDateTime now = LocalDateTime.now();
-    boolean isLecturerRegistrationOpen =
-        !now.isBefore(period.getLecturerRegistrationStart())
-            && !now.isAfter(period.getLecturerRegistrationEnd());
+    boolean isLecturerRegistrationOpen = topicService.isProposalWindowOpen(period);
     boolean canCreateTopic =
         authentication != null
             && authentication.getAuthorities().stream()
@@ -277,6 +274,7 @@ public class RegistrationPeriodController {
                         || (authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY")
                             && isLecturerRegistrationOpen));
     model.addAttribute("tableCanCreate", canCreateTopic);
+    model.addAttribute("isLecturerRegistrationOpen", isLecturerRegistrationOpen);
   }
 
   private String periodSelection(Model model, String target) {

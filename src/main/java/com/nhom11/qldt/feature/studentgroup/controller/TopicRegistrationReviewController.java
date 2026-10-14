@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
 import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
 import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
 import com.nhom11.qldt.feature.studentgroup.service.GroupActivityService;
+import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -28,13 +29,15 @@ public class TopicRegistrationReviewController {
   private final StudentGroupService studentGroupService;
   private final UserService userService;
   private final GroupActivityService groupActivityService;
+  private final ReportSubmissionService reportSubmissionService;
 
   public TopicRegistrationReviewController(
       StudentGroupService studentGroupService, UserService userService,
-      GroupActivityService groupActivityService) {
+      GroupActivityService groupActivityService, ReportSubmissionService reportSubmissionService) {
     this.studentGroupService = studentGroupService;
     this.userService = userService;
     this.groupActivityService = groupActivityService;
+    this.reportSubmissionService = reportSubmissionService;
   }
 
   @GetMapping
@@ -51,6 +54,7 @@ public class TopicRegistrationReviewController {
     model.addAttribute("registrations", registrations);
     model.addAttribute("selectedStatus", status);
     model.addAttribute("reviewStatuses", List.of(
+        TopicRegistrationStatus.DRAFT,
         TopicRegistrationStatus.PENDING,
         TopicRegistrationStatus.APPROVED,
         TopicRegistrationStatus.REJECTED));
@@ -113,6 +117,10 @@ public class TopicRegistrationReviewController {
     model.addAttribute(
         "members", studentGroupService.members(registration.getStudentGroup().getId()));
     model.addAttribute("activities", groupActivityService.history(registration.getStudentGroup().getId()));
+    var report = registration.getStatus() == TopicRegistrationStatus.APPROVED
+        ? reportSubmissionService.current(registration.getId()) : null;
+    model.addAttribute("currentReport", report);
+    model.addAttribute("reportFiles", report == null ? List.of() : reportSubmissionService.files(report.getId()));
     model.addAttribute(
         "isOpen",
         studentGroupService.isOpen(registration.getStudentGroup().getRegistrationPeriod()));

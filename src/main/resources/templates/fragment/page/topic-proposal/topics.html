@@ -1,83 +1,80 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
+      <th:block layout:fragment="actions">
+         <a th:if="${isProposalOpen}" class="btn btn-primary"
+            th:href="@{/registration-periods/{periodId}/topics/propose(periodId=${period.id})}">
+            <span class="iconify" data-icon="bi:journal-plus"></span>
+            <span th:text="#{topics.action.propose}"></span>
+         </a>
+         <button th:unless="${isProposalOpen}" class="btn btn-disabled" type="button" disabled
+            aria-disabled="true" th:text="#{topics.action.proposal-closed}"></button>
+      </th:block>
+
       <th:block layout:fragment="page-content">
-         <div class="flex flex-wrap items-center justify-between gap-4 mb-5">
-            <p class="text-base-content/70" th:text="${period.name}"></p>
-            <a
-               th:if="${isProposalOpen}"
-               class="btn btn-primary"
-               th:href="@{/registration-periods/{periodId}/topics/propose(periodId=${period.id})}"
-               ><span class="iconify" data-icon="bi:journal-plus"></span
-               ><span th:text="#{topics.action.propose}"></span
-            ></a>
-            <button
-               th:unless="${isProposalOpen}"
-               class="btn btn-disabled"
-               type="button"
-               disabled
-               aria-disabled="true"
-               tabindex="-1"
-               role="button"
-               th:text="#{topics.action.proposal-closed}"
-            ></button>
-         </div>
-         <div
-            class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-            th:if="${!#lists.isEmpty(topics)}"
-         >
-            <article
-               class="card card-border border-base-300 shadow-sm"
-               th:each="topic : ${topics}"
-            >
-               <div class="card-body p-6">
-                  <h2 class="card-title">
-                     <span
-                        ><span
-                           class="iconify inline-block align-middle mr-2 text-primary text-xl"
-                           data-icon="bi:journal-text"
-                        ></span
-                        ><span th:text="${topic.title}"></span
-                     ></span>
-                  </h2>
-                  <span
-                     class="badge badge-outline"
-                     th:text="${topic.department.name}"
-                  ></span>
-                  <span
-                     class="badge badge-soft"
-                     th:classappend="${topic.status.name() == 'APPROVED'} ? ' badge-success' : (${topic.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning')"
-                     th:text="#{__${'topics.status.' + topic.status.name()}__}"
-                  ></span>
-                  <p
-                     class="text-base-content/70"
-                     th:text="${topic.description}"
-                  ></p>
-                  <div role="alert" class="alert alert-error alert-soft" th:if="${topic.status.name() == 'REJECTED' and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
-                     <span class="iconify" data-icon="bi:exclamation-circle"></span>
+         <div class="grid gap-5 md:grid-cols-2" th:if="${!#lists.isEmpty(topics)}">
+            <article class="card card-border flex h-full flex-col overflow-hidden border-base-300 bg-base-100 shadow-sm"
+               th:each="topic : ${topics}">
+               <header class="flex items-start justify-between gap-3 border-b border-base-300 px-5 py-4">
+                  <div class="flex min-w-0 items-start gap-2.5">
+                     <span class="iconify mt-0.5 shrink-0 text-primary" data-icon="bi:journal-text"
+                        data-width="20" aria-hidden="true"></span>
+                     <h2 class="card-title min-w-0 text-base leading-snug">
+                        <a class="break-words hover:text-primary focus-visible:outline-2 focus-visible:outline-primary"
+                           th:href="@{/registration-periods/{periodId}/topics/{topicId}(periodId=${period.id},topicId=${topic.id})}"
+                           th:text="${topic.title}"></a>
+                     </h2>
+                  </div>
+                  <div class="flex shrink-0 items-center gap-1"
+                     th:if="${isProposalOpen and (topic.status.name() == 'PROPOSED' or topic.status.name() == 'REJECTED') and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
+                     <a class="btn btn-ghost btn-square btn-sm"
+                        th:href="@{/topic-proposals/{periodId}/topics/{topicId}/edit(periodId=${period.id},topicId=${topic.id})}"
+                        th:attr="aria-label=#{topics.action.edit},title=#{topics.action.edit}">
+                        <span class="iconify" data-icon="bi:pencil" aria-hidden="true"></span>
+                     </a>
+                     <form method="post"
+                        th:action="@{/topic-proposals/{periodId}/topics/{topicId}/delete(periodId=${period.id},topicId=${topic.id})}">
+                        <button class="btn btn-ghost btn-square btn-sm text-error" type="submit"
+                           th:attr="aria-label=#{topics.action.delete},title=#{topics.action.delete}">
+                           <span class="iconify" data-icon="bi:trash" aria-hidden="true"></span>
+                        </button>
+                     </form>
+                  </div>
+               </header>
+
+               <div class="flex-1 space-y-4 px-5 py-4">
+                  <p class="line-clamp-3 whitespace-pre-line break-words text-sm leading-relaxed text-base-content/80"
+                     th:text="${topic.description}"></p>
+                  <div class="flex flex-wrap gap-x-4 gap-y-2">
+                     <span class="inline-flex items-center gap-1.5 text-sm"
+                        th:each="adviser : ${topic.advisers}"
+                        th:with="isPrimary=${topic.proposedBy != null and topic.proposedBy.id == adviser.id}">
+                        <span th:if="${isPrimary}" class="iconify shrink-0 text-warning"
+                           data-icon="bi:star-fill" data-width="14" role="img"
+                           th:attr="aria-label=#{topics.advisers.owner},title=#{topics.advisers.owner}"></span>
+                        <span th:unless="${isPrimary}" class="iconify shrink-0 text-primary"
+                           data-icon="bi:person" data-width="16" aria-hidden="true"></span>
+                        <span th:text="${adviser.fullName}"></span>
+                     </span>
+                  </div>
+                  <div role="alert" class="alert alert-error alert-soft text-sm"
+                     th:if="${topic.status.name() == 'REJECTED' and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
+                     <span class="iconify" data-icon="bi:exclamation-circle" aria-hidden="true"></span>
                      <span th:text="${topic.rejectionReason}"></span>
                   </div>
-                  <div class="flex flex-wrap gap-2">
-                     <span
-                        class="badge badge-primary"
-                        th:each="adviser : ${topic.advisers}"
-                        ><span class="iconify mr-1" data-icon="bi:person"></span
-                        ><span th:text="${adviser.fullName}"></span
-                     ></span>
-                  </div>
-                  <div class="card-actions justify-end" th:if="${(topic.status.name() == 'PROPOSED' or topic.status.name() == 'REJECTED') and topic.proposedBy != null and topic.proposedBy.id == currentUserId}">
-                     <a class="btn btn-sm" th:href="@{/topic-proposals/{periodId}/topics/{topicId}/edit(periodId=${period.id},topicId=${topic.id})}"><span class="iconify" data-icon="bi:pencil"></span><span th:text="#{topics.action.edit}"></span></a>
-                     <form method="post" th:action="@{/topic-proposals/{periodId}/topics/{topicId}/delete(periodId=${period.id},topicId=${topic.id})}"><button class="btn btn-sm btn-error btn-outline"><span class="iconify" data-icon="bi:trash"></span><span th:text="#{topics.action.delete}"></span></button></form>
-                  </div>
                </div>
+
+               <footer class="flex flex-wrap items-center justify-between gap-2 border-t border-base-300 bg-base-200/50 px-5 py-3">
+                  <span class="badge badge-soft badge-sm h-auto whitespace-normal"
+                     th:classappend="${topic.status.name() == 'APPROVED'} ? ' badge-success' : (${topic.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning')"
+                     th:text="#{__${'topics.status.' + topic.status.name()}__}"></span>
+                  <span class="badge badge-info badge-soft badge-sm h-auto max-w-full whitespace-normal text-left"
+                     th:text="#{topics.department.badge(${topic.department.name})}"></span>
+               </footer>
             </article>
          </div>
-         <div
-            role="alert"
-            class="alert alert-info"
-            th:if="${#lists.isEmpty(topics)}"
-            th:text="#{topics.lecturer-list.empty}"
-         ></div>
+         <div role="alert" class="alert alert-info" th:if="${#lists.isEmpty(topics)}"
+            th:text="#{topics.lecturer-list.empty}"></div>
       </th:block>
    </body>
 </html>

@@ -45,6 +45,10 @@ public class UserService extends BaseCrudService<User, Long> {
     return userRepository.findAllLecturers();
   }
 
+  public List<User> findAllLecturersByIds(Set<Long> ids) {
+    return ids.isEmpty() ? List.of() : userRepository.findAllLecturersByIdIn(ids);
+  }
+
   public List<User> searchLecturers(String search) {
     return userRepository.searchLecturers(search == null || search.isBlank() ? null : search.trim(), PageRequest.of(0, 10));
   }

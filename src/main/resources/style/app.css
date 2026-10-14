@@ -6,9 +6,9 @@
   default: false;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(98% 0 0);
-  --color-base-300: oklch(95% 0 0);
+  --color-base-100: #fbfcfa;
+  --color-base-200: #f1f5f1;
+  --color-base-300: #dde6df;
   --color-base-content: #17231d;
   --color-primary: #165b47;
   --color-primary-content: #f7fcf8;
@@ -37,6 +37,10 @@
 }
 
 @layer base {
+  [x-cloak] {
+    display: none !important;
+  }
+
   * {
     --scrollbar-thumb: color-mix(in oklch, var(--color-primary) 50%, transparent);
     scrollbar-width: thin;

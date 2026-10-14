@@ -8,9 +8,10 @@
             >
                <button
                   th:if="${action.isPost()}"
-                  type="submit"
+                  type="button"
                   class="btn btn-ghost btn-xs"
-                  th:attr="formaction=${action.getUrl(item)}, formmethod='post'"
+                  th:attr="data-post-url=${action.getUrl(item)}"
+                  x-on:click="postAction($el.dataset.postUrl)"
                >
                      <span
                         class="iconify"
@@ -30,19 +31,22 @@
                   </button>
                   <dialog th:id="|reject_item_${item.id}|" class="modal">
                      <div class="modal-box">
-                        <form method="post" th:action="${action.getUrl(item)}">
+                        <div>
                            <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
                            <label class="form-control mt-4">
                               <span class="label" th:text="#{topics.field.rejection-reason}"></span>
                               <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
                            </label>
                            <div class="modal-action">
-                              <button class="btn btn-error" th:text="#{topics.action.reject}"></button>
+                              <button type="button" class="btn btn-error"
+                                 th:attr="data-post-url=${action.getUrl(item)}"
+                                 x-on:click="$el.closest('.modal-box').querySelector('textarea').reportValidity() && postAction($el.dataset.postUrl, $el.closest('.modal-box').querySelector('textarea').value)"
+                                 th:text="#{topics.action.reject}"></button>
                               <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
                            </div>
-                        </form>
+                        </div>
                      </div>
-                     <form method="dialog" class="modal-backdrop"><button>close</button></form>
+                     <div class="modal-backdrop"><button type="button" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|">close</button></div>
                   </dialog>
                </th:block>
                <a
@@ -101,8 +105,9 @@
                >
                   <button
                      th:if="${action.isPost()}"
-                     type="submit"
-                     th:attr="formaction=${action.getUrl(item)}, formmethod='post'"
+                     type="button"
+                     th:attr="data-post-url=${action.getUrl(item)}"
+                     x-on:click="postAction($el.dataset.postUrl)"
                   >
                         <span
                            class="iconify"
@@ -122,19 +127,22 @@
                      </button>
                      <dialog th:id="|reject_item_${item.id}|" class="modal">
                         <div class="modal-box">
-                           <form method="post" th:action="${action.getUrl(item)}">
+                           <div>
                               <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
                               <label class="form-control mt-4">
                                  <span class="label" th:text="#{topics.field.rejection-reason}"></span>
                                  <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
                               </label>
                               <div class="modal-action">
-                                 <button class="btn btn-error" th:text="#{topics.action.reject}"></button>
+                                 <button type="button" class="btn btn-error"
+                                    th:attr="data-post-url=${action.getUrl(item)}"
+                                    x-on:click="$el.closest('.modal-box').querySelector('textarea').reportValidity() && postAction($el.dataset.postUrl, $el.closest('.modal-box').querySelector('textarea').value)"
+                                    th:text="#{topics.action.reject}"></button>
                                  <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
                               </div>
-                           </form>
+                           </div>
                         </div>
-                        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+                        <div class="modal-backdrop"><button type="button" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|">close</button></div>
                      </dialog>
                   </th:block>
                   <a

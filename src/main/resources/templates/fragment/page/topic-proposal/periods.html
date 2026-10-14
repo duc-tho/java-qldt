@@ -2,54 +2,29 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="page-content">
-         <div
-            class="grid gap-5 md:grid-cols-2 xl:grid-cols-3"
-            th:if="${!#lists.isEmpty(periods)}"
-         >
-            <article
-               class="card card-border border-base-300 shadow-sm"
-               th:each="period : ${periods}"
-            >
-               <div class="card-body p-6">
-                  <span
-                     class="iconify text-primary text-2xl"
-                     data-icon="bi:journal-plus"
-                  ></span>
-                  <h2 class="card-title" th:text="${period.name}"></h2>
-                  <p
-                     class="text-sm text-base-content/60"
-                     th:text="#{topics.period.end(${#temporals.format(period.lecturerRegistrationEnd, 'dd/MM/yyyy HH:mm')})}"
-                  ></p>
-                  <div class="card-actions justify-end">
-                     <a
-                        class="btn btn-outline"
-                        th:href="@{/topic-proposals/{periodId}/topics(periodId=${period.id})}"
-                        th:text="#{topics.action.view}"
-                     ></a
-                     ><a
-                        th:if="${!now.isBefore(period.lecturerRegistrationStart) and !now.isAfter(period.lecturerRegistrationEnd)}"
-                        class="btn btn-primary"
-                        th:href="@{/registration-periods/{periodId}/topics/propose(periodId=${period.id})}"
-                        th:text="#{topics.action.propose}"
-                     ></a
-                     ><button
-                        th:unless="${!now.isBefore(period.lecturerRegistrationStart) and !now.isAfter(period.lecturerRegistrationEnd)}"
-                        class="btn btn-disabled"
-                        type="button"
-                        disabled
-                        aria-disabled="true"
-                        th:text="#{topics.action.proposal-closed}"
-                     ></button>
-                  </div>
-               </div>
-            </article>
-         </div>
-         <div
-            role="alert"
-            class="alert alert-info"
-            th:if="${#lists.isEmpty(periods)}"
-            th:text="#{topics.proposals.empty}"
-         ></div>
+         <section aria-labelledby="open-proposals-title">
+            <h2 id="open-proposals-title" class="text-xl font-semibold"
+               th:text="#{topics.proposals.open-section}"></h2>
+            <div class="mt-5 grid gap-5 md:grid-cols-2" th:if="${!#lists.isEmpty(openPeriods)}">
+               <th:block th:each="period : ${openPeriods}">
+                  <article th:replace="~{fragment/page/topic-proposal/period-card :: period-card(${period}, true)}"></article>
+               </th:block>
+            </div>
+            <p class="mt-4 text-sm text-base-content/60" th:if="${#lists.isEmpty(openPeriods)}"
+               th:text="#{topics.proposals.open-empty}"></p>
+         </section>
+
+         <section class="mt-8" aria-labelledby="closed-proposals-title">
+            <h2 id="closed-proposals-title" class="text-xl font-semibold"
+               th:text="#{topics.proposals.closed-section}"></h2>
+            <div class="mt-5 grid gap-5 md:grid-cols-2" th:if="${!#lists.isEmpty(closedPeriods)}">
+               <th:block th:each="period : ${closedPeriods}">
+                  <article th:replace="~{fragment/page/topic-proposal/period-card :: period-card(${period}, false)}"></article>
+               </th:block>
+            </div>
+            <p class="mt-4 text-sm text-base-content/60" th:if="${#lists.isEmpty(closedPeriods)}"
+               th:text="#{topics.proposals.closed-empty}"></p>
+         </section>
       </th:block>
    </body>
 </html>

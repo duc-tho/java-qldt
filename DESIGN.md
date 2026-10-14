@@ -48,7 +48,7 @@ The registration period is the product's primary organizing object. Screens must
 
 1. Registration period: show the period name, type, active time window, important deadlines, and the next relevant action.
 2. Topic: show title, status, department, advisers, and approval or rejection context before the long description and edit form.
-3. Student group: show approval state and selected topic first. Members are supporting information. A group can contain at most three members.
+3. Student group: show approval state and selected topic first. Members are supporting information. A group can contain three to five members when requesting topic approval.
 4. Topic registration review: show group, topic, advisers, status, and the approval or rejection action in one decision-oriented view.
 5. Council: show the council identity and members first, then topic assignments and publication actions as separate operational sections.
 
@@ -152,7 +152,7 @@ On wide screens, use a 12-column grid only when it makes the primary task easier
 
 - Keep labels above inputs and errors directly below the invalid field.
 - Group related dates from a registration period into the same visible scheduling section: lecturer registration, publication, student registration, report, review, and council date.
-- Use helper text only for constraints that users cannot infer, such as a group maximum of three members.
+- Use helper text only for constraints that users cannot infer, such as the three-to-five-member rule for topic approval.
 - Preserve the current server-side validation and `ClientValidationRuleRenderer` behavior. Visual changes must not remove error bindings or input names.
 
 ### Dialogs, alerts, and feedback
@@ -180,7 +180,7 @@ The topic title, lifecycle status, department, and advisers form the record head
 
 ### Student group detail
 
-Make the selected topic and registration approval state the lead summary. Place the request-approval action beside this state when the group leader may use it. The members section comes next, including the maximum-three-member constraint and leader controls. Topic selection or change is a focused next step, not a third equally weighted card.
+Make the selected topic and registration approval state the lead summary. Place the request-approval action beside this state when the group leader may use it. The members section comes next, including the three-to-five-member rule and leader controls. Topic selection or change is a focused next step, not a third equally weighted card.
 
 ### Topic discovery and registration review
 

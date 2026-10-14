@@ -6,6 +6,11 @@
             <input type="hidden" name="page" th:value="${table.data.number}" />
             <input type="hidden" name="sort" th:value="${table.sortField}" />
             <input type="hidden" name="dir" th:value="${table.sortDir}" />
+             <th:block th:if="${topicFiltersEnabled}">
+                <input type="hidden" name="departmentId" th:value="${departmentId}" />
+                <input type="hidden" name="status" th:value="${selectedStatus}" />
+                <input type="hidden" name="adviserSearch" th:value="${adviserSearch}" />
+             </th:block>
 
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                <div class="flex items-center gap-2">

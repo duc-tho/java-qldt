@@ -1,0 +1,16 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <aside th:fragment="rules" role="note"
+      class="card card-border self-start border-info/20 bg-info/10 shadow-sm lg:sticky lg:top-6">
+      <div class="flex items-center gap-2 border-b border-info/20 px-5 py-4">
+         <span class="iconify shrink-0 text-primary" data-icon="bi:info-circle" data-width="18"></span>
+         <h2 class="text-base font-semibold" th:text="#{topics.rules.title}"></h2>
+      </div>
+      <div class="space-y-3 px-5 py-4 text-sm leading-relaxed text-base-content/80">
+         <p th:text="#{topics.rules.advisers}"></p>
+         <p th:text="#{topics.rules.proposer}"></p>
+         <p th:text="#{topics.rules.window}"></p>
+         <p th:text="#{topics.rules.approval}"></p>
+      </div>
+   </aside>
+</html>

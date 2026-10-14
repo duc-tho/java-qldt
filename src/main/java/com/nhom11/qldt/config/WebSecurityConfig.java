@@ -63,6 +63,8 @@ public class WebSecurityConfig {
                     .hasRole("LECTURER")
                     .requestMatchers("/registration-periods/{periodId}/topics/propose")
                     .hasRole("LECTURER")
+                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/topics/new")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     .requestMatchers(
                         HttpMethod.GET,
                         "/registration-periods",
