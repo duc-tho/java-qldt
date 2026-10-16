@@ -1,0 +1,65 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <button th:fragment="addCouncilMember(content)" type="button"
+      class="flex w-full items-center justify-between gap-3 px-3 py-2 text-left hover:bg-base-200"
+      x-on:click="add(lecturer)">
+      <th:block th:replace="${content}"></th:block>
+   </button>
+
+   <button th:fragment="removeCouncilMember(label)" type="button"
+      class="btn btn-error btn-ghost btn-sm" x-on:click="remove(member.id)"
+      th:aria-label="${label}" th:title="${label}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(null, 'bi:x-lg')}"></th:block>
+   </button>
+
+   <button th:fragment="submitCouncil(label)" type="submit"
+      class="btn btn-sm btn-primary" x-bind:disabled="members.length < 3 || !chairperson || !secretary">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, 'bi:floppy')}"></th:block>
+   </button>
+   <th:block th:fragment="picker">
+<section class="space-y-4 border-t border-base-300 pt-6">
+               <div>
+                  <h2 class="inline-flex items-baseline gap-0.5 text-xl font-semibold"><span th:text="#{councils.field.members}"></span><span class="text-error" aria-hidden="true">*</span></h2>
+                  <p class="mt-1 text-sm text-base-content/70" th:text="#{councils.members.help}"></p>
+               </div>
+               <label class="fieldset text-sm gap-1">
+                  <span class="label text-sm font-medium text-base-content" th:text="#{councils.members.search}"></span>
+                  <input
+                     class="input w-full"
+                     type="search"
+                     x-model="search"
+                     x-on:input.debounce.250ms="lookup()"
+                     th:placeholder="#{councils.members.search-placeholder}"
+                  />
+               </label>
+               <div class="rounded-box border border-base-300 bg-base-100" x-cloak x-show="results.length">
+                  <template x-for="lecturer in results" :key="lecturer.id">
+                     <th:block th:replace="~{fragment/feature/council/member-picker :: addCouncilMember(~{::lecturer-result-content})}">
+                        <th:block th:fragment="lecturer-result-content">
+                        <span x-text="lecturer.fullName"></span>
+                        <span class="text-sm text-base-content/70" x-text="lecturer.userCode"></span>
+                        </th:block>
+                     </th:block>
+                  </template>
+               </div>
+               <div class="space-y-2" x-show="members.length">
+                  <template x-for="member in members" :key="member.id">
+                     <div class="flex items-center justify-between rounded-field border border-base-300 px-3 py-2">
+                        <input type="hidden" name="memberIds" :value="member.id" />
+                        <div>
+                           <p class="font-medium" x-text="member.fullName"></p>
+                           <p class="text-sm text-base-content/70" x-text="member.userCode"></p>
+                        </div>
+                        <th:block th:replace="~{fragment/feature/council/member-picker :: removeCouncilMember(#{councils.members.remove})}"></th:block>
+                     </div>
+                  </template>
+               </div>
+               <span class="text-sm text-error" th:if="${#fields.hasErrors('memberIds')}" th:errors="*{memberIds}"></span>
+
+               <div class="grid gap-4 md:grid-cols-2">
+                  <div th:replace="~{fragment/feature/council/role-select :: role('chairpersonId', #{councils.field.chairperson}, false)}"></div>
+                  <div th:replace="~{fragment/feature/council/role-select :: role('secretaryId', #{councils.field.secretary}, true)}"></div>
+               </div>
+            </section>
+   </th:block>
+</html>

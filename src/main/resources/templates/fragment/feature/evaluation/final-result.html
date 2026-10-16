@@ -1,0 +1,28 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <section th:fragment="result" class="border-t border-base-300 pt-6">
+      <h2 class="text-xl font-semibold" th:text="#{councils.workspace.final-result}"></h2>
+      <div class="mt-4" th:if="${finalResult != null}">
+         <p class="text-2xl font-semibold tabular-nums" th:text="${finalResult.finalScore}"></p>
+         <p class="mt-2 text-base-content/70" th:if="${finalResult.summaryComment != null}"
+            th:text="${finalResult.summaryComment}"></p>
+      </div>
+      <form class="mt-4 space-y-4" method="post"
+         th:action="@{/dot/{periodId}/danh-gia/{id}/chot(periodId=${registration.studentGroup.registrationPeriod.id},id=${registration.id})}"
+         th:if="${councilEvaluation and canFinalize}" th:object="${finalResultForm}">
+         <div th:replace="~{fragment/base/field-shell :: field('summaryComment', #{councils.workspace.summary}, false, null, false, ~{::#final-summary-control})}">
+            <th:block id="final-summary-control" th:fragment="final-summary-control"
+               th:replace="~{fragment/base/textarea :: bound('summaryComment', 'textarea min-h-28 w-full', null, false, null)}"></th:block>
+         </div>
+         <div class="flex justify-end">
+            <th:block th:replace="~{fragment/base/button :: submit(#{councils.workspace.finalize}, 'bi:check2-circle', 'btn btn-sm btn-primary', false)}"></th:block>
+         </div>
+      </form>
+      <p class="mt-3 text-sm text-base-content/70"
+         th:if="${councilEvaluation and finalResult == null and !canFinalize}"
+         th:text="#{councils.workspace.finalize-unavailable}"></p>
+      <p class="mt-3 text-sm text-base-content/70"
+         th:if="${!councilEvaluation and finalResult == null}"
+         th:text="#{councils.workspace.automatic-result-pending}"></p>
+   </section>
+</html>

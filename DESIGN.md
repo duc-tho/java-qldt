@@ -77,8 +77,11 @@ Status always has a text label. Color cannot be the sole status signal. Use the 
 ## Typography and iconography
 
 - Use the existing system sans-serif stack unless a font is explicitly added and self-hosted. Do not add remote font loading for this application.
-- Use a four-step content scale: page title `text-2xl` on desktop, section title `text-xl`, card or record title `text-lg`, and standard text `text-sm` or `text-base` according to data density.
-- Use `font-semibold` for hierarchy, not oversized headings. Page titles should remain concise and usually occupy one line.
+- Use one content scale throughout the application: page title `text-2xl` (24px), section title `text-xl` (20px), card or record title `text-lg` (18px), and ordinary text `text-sm` (14px). Body copy, supporting text, labels, field values, table cells, and buttons use 14px.
+- Use `font-semibold` for headings, `font-medium` for labels and controls, and regular weight for body text. Page titles should remain concise and usually occupy one line. Keep semantic heading order; a status caption is not a heading.
+- Use `text-base-content` for primary reading text and labels, `text-base-content/70` for supporting text, and semantic colors only for status, help, links, and actions. Do not use low-contrast text for essential information.
+- Use `btn-sm` for compact button dimensions and set its text to 14px through the shared CSS rule. Use `table-md`, `input-md`, and `select-md` for routine data tables and fields; their default text is 14px.
+- Keep a 4px label-to-field gap and a 2px label-to-required-mark gap. Place optional help icons near the label without adding another large gap.
 - Use tabular figures or a monospace treatment only where timestamps, codes, or numeric values are repeatedly compared.
 - Use Bootstrap icons through the existing Iconify integration. Keep the `bi:` icon family and use an icon only when it strengthens a label or preserves space in an icon-only control.
 - Icon-only controls require an accessible name via `title` or `aria-label`.

@@ -1,0 +1,53 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="period-card(period, periodTopics, isOpen)" th:with="visibleLimit=5">
+      <article th:replace="~{fragment/base/card :: card(~{::period-proposal-header}, ~{::period-proposal-body}, ~{::period-proposal-footer})}">
+      <header th:fragment="period-proposal-header" class="flex items-center justify-between gap-3 border-b border-base-300 px-5 py-4">
+         <h3 class="card-title min-w-0 gap-2.5 text-lg font-semibold">
+            <span class="flex size-8 shrink-0 items-center justify-center rounded-field bg-base-200 text-primary">
+               <span class="iconify" data-icon="bi:journal-plus" data-width="18"></span>
+            </span>
+            <span class="truncate" th:text="${period.name}" th:title="${period.name}"></span>
+         </h3>
+         <span class="badge badge-outline shrink-0"
+            th:text="#{topics.proposals.count(${periodTopics == null ? 0 : #lists.size(periodTopics)})}"></span>
+      </header>
+
+      <section th:fragment="period-proposal-body" class="flex flex-1 flex-col px-5 py-4">
+         <ul class="max-h-60 overflow-hidden"
+            th:if="${periodTopics != null and !#lists.isEmpty(periodTopics)}">
+            <li th:each="topic, topicStat : ${periodTopics}" th:if="${topicStat.index < visibleLimit}">
+               <th:block th:replace="~{fragment/base/button :: linkContent(@{/dot/{periodId}/de-tai/{topicId}(periodId=${period.id},topicId=${topic.id})}, 'btn btn-ghost btn-sm flex h-11 w-full justify-between gap-3 px-3 text-left font-normal', ${topic.title}, ~{::topic-link-content})}">
+                  <th:block th:fragment="topic-link-content">
+                  <span class="min-w-0 truncate text-sm font-medium" th:text="${topic.title}"></span>
+                  <span class="badge badge-soft badge-sm shrink-0"
+                     th:classappend="${topic.status.name() == 'APPROVED'} ? ' badge-success' : (${topic.status.name() == 'REJECTED'} ? ' badge-error' : ' badge-warning')"
+                     th:text="#{__${'topics.status.' + topic.status.name()}__}"></span>
+                  </th:block>
+               </th:block>
+            </li>
+         </ul>
+         <p class="mt-2 px-3 text-sm font-medium text-base-content/70"
+            th:if="${periodTopics != null and #lists.size(periodTopics) > visibleLimit}"
+            th:text="#{topics.proposals.more(${#lists.size(periodTopics) - visibleLimit})}"></p>
+         <p class="text-sm text-base-content/70" th:if="${periodTopics == null or #lists.isEmpty(periodTopics)}"
+            th:text="#{topics.lecturer-list.empty}"></p>
+
+         <div class="mt-5 grid grid-cols-2 gap-3 border-t border-base-300 pt-4">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai(periodId=${period.id})}, #{crud.action.detail}, null, 'btn btn-sm btn-outline w-full active:translate-y-px', null)}"></th:block>
+            <th:block th:if="${isOpen}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai/tao(periodId=${period.id})}, #{topics.action.new-proposal}, null, 'btn btn-sm btn-primary w-full active:translate-y-px', null)}"></th:block>
+            </th:block>
+            <th:block th:unless="${isOpen}">
+               <th:block th:replace="~{fragment/base/button :: disabled(#{topics.action.new-proposal}, null, 'btn btn-sm btn-disabled w-full', #{topics.action.proposal-closed})}"></th:block>
+            </th:block>
+         </div>
+      </section>
+
+      <footer th:fragment="period-proposal-footer" class="border-t border-base-300 bg-base-200/80 px-5 py-3">
+         <span class="badge badge-warning badge-soft h-auto max-w-full whitespace-normal px-3 py-2 text-left"
+            th:text="#{topics.period.end(${#temporals.format(period.lecturerRegistrationEnd, 'dd/MM/yyyy HH:mm')})}"></span>
+      </footer>
+      </article>
+   </th:block>
+</html>

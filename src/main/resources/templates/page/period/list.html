@@ -1,0 +1,16 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <th:block th:if="${periodView == 'staff'}">
+            <div th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
+         </th:block>
+         <th:block th:if="${periodView == 'lecturer'}">
+            <th:block th:replace="~{fragment/feature/period/lecturer-list :: lecturer-list(${openPeriods}, ${closedPeriods}, ${topicsByPeriodId}, ${work}, ${workPeriods}, ${taskCounts})}"></th:block>
+         </th:block>
+         <th:block th:if="${periodView == 'student'}">
+            <th:block th:replace="${showGroups} ? ~{fragment/feature/group/mine-cards :: cards(${groups})} : ~{fragment/feature/period/student-list :: student-list(${periods}, ${groupsByPeriod}, ${now})}"></th:block>
+         </th:block>
+      </th:block>
+   </body>
+</html>

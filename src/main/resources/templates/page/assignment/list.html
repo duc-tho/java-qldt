@@ -1,0 +1,26 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}(id=${period.id})}, #{crud.form.back}, 'bi:arrow-left', 'btn btn-outline btn-sm', null)}"></th:block>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <section class="space-y-6">
+            <div>
+               <p class="text-sm text-base-content/70" th:text="${period.name}"></p>
+               <h2 class="text-xl font-semibold" th:text="#{reviewer-assignments.section.title}"></h2>
+               <p class="mt-1 text-sm text-base-content/70" th:text="#{reviewer-assignments.description}"></p>
+            </div>
+
+            <th:block th:if="${error != null}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-error alert-soft', 'alert', #{__${error}__}, 'bi:exclamation-circle')}" ></th:block></th:block>
+
+            <th:block th:unless="${managementOpen}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft', 'alert', #{reviewer-assignments.management-closed}, 'bi:info-circle')}" ></th:block></th:block>
+
+            <th:block th:if="${#lists.isEmpty(topics)}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft', 'alert', #{reviewer-assignments.empty}, 'bi:info-circle')}" ></th:block></th:block>
+
+            <th:block th:replace="~{fragment/feature/assignment/table :: table}"></th:block>
+         </section>
+      </th:block>
+   </body>
+</html>

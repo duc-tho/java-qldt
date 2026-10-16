@@ -46,12 +46,12 @@ public class AnnouncementTableDefinition extends BaseTableDefinition<Announcemen
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Link(
-            "announcements.action.edit",
+            "crud.action.edit",
             "bi:pencil-square",
             item -> baseUrl + "/" + ((Announcement) item).getId() + "/edit",
             item -> ((Announcement) item).getStatus() == AnnouncementStatus.PUBLISHED),
         new ActionDef.Link(
-            "announcements.action.view",
+            "crud.action.detail",
             "bi:eye",
             item -> baseUrl + "/" + ((Announcement) item).getId(),
             item -> ((Announcement) item).getStatus() == AnnouncementStatus.WITHDRAWN));

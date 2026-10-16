@@ -9,6 +9,7 @@ import com.nhom11.qldt.feature.topic.service.TopicService;
 import java.util.List;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -66,24 +67,24 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
         new ActionDef.Post(
             "topics.action.approve",
             "bi:check-circle",
-            item -> baseUrl + "/" + ((Topic) item).getId() + "/approve",
+            item -> topicUrl((Topic) item) + "/duyet",
             item -> canReview((Topic) item)),
         new ActionDef.Reject(
             "topics.action.reject",
             "bi:x-circle",
-            item -> baseUrl + "/" + ((Topic) item).getId() + "/reject",
+            item -> topicUrl((Topic) item) + "/tu-choi",
             item -> canReview((Topic) item)),
         new ActionDef.Link(
-            "topics.action.edit",
+            "crud.action.edit",
             "bi:pencil-square",
-            item -> baseUrl + "/" + ((Topic) item).getId() + "/edit",
-            item -> canManageTopic((Topic) item)),
+            item -> topicUrl((Topic) item) + "/sua",
+            item -> canManageTopic((Topic) item) || canEditOwnProposal((Topic) item)),
         new ActionDef.Delete(
-            "topics.action.delete",
+            "crud.action.delete",
             "bi:trash",
-            item -> baseUrl + "/" + ((Topic) item).getId(),
+            item -> topicUrl((Topic) item) + "/xoa",
             item -> ((Topic) item).getTitle(),
-            item -> canManageTopic((Topic) item)));
+            item -> canManageTopic((Topic) item) || canEditOwnProposal((Topic) item)));
   }
 
   private String statusLabel(Topic topic) {
@@ -98,5 +99,28 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
 
   private boolean canManageTopic(Topic topic) {
     return topicService.canManageTopicsAsStaff(topic.getRegistrationPeriod());
+  }
+
+  private boolean canEditOwnProposal(Topic topic) {
+    return topic.getProposedBy() != null
+        && topic.getProposedBy().getEmail().equals(
+            SecurityContextHolder.getContext().getAuthentication().getName())
+        && (topic.getStatus() == TopicStatus.PROPOSED || topic.getStatus() == TopicStatus.REJECTED)
+        && topicService.isProposalWindowOpen(topic.getRegistrationPeriod());
+  }
+
+  @Override
+  public String createUrl(String baseUrl) {
+    return baseUrl + "/tao";
+  }
+
+  @Override
+  public String bulkDeleteUrl(String baseUrl) {
+    return baseUrl + "/xoa";
+  }
+
+  private String topicUrl(Topic topic) {
+    return "/dot/" + topic.getRegistrationPeriod().getId()
+        + "/de-tai/" + topic.getId();
   }
 }

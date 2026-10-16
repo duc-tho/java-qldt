@@ -1,0 +1,54 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="viewer-summary(period, periodStage, now, isLecturer, canPropose, canCreateGroup, groupId)">
+      <div class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]">
+         <article th:replace="~{fragment/base/card :: card(~{::period-timeline-header}, ~{::period-timeline-body}, ~{::period-timeline-footer})}">
+            <header th:fragment="period-timeline-header" class="card-body pb-0">
+               <div class="flex flex-wrap items-center gap-2">
+                  <th:block th:replace="~{fragment/feature/period/status-badges :: badges(${period.periodType}, ${periodStage})}"></th:block>
+               </div>
+            </header>
+            <section th:fragment="period-timeline-body" class="card-body pt-4">
+               <h2 class="card-title text-lg font-semibold" th:text="#{registration_periods.timeline.title}"></h2>
+               <ul class="mt-3 space-y-4">
+                  <li th:replace="~{fragment/base/timeline :: milestone(#{registration_periods.timeline.step-one}, ${period.lecturerRegistrationStart}, ${!now.isBefore(period.lecturerRegistrationStart)})}"></li>
+                  <li th:replace="~{fragment/base/timeline :: milestone(#{registration_periods.timeline.step-two}, ${period.studentRegistrationStart}, ${!now.isBefore(period.studentRegistrationStart)})}"></li>
+                  <li th:replace="~{fragment/base/timeline :: milestone(#{registration_periods.timeline.step-three}, ${period.studentRegistrationEnd}, ${!now.isBefore(period.studentRegistrationEnd)})}"></li>
+                  <li th:replace="~{fragment/base/timeline :: milestone(#{registration_periods.timeline.step-four}, ${period.reportDeadline}, ${!now.isBefore(period.reportDeadline)})}"></li>
+               </ul>
+            </section>
+            <th:block th:fragment="period-timeline-footer"></th:block>
+         </article>
+
+         <article th:replace="~{fragment/base/card :: card(~{::period-topics-header}, ~{::period-topics-body}, ~{::period-topics-footer})}">
+            <header th:fragment="period-topics-header" class="card-body pb-0">
+               <h2 class="card-title text-lg font-semibold" th:text="#{topics.section.title}"></h2>
+            </header>
+            <section th:fragment="period-topics-body" class="card-body pt-4">
+               <div th:if="${isLecturer}" class="mb-2 flex flex-wrap gap-2">
+                  <span th:replace="~{fragment/base/badge :: text(#{registration_periods.summary.pending} + ': ' + ${pendingCount}, 'badge badge-soft')}"></span>
+                  <span th:replace="~{fragment/base/badge :: text(#{registration_periods.summary.assigned} + ': ' + ${assignedCount}, 'badge badge-soft')}"></span>
+               </div>
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/de-tai(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-sm btn-outline', null)}"></th:block>
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom(id=${period.id})}, #{student-groups.page.list.title}, 'bi:people', 'btn btn-sm btn-outline', null)}"></th:block>
+               <th:block th:if="${isLecturer}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/danh-gia(id=${period.id})}, #{councils.workspace.list.title}, 'bi:clipboard2-check', 'btn btn-sm btn-outline', null)}"></th:block>
+               </th:block>
+               <th:block th:if="${resultsPublished}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.title}, 'bi:award', 'btn btn-sm btn-outline', null)}"></th:block>
+               </th:block>
+               <th:block th:if="${canPropose}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/de-tai/tao(id=${period.id})}, #{topics.action.propose}, null, 'btn btn-sm btn-primary', null)}"></th:block>
+               </th:block>
+               <th:block th:if="${groupId != null}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${groupId})}, #{student-groups.action.open}, null, 'btn btn-sm btn-outline', null)}"></th:block>
+               </th:block>
+               <th:block th:if="${canCreateGroup and groupId == null}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom/tao(id=${period.id})}, #{student-groups.action.create}, null, 'btn btn-sm btn-primary', null)}"></th:block>
+               </th:block>
+            </section>
+            <th:block th:fragment="period-topics-footer"></th:block>
+         </article>
+      </div>
+   </th:block>
+</html>

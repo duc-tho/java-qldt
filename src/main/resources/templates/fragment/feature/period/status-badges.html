@@ -1,0 +1,7 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="badges(periodType, stage)">
+      <th:block th:replace="~{fragment/base/badge :: text(#{period-types.__${periodType.name()}__}, 'badge badge-primary badge-soft')}"></th:block>
+      <th:block th:replace="~{fragment/base/badge :: text(#{registration_periods.stage.__${stage.name()}__}, 'badge badge-primary badge-soft')}"></th:block>
+   </th:block>
+</html>

@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="field(name, label, required, helpText, readonly, content)"
+      class="flex flex-col gap-1">
+      <div th:replace="~{fragment/base/field-label :: label(${name}, ${label}, ${required and !readonly}, ${helpText})}"></div>
+      <th:block th:replace="${content}"></th:block>
+      <div th:replace="~{fragment/base/field-shell :: errors(${name}, ${readonly})}"></div>
+   </div>
+
+   <div th:fragment="errors(name, readonly)" th:unless="${readonly}" th:id="|${name}-error|">
+         <span class="text-error mt-1 block text-sm"
+            th:if="${#fields.hasErrors(name)}" th:errors="*{__${name}__}"></span>
+   </div>
+</html>

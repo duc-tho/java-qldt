@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="header(icon, title, count, actions)"
+      class="flex flex-wrap items-center justify-between gap-2 border-b border-base-300 pb-4">
+      <div class="flex items-center gap-2">
+         <span class="iconify text-primary" th:attr="data-icon=${icon}" aria-hidden="true"></span>
+         <h2 class="card-title text-lg font-semibold" th:text="${title}"></h2>
+         <th:block th:if="${count != null}">
+            <th:block th:replace="~{fragment/base/badge :: text(${count}, 'badge badge-primary badge-soft badge-sm')}"></th:block>
+         </th:block>
+      </div>
+      <th:block th:replace="${actions}"></th:block>
+   </div>
+</html>

@@ -1,0 +1,7 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <form th:fragment="formCard(action, data, classes, content)" method="post"
+      th:action="${action}" th:object="${data}" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </form>
+</html>

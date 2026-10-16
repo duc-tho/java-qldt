@@ -40,13 +40,13 @@ public class DepartmentTableDefinition extends BaseTableDefinition<Department> {
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Link(
-            "departments.action.edit",
+            "crud.action.edit",
             "bi:pencil-square",
             item -> baseUrl + "/" + ((Department) item).getId() + "/edit"),
         new ActionDef.Delete(
-            "departments.action.delete",
+            "crud.action.delete",
             "bi:trash",
-            item -> baseUrl + "/" + ((Department) item).getId(),
+            item -> baseUrl + "/" + ((Department) item).getId() + "/delete",
             item -> ((Department) item).getName()));
   }
 }

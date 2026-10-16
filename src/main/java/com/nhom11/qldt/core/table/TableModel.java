@@ -7,6 +7,8 @@ import org.springframework.data.domain.Page;
 public record TableModel<T>(
     Page<T> data,
     String baseUrl,
+    String createUrl,
+    String bulkDeleteUrl,
     String search,
     String sortField,
     String sortDir,

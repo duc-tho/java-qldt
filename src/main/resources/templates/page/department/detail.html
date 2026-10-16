@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:if="${form.readonly}">
+            <th:block th:replace="~{fragment/base/button :: link(${form.actionUrl + '/edit'}, #{crud.action.edit}, 'bi:pencil-square', 'primary')}"></th:block>
+            <th:block th:replace="~{fragment/crud/delete-action :: delete(${form.actionUrl + '/delete'}, ${form.data.name}, #{crud.action.delete})}"></th:block>
+         </th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div>
+      </th:block>
+   </body>
+</html>

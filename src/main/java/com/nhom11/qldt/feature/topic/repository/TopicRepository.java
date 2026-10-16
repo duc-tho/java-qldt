@@ -13,6 +13,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TopicRepository extends BaseRepository<Topic, Long> {
+  long countByRegistrationPeriodId(Long registrationPeriodId);
+
   @Query("select topic.council.id, count(topic) from Topic topic where topic.registrationPeriod.id = :periodId and topic.council is not null group by topic.council.id")
   List<Object[]> countByCouncilInPeriod(@Param("periodId") Long periodId);
 
@@ -25,6 +27,9 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
         and (:titleFilter is null or lower(topic.title) like lower(concat('%', :titleFilter, '%')))
         and (:departmentId is null or topic.department.id = :departmentId)
         and (:status is null or topic.status = :status)
+        and (:lecturerId is null or topic.status = com.nhom11.qldt.feature.topic.model.enums.TopicStatus.APPROVED
+          or topic.proposedBy.id = :lecturerId)
+        and (:proposedById is null or topic.proposedBy.id = :proposedById)
         and (:adviserSearch is null or exists (
           select adviser.id from Topic searched join searched.advisers adviser
           where searched.id = topic.id and (lower(adviser.fullName) like lower(concat('%', :adviserSearch, '%'))
@@ -37,10 +42,12 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
       @Param("titleFilter") String titleFilter,
       @Param("departmentId") Long departmentId,
       @Param("status") TopicStatus status,
+      @Param("lecturerId") Long lecturerId,
+      @Param("proposedById") Long proposedById,
       @Param("adviserSearch") String adviserSearch,
       Pageable pageable);
 
-  @Query("select distinct topic from Topic topic join fetch topic.department left join fetch topic.advisers where topic.id in :ids")
+  @Query("select distinct topic from Topic topic join fetch topic.department join fetch topic.registrationPeriod left join fetch topic.advisers left join fetch topic.proposedBy where topic.id in :ids")
   List<Topic> findAllWithAdvisersByIdIn(@Param("ids") List<Long> ids);
 
   @Query("select count(e) > 0 from Evaluation e where e.topicRegistration.topic.id = :topicId and e.status = com.nhom11.qldt.feature.council.model.enums.EvaluationStatus.SUBMITTED")
@@ -49,6 +56,7 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
   @Query("select count(member) > 0 from CouncilMember member where member.council.id = :councilId and member.lecturer.id in :adviserIds")
   boolean hasCouncilMemberIn(@Param("councilId") Long councilId, @Param("adviserIds") java.util.Set<Long> adviserIds);
 
+  @EntityGraph(attributePaths = {"department", "advisers", "registrationPeriod", "proposedBy"})
   Optional<Topic> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 
   @Query(
@@ -63,6 +71,10 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
 
   @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds order by topic.title")
   List<TopicProposalSummary> findProposalSummariesByPeriodIds(@Param("periodIds") List<Long> periodIds);
+
+  @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds and (topic.status = com.nhom11.qldt.feature.topic.model.enums.TopicStatus.APPROVED or topic.proposedBy.id = :lecturerId) order by topic.title")
+  List<TopicProposalSummary> findVisibleProposalSummariesByPeriodIds(
+      @Param("periodIds") List<Long> periodIds, @Param("lecturerId") Long lecturerId);
 
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);
 

@@ -1,0 +1,8 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="fields(departmentId, status, adviserSearch)">
+      <input type="hidden" name="departmentId" th:value="${departmentId}" />
+      <input type="hidden" name="status" th:value="${status}" />
+      <input type="hidden" name="adviserSearch" th:value="${adviserSearch}" />
+   </th:block>
+</html>

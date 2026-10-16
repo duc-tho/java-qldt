@@ -1,0 +1,19 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="initial(initial, size, wrapperClasses)"
+      th:replace="~{fragment/base/avatar :: initialStyled(${initial}, ${size}, ${wrapperClasses}, 'bg-primary/15 text-sm font-semibold text-primary', null)}"></div>
+
+   <div th:fragment="initialStyled(initial, size, wrapperClasses, innerClasses, title)"
+      th:class="|avatar avatar-placeholder ${wrapperClasses}|" th:title="${title}">
+      <div th:class="|flex ${size} items-center justify-center rounded-full ${innerClasses}|">
+         <span th:text="${initial}"></span>
+      </div>
+   </div>
+
+   <div th:fragment="alpine(initialExpression, size, wrapperClasses, innerClasses)"
+      th:class="|avatar avatar-placeholder ${wrapperClasses}|">
+      <div th:class="|flex ${size} items-center justify-center rounded-full ${innerClasses}|">
+         <span class="text-sm font-semibold" th:attr="x-text=${initialExpression}"></span>
+      </div>
+   </div>
+</html>

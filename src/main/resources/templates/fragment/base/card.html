@@ -1,0 +1,29 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <article th:fragment="card(header, body, footer)"
+      class="card card-border overflow-hidden border-base-300 bg-base-100 shadow-sm">
+      <th:block th:replace="${header}"></th:block>
+      <th:block th:replace="${body}"></th:block>
+      <th:block th:replace="${footer}"></th:block>
+   </article>
+
+   <article th:fragment="cardStyled(classes, content)" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </article>
+
+   <section th:fragment="section(classes, content)" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </section>
+
+   <div th:fragment="container(classes, content)" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </div>
+
+   <aside th:fragment="aside(classes, role, content)" th:class="${classes}" th:attr="role=${role}">
+      <th:block th:replace="${content}"></th:block>
+   </aside>
+
+   <a th:fragment="linkCard(url, classes, content)" th:href="${url}" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </a>
+</html>

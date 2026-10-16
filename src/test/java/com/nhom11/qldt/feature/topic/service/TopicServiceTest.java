@@ -2,13 +2,10 @@ package com.nhom11.qldt.feature.topic.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.model.enums.RegistrationPeriodStage;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
@@ -52,8 +49,6 @@ class TopicServiceTest {
         .setAuthentication(new TestingAuthenticationToken("head", "", "ROLE_HEAD_OF_FACULTY"));
     Topic topic = proposedTopic();
     when(topicRepository.findByIdAndRegistrationPeriodId(1L, 2L)).thenReturn(Optional.of(topic));
-    when(registrationPeriodService.stage(eq(topic.getRegistrationPeriod()), any(LocalDateTime.class)))
-        .thenReturn(RegistrationPeriodStage.CLOSED);
     TopicService service = new TopicService(topicRepository, null, null, registrationPeriodService);
 
     assertThatThrownBy(() -> service.approve(1L, 2L))
@@ -65,6 +60,8 @@ class TopicServiceTest {
   private Topic proposedTopic() {
     RegistrationPeriod period = new RegistrationPeriod();
     period.setId(2L);
+    period.setLecturerRegistrationStart(LocalDateTime.now().minusDays(3));
+    period.setLecturerRegistrationEnd(LocalDateTime.now().minusDays(1));
     Topic topic = new Topic();
     topic.setId(1L);
     topic.setRegistrationPeriod(period);

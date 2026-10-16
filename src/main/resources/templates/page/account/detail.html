@@ -1,0 +1,22 @@
+<!doctype html>
+<html
+   xmlns:th="http://www.thymeleaf.org"
+   layout:decorate="~{layout/page.html}"
+   lang="vi"
+>
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
+
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:replace="~{fragment/base/button :: modalOpen('change-password-dialog', #{account.action.change_password}, 'bi:key', 'btn btn-primary btn-sm')}"></th:block>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <th:block th:replace="~{fragment/feature/account/profile-form :: form}"></th:block>
+
+         <th:block th:replace="~{fragment/feature/account/password-dialog :: dialog}"></th:block>
+      </th:block>
+   </body>
+</html>

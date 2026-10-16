@@ -1,10 +1,12 @@
 package com.nhom11.qldt.feature.auth.controller;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,6 +26,22 @@ import org.springframework.test.web.servlet.MockMvc;
 class UserRoleFormTest {
   @Autowired private MockMvc mockMvc;
   @MockitoBean private UserService userService;
+
+  @Test
+  void detailShowsSelectableAccountDataInsteadOfEditableInputs() throws Exception {
+    User existing = new User();
+    existing.setId(9L);
+    existing.setFullName("Test User");
+    existing.setUsername("test-user");
+    existing.setEmail("test-user@example.com");
+    when(userService.findById(9L)).thenReturn(existing);
+
+    mockMvc.perform(get("/users/9"))
+        .andExpect(status().isOk())
+        .andExpect(content().string(containsString("data-readonly-field=\"fullName\"")))
+        .andExpect(content().string(containsString("Test User")))
+        .andExpect(content().string(not(containsString("<input id=\"fullName\""))));
+  }
 
   @Test
   void createShowsRoleErrorWithoutSavingInvalidCombination() throws Exception {

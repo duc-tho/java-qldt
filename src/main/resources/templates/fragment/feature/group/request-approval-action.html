@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <form th:fragment="action(group, isLeader, registration, isDraftRegistration, isOpen, memberCount)"
+      th:if="${isLeader and (registration == null or isDraftRegistration)}"
+      th:action="@{/dot/{periodId}/nhom/{groupId}/gui-duyet(periodId=${group.registrationPeriod.id},groupId=${group.id})}"
+      method="post">
+      <th:block th:replace="~{fragment/base/button :: submit(#{topic-registrations.action.request-approval}, null, 'btn btn-primary btn-sm', ${!isOpen or !isDraftRegistration or memberCount < 3})}"></th:block>
+   </form>
+</html>

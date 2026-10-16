@@ -1,5 +1,6 @@
 import chokidar from "chokidar";
 import { build } from "vite";
+import config from "../vite.config.js";
 
 const watcher = chokidar.watch(
   [
@@ -23,7 +24,7 @@ async function rebuild() {
   do {
     pending = false;
     try {
-      await build();
+      await build({ ...config, configFile: false });
     } catch (error) {
       console.error(error);
     }

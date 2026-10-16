@@ -1,0 +1,20 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="roster">
+            <div th:replace="~{fragment/base/card :: container('card card-border border-base-300', ~{::#council-detail-card})}">
+               <th:block id="council-detail-card" th:fragment="council-detail-card">
+               <div class="card-body gap-4">
+                  <div>
+                     <p class="text-sm text-base-content/70" th:text="${council.registrationPeriod.name}"></p>
+                     <h2 class="card-title text-lg font-semibold" th:text="${council.name}"></h2>
+                  </div>
+                  <div class="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+                     <th:block th:each="member : ${members}">
+                        <div th:replace="~{fragment/shared/person-row :: row(${#strings.substring(member.lecturer.fullName, 0, 1)}, ${member.lecturer.fullName}, #{__${'council-member-roles.' + member.memberRole.name()}__}, 'w-10', 'rounded-box border border-base-300 px-4 py-3', null)}"></div>
+                     </th:block>
+                  </div>
+               </div>
+               </th:block>
+            </div>
+   </th:block>
+</html>

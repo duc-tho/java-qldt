@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <section th:fragment="scoreForm">
+      <h2 class="text-xl font-semibold" th:text="#{councils.workspace.my-evaluation}"></h2>
+      <form class="mt-4 space-y-4" method="post"
+         th:action="@{/dot/{periodId}/danh-gia/{id}/luu-nhap(periodId=${registration.studentGroup.registrationPeriod.id},id=${registration.id})}"
+         th:object="${evaluationForm}" th:if="${canEvaluate}">
+         <div th:replace="~{fragment/base/field-shell :: field('score', #{councils.workspace.score}, false, null, false, ~{::#score})}">
+            <input id="score"
+               class="input w-full max-w-xs" type="number" min="0" max="10" step="0.01"
+               th:field="*{score}" />
+         </div>
+         <div th:replace="~{fragment/base/field-shell :: field('comment', #{councils.workspace.comment}, false, null, false, ~{::#evaluation-comment-control})}">
+            <th:block id="evaluation-comment-control" th:fragment="evaluation-comment-control"
+               th:replace="~{fragment/base/textarea :: bound('comment', 'textarea min-h-28 w-full', null, false, null)}"></th:block>
+         </div>
+         <div class="flex flex-wrap justify-end gap-3">
+            <th:block th:replace="~{fragment/base/button :: submitTo(@{/dot/{periodId}/danh-gia/{id}/luu-nhap(periodId=${registration.studentGroup.registrationPeriod.id},id=${registration.id})}, #{councils.workspace.save-draft}, 'bi:floppy', 'btn btn-sm btn-outline')}"></th:block>
+            <th:block th:replace="~{fragment/base/button :: submitTo(@{/dot/{periodId}/danh-gia/{id}/nop(periodId=${registration.studentGroup.registrationPeriod.id},id=${registration.id})}, #{councils.workspace.submit-evaluation}, 'bi:send-check', 'btn btn-sm btn-primary')}"></th:block>
+         </div>
+      </form>
+      <th:block th:unless="${canEvaluate}"
+         th:with="unavailableLabel=${evaluation != null and evaluation.status.name() == 'SUBMITTED'} ? #{evaluations.error.submitted-locked} : #{councils.workspace.evaluation-unavailable}">
+         <th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft mt-4', 'alert', ${unavailableLabel}, 'bi:lock')}"></th:block>
+      </th:block>
+   </section>
+</html>

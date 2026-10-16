@@ -1,0 +1,79 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong(id=${period.id})}, #{councils.action.back}, 'bi:arrow-left', 'btn btn-outline btn-sm', null)}"></th:block>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <form
+            class="mx-auto w-full max-w-4xl space-y-6"
+            method="post"
+            th:action="${formAction}"
+            th:object="${data}"
+            x-data="councilMembers()"
+         >
+            <th:block th:if="${#fields.hasGlobalErrors()}">
+               <th:block th:replace="~{fragment/base/alert :: globalErrors('alert alert-error alert-soft', 'bi:exclamation-circle')}"></th:block>
+            </th:block>
+
+            <section class="space-y-5">
+               <div>
+                  <h2 class="text-xl font-semibold" th:text="#{councils.section.identity}"></h2>
+                  <p class="mt-1 text-sm text-base-content/70" th:text="${period.name}"></p>
+               </div>
+               <div class="fieldset text-sm gap-1">
+                  <div th:replace="~{fragment/base/field-label :: label('name', #{councils.field.name}, true, null)}"></div>
+                  <th:block th:replace="~{fragment/base/input :: bound('name', 'text', 'input w-full', null, true, 150)}"></th:block>
+                  <span class="mt-1 text-sm text-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></span>
+               </div>
+            </section>
+
+            <th:block th:replace="~{fragment/feature/council/member-picker :: picker}"></th:block>
+
+            <div class="flex justify-end gap-3 border-t border-base-300 pt-5">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong(id=${period.id})}, #{crud.form.cancel}, null, 'btn btn-sm', null)}"></th:block>
+               <th:block th:replace="~{fragment/feature/council/member-picker :: submitCouncil(#{crud.form.save})}"></th:block>
+            </div>
+         </form>
+
+         <script th:inline="javascript">
+            function councilMembers() {
+               return {
+                  search: '',
+                  results: [],
+                  members: /*[[${initialMembers}]]*/ [],
+                  chairperson: /*[[${data.chairpersonId}]]*/ '',
+                  secretary: /*[[${data.secretaryId}]]*/ '',
+                  async lookup() {
+                     if (this.search.trim().length < 2) {
+                        this.results = [];
+                        return;
+                     }
+                     const url = /*[[${'/dot/' + period.id + '/hoi-dong/giang-vien'}]]*/ '';
+                     const response = await fetch(url + '?search=' + encodeURIComponent(this.search));
+                     if (!response.ok) {
+                        this.results = [];
+                        return;
+                     }
+                     this.results = (await response.json()).filter(
+                        item => !this.members.some(member => member.id === item.id),
+                     );
+                  },
+                  add(item) {
+                     if (this.members.length >= 5) return;
+                     this.members.push(item);
+                     this.search = '';
+                     this.results = [];
+                  },
+                  remove(id) {
+                     this.members = this.members.filter(item => item.id !== id);
+                     if (String(this.chairperson) === String(id)) this.chairperson = '';
+                     if (String(this.secretary) === String(id)) this.secretary = '';
+                  },
+               };
+            }
+         </script>
+      </th:block>
+   </body>
+</html>

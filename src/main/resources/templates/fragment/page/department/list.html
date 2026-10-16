@@ -1,8 +1,0 @@
-<!doctype html>
-<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
-   <body>
-      <th:block layout:fragment="page-content">
-         <div th:replace="~{fragment/crud/table :: crud-table(${table})}"></div>
-      </th:block>
-   </body>
-</html>

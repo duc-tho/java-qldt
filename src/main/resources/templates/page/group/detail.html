@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+<body>
+<th:block layout:fragment="page-meta"><div class="ml-14 mt-3 flex flex-wrap items-center gap-2">
+  <span class="badge badge-primary badge-soft" th:text="|#{student-groups.group-code}: #${group.id}|"></span>
+  <span class="badge badge-info badge-soft" th:text="|#{student-groups.period-label} ${group.registrationPeriod.name}|"></span>
+  <span class="badge badge-neutral badge-soft" th:text="|#{student-groups.created-at}: ${#temporals.format(group.createdAt, 'dd/MM/yyyy HH:mm')}|"></span>
+  <span class="badge badge-secondary badge-soft" th:if="${leader != null}" th:text="|#{student-groups.leader}: ${leader.student.fullName} (${leader.student.userCode})|"></span>
+</div></th:block>
+<th:block layout:fragment="actions"><th:block th:replace="~{fragment/feature/group/request-approval-action :: action(${group}, ${isLeader}, ${registration}, ${isDraftRegistration}, ${isOpen}, ${members.size()})}"></th:block></th:block>
+<th:block layout:fragment="page-content">
+  <th:block th:if="${error != null}"><th:block th:replace="~{fragment/base/alert :: text('alert alert-error', 'alert', #{__${error}__})}"></th:block></th:block>
+  <th:block th:with="status=${registration == null ? 'NONE' : registration.status.name()}">
+  <th:block th:with="cardClasses=${'card card-border overflow-hidden' + (status == 'APPROVED' ? ' border-success/50' : (status == 'REJECTED' ? ' border-error/50' : (status == 'PENDING' ? ' border-warning/50' : (status == 'DRAFT' ? ' border-info/50' : ' border-base-300'))))}">
+  <th:block th:replace="~{fragment/feature/group/status-panel :: panel}"></th:block>
+  </th:block>
+  </th:block>
+  <div class="grid items-stretch gap-5 lg:grid-cols-3">
+    <th:block th:replace="~{fragment/feature/group/members-panel :: panel}"></th:block>
+    <th:block th:replace="~{fragment/feature/group/activity-panel :: panel}"></th:block>
+  </div>
+  <th:block th:if="${canReviewRegistration}">
+    <th:block th:replace="~{fragment/feature/group/approval-panel :: panel}"></th:block>
+  </th:block>
+  <th:block th:if="${isLeader and registration != null}">
+  <th:block th:replace="~{fragment/feature/report/group-panel :: panel}"></th:block>
+  </th:block>
+  <th:block th:if="${publishedResult != null}">
+  <th:block th:replace="~{fragment/feature/result/group-panel :: panel}"></th:block>
+  </th:block>
+</th:block>
+</body></html>

@@ -1,0 +1,16 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="label(name, text, required, helpText)"
+      class="flex items-center gap-1">
+      <label class="label gap-0.5 p-0 text-sm font-medium text-base-content" th:for="${name}">
+         <span th:text="${text}"></span>
+         <span th:if="${required}" th:attr="data-required-for=${name}"
+            class="text-error" aria-hidden="true">*</span>
+      </label>
+      <span th:if="${helpText != null and !#strings.isEmpty(helpText)}"
+         class="tooltip tooltip-right inline-flex cursor-help text-base-content/70 focus-visible:outline-2 focus-visible:outline-primary"
+         tabindex="0" th:attr="data-tip=${helpText}, data-help-for=${name}, title=${helpText}, aria-label=${helpText}">
+         <span class="iconify" data-icon="bi:exclamation-circle" data-width="16"></span>
+      </span>
+   </div>
+</html>

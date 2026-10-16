@@ -1,31 +1,18 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
-   <th:block th:fragment="crud-table(table)">
+   <th:block th:fragment="crud-table(table, extraFilters)">
       <div id="crud-table" x-data="crudTable">
          <form method="get" th:action="${table.baseUrl}" x-ref="queryForm">
             <input type="hidden" name="page" th:value="${table.data.number}" />
             <input type="hidden" name="sort" th:value="${table.sortField}" />
             <input type="hidden" name="dir" th:value="${table.sortDir}" />
-             <th:block th:if="${topicFiltersEnabled}">
-                <input type="hidden" name="departmentId" th:value="${departmentId}" />
-                <input type="hidden" name="status" th:value="${selectedStatus}" />
-                <input type="hidden" name="adviserSearch" th:value="${adviserSearch}" />
-             </th:block>
+            <th:block th:if="${extraFilters != null}">
+               <th:block th:replace="${extraFilters}"></th:block>
+            </th:block>
 
             <div class="flex flex-wrap items-center justify-between gap-3 mb-4">
                <div class="flex items-center gap-2">
-                  <button
-                     type="button"
-                     class="btn btn-ghost btn-sm btn-square"
-                     th:title="#{crud.table.reload}"
-                     x-on:click="submitQuery()"
-                  >
-                     <span
-                        class="iconify"
-                        data-icon="bi:arrow-clockwise"
-                        data-width="16"
-                     ></span>
-                  </button>
+                  <th:block th:replace="~{fragment/crud/table-controls :: reload(#{crud.table.reload})}"></th:block>
                </div>
 
                <div class="flex flex-wrap items-center gap-2">
@@ -35,44 +22,21 @@
                      name="search"
                      th:value="${table.search}"
                      th:placeholder="#{crud.table.search}"
-                     class="input input-sm w-56"
+                     class="input input-md w-56"
                      x-on:change="submitQuery(0)"
                   />
-                  <button
-                     th:if="${table.bulkDeleteEnabled}"
-                     type="button"
-                     class="btn btn-error btn-outline btn-sm"
-                     th:attr="data-batch-delete-url=${table.baseUrl + '/delete'}, data-batch-delete-template=#{crud.delete.batch}"
-                     x-bind:disabled="selectedIds.length === 0"
-                     x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.batchDeleteUrl, ids: selectedIds, template: $el.dataset.batchDeleteTemplate })"
-                  >
-                     <span
-                        class="iconify"
-                        data-icon="bi:trash"
-                        data-width="16"
-                     ></span>
-                     <span th:text="#{crud.table.delete_selected}"></span>
-                  </button>
-                  <a
-                     th:if="${table.canCreate and (tableCanCreate == null or tableCanCreate)}"
-                     th:href="${table.baseUrl + '/new'}"
-                     class="btn btn-primary btn-sm"
-                  >
-                     <span
-                        class="iconify"
-                        data-icon="bi:plus-lg"
-                        data-width="16"
-                     ></span>
-                     <span th:text="#{crud.table.add}"></span>
-                  </a>
+                  <th:block th:if="${table.bulkDeleteEnabled}">
+                     <th:block th:replace="~{fragment/crud/table-controls :: batchDelete(${table.bulkDeleteUrl}, #{crud.delete.batch}, #{crud.table.delete_selected})}"></th:block>
+                  </th:block>
+                  <th:block th:if="${table.canCreate and (tableCanCreate == null or tableCanCreate)}">
+                     <th:block th:replace="~{fragment/base/button :: linkStyled(${table.createUrl}, #{crud.action.add}, 'bi:plus-lg', 'btn btn-primary btn-sm', null)}"></th:block>
+                  </th:block>
                </div>
             </div>
 
             <div class="overflow-x-auto rounded-box border-2 border-base-300">
-               <table
-                  class="table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32"
-               >
-                  <thead class="bg-base-200">
+               <th:block th:replace="~{fragment/base/table :: table('table table-zebra w-full min-w-max text-sm [&_th]:min-w-32 [&_td]:min-w-32 table-md', ~{::#crud-table-head}, ~{::#crud-table-body})}">
+                  <thead id="crud-table-head" th:fragment="crud-table-head" class="bg-base-200">
                      <tr>
                         <th th:if="${table.bulkDeleteEnabled}" class="w-10">
                            <input
@@ -90,35 +54,9 @@
                                         isAsc=${col.field == table.sortField && table.sortDir == 'asc'},
                                         isDesc=${col.field == table.sortField && table.sortDir == 'desc'}"
                            >
-                              <button
-                                 th:if="${col.sortable}"
-                                 type="button"
-                                 class="btn btn-ghost btn-sm gap-1 -ml-1"
-                                 th:attr="data-sort=${isDesc ? '' : col.field}, data-dir=${isAsc ? 'desc' : 'asc'}"
-                                 x-on:click="submitQuery(0, $el.dataset.sort, $el.dataset.dir)"
-                              >
-                                 <span
-                                    th:text="${#messages.msg(col.label)}"
-                                 ></span>
-                                 <span
-                                    th:if="${!isSorted}"
-                                    class="iconify text-base-content/40"
-                                    data-icon="bi:arrow-down-up"
-                                    data-width="14"
-                                 ></span>
-                                 <span
-                                    th:if="${isAsc}"
-                                    class="iconify"
-                                    data-icon="bi:sort-down"
-                                    data-width="14"
-                                 ></span>
-                                 <span
-                                    th:if="${isDesc}"
-                                    class="iconify"
-                                    data-icon="bi:sort-up"
-                                    data-width="14"
-                                 ></span>
-                              </button>
+                              <th:block th:if="${col.sortable}">
+                                 <th:block th:replace="~{fragment/crud/table-controls :: sort(${col.field}, ${#messages.msg(col.label)}, ${isSorted}, ${isAsc}, ${isDesc})}"></th:block>
+                              </th:block>
                               <span
                                  th:unless="${col.sortable}"
                                  class="text-sm"
@@ -133,26 +71,14 @@
                      </tr>
                      <tr th:if="${!#lists.isEmpty(table.filterableColumns)}">
                         <th th:if="${table.bulkDeleteEnabled}">
-                           <button
-                              type="button"
-                              class="btn btn-primary btn-sm btn-square"
-                              th:title="#{crud.table.search}"
-                              th:aria-label="#{crud.table.search}"
-                              x-on:click="submitQuery(0)"
-                           >
-                              <span
-                                 class="iconify"
-                                 data-icon="bi:search"
-                                 data-width="16"
-                              ></span>
-                           </button>
+                           <th:block th:replace="~{fragment/crud/table-controls :: search(#{crud.table.search})}"></th:block>
                         </th>
                         <th:block th:each="col : ${table.columns}">
                            <th>
                               <input
                                  th:if="${col.filterable}"
                                  type="search"
-                                 class="input input-sm w-full"
+                                 class="input input-md w-full"
                                  th:name="|filters[${col.field}]|"
                                  th:value="${table.filters[col.field]}"
                                  th:placeholder="${'Tìm kiếm theo ' + #messages.msg(col.label)}"
@@ -163,6 +89,7 @@
                         <th></th>
                      </tr>
                   </thead>
+                  <th:block id="crud-table-body" th:fragment="crud-table-body">
                   <tbody th:if="${!table.data.empty}">
                      <tr
                         th:each="item : ${table.data.content}"
@@ -209,12 +136,13 @@
                      <tr>
                         <td
                            th:attr="colspan=${#lists.size(table.columns) + (table.bulkDeleteEnabled ? 2 : 1)}"
-                           class="text-center text-base-content/50 py-6"
+                           class="text-center text-base-content/70 py-6"
                            th:text="#{crud.table.empty}"
                         ></td>
                      </tr>
                   </tbody>
-               </table>
+                  </th:block>
+               </th:block>
             </div>
 
             <div class="flex flex-wrap items-center justify-between gap-3 mt-4">
@@ -227,7 +155,7 @@
 
                   <select
                      name="size"
-                     class="select select-sm w-20"
+                     class="select select-md w-20"
                      x-on:change="submitQuery(0)"
                   >
                      <option

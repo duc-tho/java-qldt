@@ -1,0 +1,74 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="tables">
+            <section>
+               <h2 class="text-xl font-semibold" th:text="#{councils.section.assignments}"></h2>
+               <p class="mt-1 text-sm text-base-content/70" th:text="#{councils.assignments.help}"></p>
+               <th:block th:if="${#lists.isEmpty(eligibleRegistrations)}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft mt-4', 'alert', #{councils.assignments.empty}, 'bi:info-circle')}" ></th:block></th:block>
+               <div class="mt-4 overflow-x-auto rounded-box border border-base-300" th:unless="${#lists.isEmpty(eligibleRegistrations)}">
+                  <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+                     <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                        <tr>
+                           <th th:text="#{councils.column.topic}"></th>
+                           <th th:text="#{councils.column.group}"></th>
+                           <th class="text-right" th:text="#{crud.table.actions}"></th>
+                        </tr>
+                     </thead>
+                     <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+                     <tbody>
+                        <tr th:each="registration : ${eligibleRegistrations}">
+                           <th:block th:replace="~{fragment/feature/council/assignment-tables :: registrationCells(${registration})}"></th:block>
+                           <td class="text-right">
+                              <form method="post" th:action="@{/dot/{periodId}/hoi-dong/{councilId}/de-tai/{topicId}(periodId=${council.registrationPeriod.id},councilId=${council.id},topicId=${registration.topic.id})}">
+                                 <th:block th:replace="~{fragment/base/button :: submit(#{councils.action.assign}, 'bi:plus-circle', 'btn btn-outline btn-sm', false)}"></th:block>
+                              </form>
+                           </td>
+                        </tr>
+                     </tbody>
+                  
+                     </th:block></th:block>
+               </div>
+            </section>
+
+            <section class="border-t border-base-300 pt-6">
+               <h2 class="text-xl font-semibold" th:text="#{councils.section.assigned}"></h2>
+               <th:block th:if="${#lists.isEmpty(assignedRegistrations)}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft mt-4', 'alert', #{councils.assigned.empty}, 'bi:info-circle')}" ></th:block></th:block>
+               <div class="mt-4 overflow-x-auto rounded-box border border-base-300" th:unless="${#lists.isEmpty(assignedRegistrations)}">
+                  <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-2}, ~{::#shared-table-body-2})}">
+                     <thead id="shared-table-head-2" th:fragment="shared-table-head-2" class="bg-base-200">
+                        <tr>
+                           <th th:text="#{councils.column.topic}"></th>
+                           <th th:text="#{councils.column.group}"></th>
+                           <th th:text="#{councils.column.registration-status}"></th>
+                           <th class="text-right" th:if="${managementOpen}" th:text="#{crud.table.actions}"></th>
+                        </tr>
+                     </thead>
+                     <th:block id="shared-table-body-2" th:fragment="shared-table-body-2">
+                     <tbody>
+                        <tr th:each="registration : ${assignedRegistrations}">
+                           <th:block th:replace="~{fragment/feature/council/assignment-tables :: registrationCells(${registration})}"></th:block>
+                           <td>
+                              <span class="badge badge-success badge-soft" th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"></span>
+                           </td>
+                           <td class="text-right" th:if="${managementOpen}">
+                              <form method="post" th:action="@{/dot/{periodId}/hoi-dong/{councilId}/de-tai/{topicId}/bo-phan-cong(periodId=${council.registrationPeriod.id},councilId=${council.id},topicId=${registration.topic.id})}">
+                                 <th:block th:replace="~{fragment/base/button :: submit(#{councils.action.unassign}, 'bi:x-circle', 'btn btn-error btn-outline btn-sm', false)}"></th:block>
+                              </form>
+                           </td>
+                        </tr>
+                     </tbody>
+                  
+                     </th:block></th:block>
+               </div>
+            </section>
+   </th:block>
+
+   <th:block th:fragment="registrationCells(registration)">
+      <td class="font-medium" th:text="${registration.topic.title}"></td>
+      <td>
+         <a class="link link-primary"
+            th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}"
+            th:text="${registration.studentGroup.name}"></a>
+      </td>
+   </th:block>
+</html>

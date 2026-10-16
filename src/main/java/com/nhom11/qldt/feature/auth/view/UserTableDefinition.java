@@ -51,13 +51,13 @@ public class UserTableDefinition extends BaseTableDefinition<User> {
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Link(
-            "users.action.edit",
+            "crud.action.edit",
             "bi:pencil-square",
             user -> baseUrl + "/" + ((User) user).getId() + "/edit"),
         new ActionDef.Delete(
-            "users.action.delete",
+            "crud.action.delete",
             "bi:trash",
-            user -> baseUrl + "/" + ((User) user).getId(),
+            user -> baseUrl + "/" + ((User) user).getId() + "/delete",
             user -> ((User) user).getFullName()));
   }
 }

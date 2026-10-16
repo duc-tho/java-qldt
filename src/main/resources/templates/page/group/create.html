@@ -1,0 +1,22 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <form th:replace="~{fragment/shared/form-card :: formCard(@{/dot/{id}/nhom(id=${periodId})}, ${data}, 'card card-border border-base-300 shadow-sm max-w-xl mx-auto', ~{::group-create-content})}">
+            <div th:fragment="group-create-content" class="card-body p-6">
+               <h2
+                  class="card-title text-lg font-semibold"
+                  th:text="#{student-groups.page.create.title}"
+               ></h2>
+               <th:block th:if="${#fields.hasGlobalErrors()}">
+                  <th:block th:replace="~{fragment/base/alert :: globalErrorsPlain('alert alert-error')}"></th:block>
+               </th:block>
+               <div th:replace="~{fragment/base/input :: field('name', #{student-groups.field.name}, 'text', null, false, null, true, null)}"></div>
+               <div class="card-actions justify-end">
+                  <th:block th:replace="~{fragment/base/button :: submit(#{student-groups.action.create}, null, 'btn btn-sm btn-primary', false)}"></th:block>
+               </div>
+            </div>
+         </form>
+      </th:block>
+   </body>
+</html>

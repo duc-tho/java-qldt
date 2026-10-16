@@ -2,9 +2,9 @@ package com.nhom11.qldt.feature.council.controller;
 
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.service.CouncilService;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.model.enums.PeriodType;
+import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/registration-periods/{periodId}/reviewer-assignments")
+@RequestMapping("/dot/{periodId}/phan-cong")
 public class ReviewerAssignmentController {
   private final CouncilService councilService;
   private final RegistrationPeriodService periodService;
@@ -34,7 +34,7 @@ public class ReviewerAssignmentController {
   public String list(@PathVariable Long periodId, Model model) {
     RegistrationPeriod period = periodService.findById(periodId);
     if (period == null || period.getPeriodType() != PeriodType.TLCN) {
-      return "redirect:/registration-periods";
+      return "redirect:/dot";
     }
 
     model.addAttribute("period", period);
@@ -43,10 +43,10 @@ public class ReviewerAssignmentController {
     model.addAttribute("managementOpen", councilService.isReviewerAssignmentOpen(periodId));
     model.addAttribute("pageTitle", "reviewer-assignments.page.title");
     model.addAttribute("pageIcon", "bi:person-check");
-    return "fragment/page/council/reviewer-assignments";
+    return "page/assignment/list";
   }
 
-  @PostMapping("/topics/{topicId}")
+  @PostMapping("/de-tai/{topicId}")
   public String assign(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -61,6 +61,6 @@ public class ReviewerAssignmentController {
   }
 
   private String redirect(Long periodId) {
-    return "redirect:/registration-periods/" + periodId + "/reviewer-assignments";
+    return "redirect:/dot/" + periodId + "/phan-cong";
   }
 }

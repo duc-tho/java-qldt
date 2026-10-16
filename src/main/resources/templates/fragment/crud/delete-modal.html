@@ -23,7 +23,7 @@
                   data-icon="bi:exclamation-triangle"
                   data-width="20"
                ></span>
-               <h3 class="text-lg font-bold">
+               <h3 class="text-lg font-semibold">
                   <span th:text="#{crud.delete.title}"></span>
                </h3>
             </div>
@@ -36,30 +36,12 @@
             </div>
             <div class="border-t border-dashed border-base-300"></div>
             <div class="flex justify-end gap-3 px-6 py-4">
-               <button
-                  type="button"
-                  class="btn btn-ghost"
-                  x-on:click="$refs.dialog.close()"
-               >
-                  <span
-                     class="iconify inline"
-                     data-icon="bi:x-lg"
-                     data-width="14"
-                  ></span>
-                  <span th:text="#{crud.delete.cancel}"></span>
-               </button>
-               <button type="submit" class="btn btn-error">
-                  <span
-                     class="iconify inline"
-                     data-icon="bi:trash"
-                     data-width="14"
-                  ></span>
-                  <span th:text="#{crud.delete.submit}"></span>
-               </button>
+               <th:block th:replace="~{fragment/base/button :: modalRefClose(#{crud.delete.cancel}, 'bi:x-lg', 'btn btn-sm btn-ghost')}"></th:block>
+               <th:block th:replace="~{fragment/base/button :: submit(#{crud.delete.submit}, 'bi:trash', 'btn btn-sm btn-error', false)}"></th:block>
             </div>
          </form>
          <form method="dialog" class="modal-backdrop">
-            <button th:aria-label="#{crud.delete.close}"></button>
+            <th:block th:replace="~{fragment/base/button :: dialogDismiss(#{crud.delete.close})}"></th:block>
          </form>
       </dialog>
    </th:block>

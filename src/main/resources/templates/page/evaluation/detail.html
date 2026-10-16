@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/danh-gia(periodId=${registration.studentGroup.registrationPeriod.id})}, #{navigation.action.back}, 'bi:arrow-left', 'btn btn-outline btn-sm', null)}"></th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <section class="space-y-6">
+            <th:block th:if="${error != null}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-error alert-soft', 'alert', #{__${error}__}, 'bi:exclamation-circle')}" ></th:block></th:block>
+
+            <th:block th:replace="~{fragment/feature/evaluation/report-overview :: overview}"></th:block>
+
+            <th:block th:replace="~{fragment/feature/evaluation/score-form :: scoreForm}"></th:block>
+
+            <th:block th:replace="~{fragment/feature/evaluation/evaluations-table :: table}"></th:block>
+
+            <th:block th:replace="~{fragment/feature/evaluation/final-result :: result}"></th:block>
+         </section>
+      </th:block>
+   </body>
+</html>

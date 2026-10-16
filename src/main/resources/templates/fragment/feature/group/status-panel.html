@@ -1,0 +1,46 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel">
+      <section th:replace="~{fragment/base/card :: section(${cardClasses}, ~{::#group-status-card})}">
+         <th:block id="group-status-card" th:fragment="group-status-card">
+            <div class="card-body gap-0 p-0">
+               <div class="flex flex-wrap items-start justify-between gap-4 border-b border-base-300 p-5 md:px-7"
+                  th:classappend="${status == 'APPROVED'} ? ' bg-success/10' : (${status == 'REJECTED'} ? ' bg-error/10' : (${status == 'PENDING'} ? ' bg-warning/10' : (${status == 'DRAFT'} ? ' bg-info/10' : ' bg-base-200/40'))) ">
+                  <div class="flex min-w-0 flex-1 items-start gap-3">
+                     <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-xl leading-none"
+                        th:classappend="${status == 'APPROVED'} ? ' bg-success text-success-content' : (${status == 'REJECTED'} ? ' bg-error text-error-content' : (${status == 'PENDING'} ? ' bg-warning text-warning-content' : (${status == 'DRAFT'} ? ' bg-info text-info-content' : ' bg-neutral text-neutral-content'))) ">
+                        <span class="iconify text-inherit"
+                           th:attr="data-icon=${status == 'APPROVED' ? 'bi:check-circle' : (status == 'REJECTED' ? 'bi:x-circle' : (status == 'PENDING' ? 'bi:hourglass-split' : (status == 'DRAFT' ? 'bi:pencil-square' : 'bi:journal-plus')))}"></span>
+                     </span>
+                     <div class="min-w-0">
+                        <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                           <p class="text-sm font-semibold"
+                              th:text="#{__${'student-groups.status.' + status}__}"></p>
+                           <span class="text-sm text-base-content/70" th:if="${statusChangedAt != null}"
+                              th:text="|#{__${'student-groups.status.time.' + status}__}: ${#temporals.format(statusChangedAt, 'dd/MM/yyyy HH:mm')}|"></span>
+                        </div>
+                        <p class="mt-1 text-sm leading-relaxed text-base-content"
+                           th:text="${#messages.msg(statusGuidanceKey, members.size())}"></p>
+                        <p class="mt-2 text-sm text-error"
+                           th:if="${registration != null and registration.status.name() == 'REJECTED' and registration.rejectionReason != null}">
+                           <span class="font-semibold" th:text="#{student-groups.status.reason}"></span>
+                           <span th:text="${registration.rejectionReason}"></span>
+                        </p>
+                     </div>
+                  </div>
+                  <div class="flex flex-wrap items-center gap-2"
+                     th:with="deadline=${status == 'APPROVED' ? group.registrationPeriod.reportDeadline : group.registrationPeriod.studentRegistrationEnd}">
+                     <div class="rounded-box border border-base-300 bg-base-100/70 px-3 py-2 text-sm font-medium tabular-nums"
+                        th:if="${deadline != null}">
+                        <span th:text="${status == 'APPROVED'} ? #{student-groups.status.report-deadline} : (${status == 'PENDING'} ? #{student-groups.status.review-deadline} : #{student-groups.status.registration-deadline})"></span>
+                        <time th:text="${#temporals.format(deadline, 'dd/MM/yyyy HH:mm')}"></time>
+                     </div>
+                     <th:block th:replace="~{fragment/feature/group/request-approval-action :: action(${group}, ${isLeader}, ${registration}, ${isDraftRegistration}, ${isOpen}, ${members.size()})}"></th:block>
+                  </div>
+               </div>
+               <th:block th:replace="~{fragment/feature/group/topic-panel :: content}"></th:block>
+            </div>
+         </th:block>
+      </section>
+   </th:block>
+</html>

@@ -1,0 +1,13 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="cards(groups)">
+      <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(groups)}">
+         <th:block th:each="summary : ${groups}">
+            <th:block th:replace="~{fragment/feature/group/summary-card :: card(${summary})}"></th:block>
+         </th:block>
+      </div>
+      <th:block th:if="${#lists.isEmpty(groups)}">
+         <th:block th:replace="~{fragment/base/alert :: text('alert alert-info', 'alert', #{student-groups.mine.empty})}"></th:block>
+      </th:block>
+   </th:block>
+</html>

@@ -1,0 +1,18 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="groups">
+         <th:block th:if="${groupRegistrations != null}">
+            <section th:replace="~{fragment/base/card :: section('card card-border border-base-300 mt-5', ~{::#topic-groups-card})}">
+               <th:block id="topic-groups-card" th:fragment="topic-groups-card">
+                  <div class="card-body">
+                     <h2 class="card-title text-lg font-semibold" th:text="#{student-groups.section.period-groups}"></h2>
+                     <p class="text-sm text-base-content/70" th:if="${#lists.isEmpty(groupRegistrations)}" th:text="#{crud.table.empty}"></p>
+                     <ul class="space-y-2" th:unless="${#lists.isEmpty(groupRegistrations)}">
+                        <li th:each="registration : ${groupRegistrations}"><a class="link link-primary" th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${topic.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a><span class="badge badge-soft badge-sm ml-2" th:text="#{__${'topic-registrations.status.' + registration.status.name()}__}"></span></li>
+                     </ul>
+                  </div>
+               </th:block>
+            </section>
+         </th:block>
+   </th:block>
+</html>

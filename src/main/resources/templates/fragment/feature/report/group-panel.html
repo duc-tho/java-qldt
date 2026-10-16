@@ -1,0 +1,44 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel">
+      <section th:replace="~{fragment/base/card :: section('card card-border border-base-300', ~{::#group-report-card})}">
+         <th:block id="group-report-card" th:fragment="group-report-card">
+            <div class="card-body">
+               <div class="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                     <h2 class="card-title text-lg font-semibold" th:text="#{report-submissions.title}"></h2>
+                     <p class="text-sm text-base-content/70" th:text="#{report-submissions.description}"></p>
+                     <p class="text-sm text-base-content/70"
+                        th:if="${group.registrationPeriod.reportDeadline != null}"
+                        th:text="${#temporals.format(group.registrationPeriod.reportDeadline, 'dd/MM/yyyy HH:mm')}"></p>
+                  </div>
+                  <th:block th:if="${currentReport != null}">
+                     <th:block th:replace="~{fragment/base/badge :: text(#{__${'report-submissions.status.' + currentReport.status.name()}__}, 'badge badge-success badge-soft')}"></th:block>
+                  </th:block>
+               </div>
+
+               <th:block th:if="${currentReport == null and !isReportUploadClosed and !isReportUploadNotStarted}">
+                  <th:block th:replace="~{fragment/base/alert :: text('alert alert-info alert-soft', 'alert', #{report-submissions.empty})}"></th:block>
+               </th:block>
+               <th:block th:if="${isReportUploadNotStarted}">
+                  <th:block th:replace="~{fragment/base/alert :: text('alert alert-info alert-soft', 'alert', #{report-submissions.error.not-open})}"></th:block>
+               </th:block>
+               <th:block th:if="${isReportUploadClosed}">
+                  <th:block th:replace="~{fragment/base/alert :: text('alert alert-warning alert-soft', 'alert', #{report-submissions.error.deadline-passed})}"></th:block>
+               </th:block>
+
+               <form th:if="${canUploadReport}"
+                  th:action="@{/dot/{periodId}/nhom/{groupId}/bao-cao(periodId=${group.registrationPeriod.id},groupId=${group.id})}"
+                  method="post" enctype="multipart/form-data" class="flex flex-col gap-3 sm:flex-row">
+                  <input class="file-input file-input-primary w-full" type="file" name="files" multiple
+                     accept=".pdf,.docx,.zip,.rar" required>
+                  <th:block th:replace="~{fragment/base/button :: submit(#{report-submissions.action.upload}, null, 'btn btn-sm btn-primary', false)}"></th:block>
+               </form>
+
+               <div class="overflow-x-auto"
+                  th:replace="~{fragment/feature/report/history-table :: table(${reportHistory}, ${group})}"></div>
+            </div>
+         </th:block>
+      </section>
+   </th:block>
+</html>

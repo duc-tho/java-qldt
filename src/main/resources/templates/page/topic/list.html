@@ -1,0 +1,47 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <th:block th:unless="${isStudent}">
+          <label class="fieldset mb-4 max-w-sm gap-1"><span class="label text-sm font-medium text-base-content"
+             th:text="#{topic-registrations.field.registration-period}"></span>
+             <select class="select w-full" x-on:change="window.location.assign($el.value)">
+                <option th:each="period : ${periods}" th:value="@{/dot/{id}/de-tai(id=${period.id})}"
+                   th:selected="${period.id == periodId}" th:text="${period.name}"></option>
+             </select>
+          </label>
+          <form th:replace="~{fragment/shared/filter-bar :: get(@{/dot/{id}/de-tai(id=${periodId})}, 'mb-5 grid gap-3 rounded-box border border-base-300 bg-base-100 p-4 sm:grid-cols-2 xl:grid-cols-[1fr_1fr_1fr_auto]', ~{::#staff-topic-filters})}">
+             <th:block id="staff-topic-filters" th:fragment="staff-topic-filters">
+             <label class="fieldset text-sm gap-1"><span class="label text-sm font-medium text-base-content" th:text="#{topics.field.department}"></span>
+                <select th:replace="~{fragment/base/select :: query('departmentId', 'select w-full', ~{::#topic-department-options})}">
+                   <th:block id="topic-department-options" th:fragment="topic-department-options">
+                   <option value="" th:text="#{topic-filters.all-departments}"></option>
+                   <option th:each="department : ${departments}" th:value="${department.id}"
+                      th:selected="${department.id == departmentId}" th:text="${department.name}"></option>
+                   </th:block>
+                </select></label>
+             <label class="fieldset text-sm gap-1"><span class="label text-sm font-medium text-base-content" th:text="#{topics.column.status}"></span>
+                <select th:replace="~{fragment/base/select :: query('status', 'select w-full', ~{::#topic-status-options})}">
+                   <th:block id="topic-status-options" th:fragment="topic-status-options">
+                   <option value="" th:text="#{topic-filters.all-statuses}"></option>
+                   <option th:each="topicStatus : ${statuses}" th:value="${topicStatus.name()}"
+                      th:selected="${topicStatus == selectedStatus}"
+                      th:text="#{__${'topics.status.' + topicStatus.name()}__}"></option>
+                   </th:block>
+                </select></label>
+             <label class="fieldset text-sm gap-1"><span class="label text-sm font-medium text-base-content" th:text="#{topics.field.advisers}"></span>
+                <th:block th:replace="~{fragment/base/input :: query('adviserSearch', ${adviserSearch}, #{topics.advisers.search}, 'search', 'input w-full')}"></th:block></label>
+             <th:block th:replace="~{fragment/base/button :: submit(#{topic-filters.apply}, null, 'btn btn-sm btn-outline self-end', false)}"></th:block>
+             </th:block>
+          </form>
+         <th:block th:if="${canPropose}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/de-tai/tao(id=${periodId})}, #{topics.action.propose}, null, 'btn btn-sm btn-primary mb-5', null)}"></th:block>
+         </th:block>
+         <div th:replace="~{fragment/crud/table :: crud-table(${table}, ~{fragment/feature/topic/hidden-filters :: fields(${departmentId}, ${selectedStatus}, ${adviserSearch})})}"></div>
+         </th:block>
+         <th:block th:if="${isStudent}">
+            <div th:replace="~{fragment/feature/topic/student-list :: student-list(${period}, ${topics}, ${departments}, ${search}, ${departmentId})}"></div>
+         </th:block>
+      </th:block>
+   </body>
+</html>

@@ -37,6 +37,11 @@
 }
 
 @layer base {
+  body {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
   [x-cloak] {
     display: none !important;
   }
@@ -97,6 +102,10 @@
 }
 
 @layer utilities {
+  .btn.btn-sm {
+    --fontsize: 0.875rem;
+  }
+
   .table thead {
     background-color: color-mix(in oklab, var(--color-primary) 8%, var(--color-base-100));
   }

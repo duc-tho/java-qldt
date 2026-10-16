@@ -2,14 +2,10 @@
    <div
       class="flex items-center gap-2 rounded-lg border border-base-300 bg-base-100 px-4 py-2 transition-[gap] duration-200 is-drawer-close:justify-center is-drawer-close:gap-0 is-drawer-close:px-1"
    >
-      <div class="avatar avatar-placeholder shrink-0">
-         <div class="flex size-8 items-center justify-center rounded-full bg-primary/15 text-xs font-semibold text-primary">
-            <span th:text="${#strings.substring(currentUser.fullName, 0, 1)}"></span>
-         </div>
-      </div>
+      <div th:replace="~{fragment/base/avatar :: initial(${#strings.substring(currentUser.fullName, 0, 1)}, 'size-8', 'shrink-0')}"></div>
       <div class="sidebar-item-label min-w-0 text-left">
          <p class="truncate text-sm font-semibold text-base-content" th:text="${currentUser.fullName}"></p>
-         <p class="truncate text-xs text-base-content/60">
+         <p class="truncate text-sm text-base-content/70">
             <span
                th:each="role, iter : ${currentUser.roles}"
                th:text="|#{roles.__${role.name}__}${iter.last ? '' : ' / '}|"

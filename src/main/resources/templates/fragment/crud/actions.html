@@ -6,75 +6,19 @@
             <th:block
                th:if="${actionStat.count <= T(com.nhom11.qldt.core.table.ActionDef).INLINE_ACTION_LIMIT and action.isVisible(item)}"
             >
-               <button
-                  th:if="${action.isPost()}"
-                  type="button"
-                  class="btn btn-ghost btn-xs"
-                  th:attr="data-post-url=${action.getUrl(item)}"
-                  x-on:click="postAction($el.dataset.postUrl)"
-               >
-                     <span
-                        class="iconify"
-                        th:attr="data-icon=${action.icon()}"
-                        data-width="14"
-                     ></span>
-                     <span th:text="${#messages.msg(action.label())}"></span>
-               </button>
-               <th:block th:if="${action.isReject()}">
-                  <button
-                     type="button"
-                     class="btn btn-ghost btn-xs text-error"
-                     th:attr="onclick=|document.getElementById('reject_item_${item.id}').showModal()|"
-                  >
-                     <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
-                     <span th:text="${#messages.msg(action.label())}"></span>
-                  </button>
-                  <dialog th:id="|reject_item_${item.id}|" class="modal">
-                     <div class="modal-box">
-                        <div>
-                           <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
-                           <label class="form-control mt-4">
-                              <span class="label" th:text="#{topics.field.rejection-reason}"></span>
-                              <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
-                           </label>
-                           <div class="modal-action">
-                              <button type="button" class="btn btn-error"
-                                 th:attr="data-post-url=${action.getUrl(item)}"
-                                 x-on:click="$el.closest('.modal-box').querySelector('textarea').reportValidity() && postAction($el.dataset.postUrl, $el.closest('.modal-box').querySelector('textarea').value)"
-                                 th:text="#{topics.action.reject}"></button>
-                              <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
-                           </div>
-                        </div>
-                     </div>
-                     <div class="modal-backdrop"><button type="button" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|">close</button></div>
-                  </dialog>
+               <th:block th:if="${action.isPost()}">
+                  <th:block th:replace="~{fragment/crud/actions :: postAction(${action.getUrl(item)}, ${#messages.msg(action.label())}, ${action.icon()}, 'btn btn-ghost btn-sm')}"></th:block>
                </th:block>
-               <a
-                  th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}"
-                  th:href="${action.getUrl(item)}"
-                  class="btn btn-ghost btn-xs"
-               >
-                  <span
-                     class="iconify"
-                     th:attr="data-icon=${action.icon()}"
-                     data-width="14"
-                  ></span>
-                  <span th:text="${#messages.msg(action.label())}"></span>
-               </a>
-               <button
-                  th:if="${action.isDelete()}"
-                  type="button"
-                  class="btn btn-ghost btn-xs text-error"
-                  th:attr="data-delete-url=${action.getUrl(item) + '/delete'}, data-delete-name=${action.getName(item)}"
-                  x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })"
-               >
-                  <span
-                     class="iconify"
-                     th:attr="data-icon=${action.icon()}"
-                     data-width="14"
-                  ></span>
-                  <span th:text="${#messages.msg(action.label())}"></span>
-               </button>
+               <th:block th:if="${action.isReject()}">
+                  <th:block th:replace="~{fragment/base/button :: modalOpen(|reject_item_${item.id}|, ${#messages.msg(action.label())}, ${action.icon()}, 'btn btn-ghost btn-sm text-error')}"></th:block>
+                  <th:block th:replace="~{fragment/feature/topic/rejection-dialog :: rejection-dialog(${item}, ${action})}"></th:block>
+               </th:block>
+               <th:block th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}">
+                  <th:block th:replace="~{fragment/base/button :: linkStyled(${action.getUrl(item)}, ${#messages.msg(action.label())}, ${action.icon()}, 'btn btn-ghost btn-sm', null)}"></th:block>
+               </th:block>
+               <th:block th:if="${action.isDelete()}">
+                  <th:block th:replace="~{fragment/crud/delete-action :: deleteStyled(${action.getUrl(item)}, ${action.getName(item)}, ${#messages.msg(action.label())}, 'btn btn-ghost btn-sm text-error', ${action.icon()})}"></th:block>
+               </th:block>
             </th:block>
          </th:block>
 
@@ -82,17 +26,7 @@
             th:if="${T(com.nhom11.qldt.core.table.ActionDef).hasVisibleOverflow(actions, item)}"
             class="dropdown"
          >
-            <button
-               type="button"
-               class="btn btn-ghost btn-xs btn-square"
-               th:attr="popovertarget=|more_action_menu_${item.id}|, style=|anchor-name: --more_action_${item.id};|"
-            >
-               <span
-                  class="iconify"
-                  data-icon="bi:three-dots"
-                  data-width="14"
-               ></span>
-            </button>
+            <th:block th:replace="~{fragment/crud/actions :: popoverToggle(|more_action_menu_${item.id}|, |more_action_${item.id}|, #{crud.table.actions})}"></th:block>
             <ul
                class="dropdown menu bg-base-100 rounded-box w-40 p-2 shadow"
                popover
@@ -103,76 +37,35 @@
                   th:each="action, actionStat : ${actions}"
                   th:if="${actionStat.count > T(com.nhom11.qldt.core.table.ActionDef).INLINE_ACTION_LIMIT and action.isVisible(item)}"
                >
-                  <button
-                     th:if="${action.isPost()}"
-                     type="button"
-                     th:attr="data-post-url=${action.getUrl(item)}"
-                     x-on:click="postAction($el.dataset.postUrl)"
-                  >
-                        <span
-                           class="iconify"
-                           th:attr="data-icon=${action.icon()}"
-                           data-width="14"
-                        ></span>
-                        <span th:text="${#messages.msg(action.label())}"></span>
-                  </button>
-                  <th:block th:if="${action.isReject()}">
-                     <button
-                        type="button"
-                        class="text-error"
-                        th:attr="onclick=|document.getElementById('reject_item_${item.id}').showModal()|"
-                     >
-                        <span class="iconify" th:attr="data-icon=${action.icon()}" data-width="14"></span>
-                        <span th:text="${#messages.msg(action.label())}"></span>
-                     </button>
-                     <dialog th:id="|reject_item_${item.id}|" class="modal">
-                        <div class="modal-box">
-                           <div>
-                              <h3 class="text-lg font-bold" th:text="#{topics.action.reject}"></h3>
-                              <label class="form-control mt-4">
-                                 <span class="label" th:text="#{topics.field.rejection-reason}"></span>
-                                 <textarea class="textarea w-full" name="reason" required maxlength="500"></textarea>
-                              </label>
-                              <div class="modal-action">
-                                 <button type="button" class="btn btn-error"
-                                    th:attr="data-post-url=${action.getUrl(item)}"
-                                    x-on:click="$el.closest('.modal-box').querySelector('textarea').reportValidity() && postAction($el.dataset.postUrl, $el.closest('.modal-box').querySelector('textarea').value)"
-                                    th:text="#{topics.action.reject}"></button>
-                                 <button type="button" class="btn" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|" th:text="#{crud.form.cancel}"></button>
-                              </div>
-                           </div>
-                        </div>
-                        <div class="modal-backdrop"><button type="button" th:attr="onclick=|document.getElementById('reject_item_${item.id}').close()|">close</button></div>
-                     </dialog>
+                  <th:block th:if="${action.isPost()}">
+                     <th:block th:replace="~{fragment/crud/actions :: postAction(${action.getUrl(item)}, ${#messages.msg(action.label())}, ${action.icon()}, '')}"></th:block>
                   </th:block>
-                  <a
-                     th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}"
-                     th:href="${action.getUrl(item)}"
-                  >
-                     <span
-                        class="iconify"
-                        th:attr="data-icon=${action.icon()}"
-                        data-width="14"
-                     ></span>
-                     <span th:text="${#messages.msg(action.label())}"></span>
-                  </a>
-                  <button
-                     th:if="${action.isDelete()}"
-                     type="button"
-                     class="text-error"
-                     th:attr="data-delete-url=${action.getUrl(item) + '/delete'}, data-delete-name=${action.getName(item)}"
-                     x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })"
-                  >
-                     <span
-                        class="iconify"
-                        th:attr="data-icon=${action.icon()}"
-                        data-width="14"
-                     ></span>
-                     <span th:text="${#messages.msg(action.label())}"></span>
-                  </button>
+                  <th:block th:if="${action.isReject()}">
+                     <th:block th:replace="~{fragment/base/button :: modalOpen(|reject_item_${item.id}|, ${#messages.msg(action.label())}, ${action.icon()}, 'text-error')}"></th:block>
+                     <th:block th:replace="~{fragment/feature/topic/rejection-dialog :: rejection-dialog(${item}, ${action})}"></th:block>
+                  </th:block>
+                  <th:block th:if="${!action.isDelete() and !action.isPost() and !action.isReject()}">
+                     <th:block th:replace="~{fragment/base/button :: linkStyled(${action.getUrl(item)}, ${#messages.msg(action.label())}, ${action.icon()}, '', null)}"></th:block>
+                  </th:block>
+                  <th:block th:if="${action.isDelete()}">
+                     <th:block th:replace="~{fragment/crud/delete-action :: deleteStyled(${action.getUrl(item)}, ${action.getName(item)}, ${#messages.msg(action.label())}, 'text-error', ${action.icon()})}"></th:block>
+                  </th:block>
                </li>
             </ul>
          </div>
       </div>
    </th:block>
+
+   <button th:fragment="postAction(url, label, icon, classes)"
+      type="button" th:class="${classes}" th:attr="data-post-url=${url}"
+      x-on:click="postAction($el.dataset.postUrl)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="popoverToggle(id, anchor, label)"
+      type="button" class="btn btn-ghost btn-sm btn-square"
+      th:attr="popovertarget=${id}, style=|anchor-name: --${anchor};|"
+      th:aria-label="${label}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(null, 'bi:three-dots')}"></th:block>
+   </button>
 </html>

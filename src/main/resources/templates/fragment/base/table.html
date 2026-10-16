@@ -1,0 +1,7 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <table th:fragment="table(classes, head, body)" th:class="${classes}">
+      <th:block th:replace="${head}"></th:block>
+      <th:block th:replace="${body}"></th:block>
+   </table>
+</html>

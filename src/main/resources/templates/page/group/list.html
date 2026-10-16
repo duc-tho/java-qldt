@@ -1,0 +1,25 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:if="${canCreateGroup}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom/tao(id=${period.id})}, #{student-groups.action.create}, 'bi:plus-lg', 'btn btn-sm btn-primary', null)}"></th:block>
+         </th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <th:block th:unless="${isStudent}">
+            <th:block th:replace="~{fragment/feature/period/registrations :: registrations(${groupSummaries})}"></th:block>
+         </th:block>
+         <th:block th:if="${isStudent}">
+            <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(groupSummaries)}">
+               <th:block th:each="summary : ${groupSummaries}">
+                  <th:block th:replace="~{fragment/feature/group/summary-card :: card(${summary})}"></th:block>
+               </th:block>
+            </div>
+            <th:block th:if="${#lists.isEmpty(groupSummaries)}">
+               <th:block th:replace="~{fragment/shared/empty-state :: centered('bi:people', #{student-groups.empty}, #{student-groups.page.index.title})}"></th:block>
+            </th:block>
+         </th:block>
+      </th:block>
+   </body>
+</html>

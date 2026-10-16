@@ -4,7 +4,7 @@ import com.nhom11.qldt.core.entity.SoftDeleteEntity;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.council.model.entity.Council;
 import com.nhom11.qldt.feature.department.model.entity.Department;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

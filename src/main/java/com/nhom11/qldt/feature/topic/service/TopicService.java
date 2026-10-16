@@ -7,8 +7,8 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.department.model.entity.Department;
 import com.nhom11.qldt.feature.department.repository.DepartmentRepository;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary;
 import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
@@ -52,6 +52,10 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     return super.create(topic);
   }
 
+  public long countByPeriod(Long periodId) {
+    return topicRepository.countByRegistrationPeriodId(periodId);
+  }
+
   public Topic update(Topic topic) {
     return super.update(topic);
   }
@@ -64,6 +68,21 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   public Page<Topic> findAllByRegistrationPeriodId(
       Long registrationPeriodId, TableQuery query, TopicTableDefinition definition,
       Long departmentId, TopicStatus status, String adviserSearch) {
+    return findAllByRegistrationPeriodId(
+        registrationPeriodId, query, definition, departmentId, status, adviserSearch, null);
+  }
+
+  public Page<Topic> findAllByRegistrationPeriodId(
+      Long registrationPeriodId, TableQuery query, TopicTableDefinition definition,
+      Long departmentId, TopicStatus status, String adviserSearch, Long lecturerId) {
+    return findAllByRegistrationPeriodId(
+        registrationPeriodId, query, definition, departmentId, status, adviserSearch, lecturerId, null);
+  }
+
+  public Page<Topic> findAllByRegistrationPeriodId(
+      Long registrationPeriodId, TableQuery query, TopicTableDefinition definition,
+      Long departmentId, TopicStatus status, String adviserSearch, Long lecturerId,
+      Long proposedById) {
     String search = query.getSearch();
     var filters = query.filterValues(definition);
     Page<Topic> page = topicRepository.findAllByRegistrationPeriodId(
@@ -72,12 +91,14 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         filters.get("title"),
         departmentId,
         status,
+        lecturerId,
+        proposedById,
         adviserSearch == null || adviserSearch.isBlank() ? null : adviserSearch.trim(),
         query.pageable(definition));
     if (page.isEmpty()) return page;
-    var ids = page.getContent().stream().map(Topic::getId).toList();
+    var ids = page.getContent().stream().map(topic -> topic.getId()).toList();
     var details = topicRepository.findAllWithAdvisersByIdIn(ids).stream()
-        .collect(java.util.stream.Collectors.toMap(Topic::getId, topic -> topic));
+        .collect(java.util.stream.Collectors.toMap(topic -> topic.getId(), topic -> topic));
     return new PageImpl<>(ids.stream().map(details::get).toList(), page.getPageable(), page.getTotalElements());
   }
 
@@ -86,8 +107,14 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   }
 
   public List<Topic> findApprovedByRegistrationPeriodId(Long registrationPeriodId) {
+    return findApprovedByRegistrationPeriodId(registrationPeriodId, null, null);
+  }
+
+  public List<Topic> findApprovedByRegistrationPeriodId(
+      Long registrationPeriodId, String search, Long departmentId) {
     return topicRepository.findAllByRegistrationPeriodIdAndStatus(
-        registrationPeriodId, TopicStatus.APPROVED, null, null);
+        registrationPeriodId, TopicStatus.APPROVED,
+        search == null || search.isBlank() ? null : search.trim(), departmentId);
   }
 
   public List<Topic> findAllWithDetailsByRegistrationPeriodId(Long registrationPeriodId) {
@@ -96,6 +123,13 @@ public class TopicService extends BaseCrudService<Topic, Long> {
 
   public List<TopicProposalSummary> findProposalSummariesByPeriodIds(List<Long> periodIds) {
     return periodIds.isEmpty() ? List.of() : topicRepository.findProposalSummariesByPeriodIds(periodIds);
+  }
+
+  public List<TopicProposalSummary> findVisibleProposalSummariesByPeriodIds(
+      List<Long> periodIds, Long lecturerId) {
+    return periodIds.isEmpty()
+        ? List.of()
+        : topicRepository.findVisibleProposalSummariesByPeriodIds(periodIds, lecturerId);
   }
 
   public Topic create(
@@ -265,7 +299,7 @@ public class TopicService extends BaseCrudService<Topic, Long> {
   }
 
   private void validateAdviserChange(Topic existing, Set<Long> adviserIds) {
-    Set<Long> currentIds = existing.getAdvisers().stream().map(User::getId)
+    Set<Long> currentIds = existing.getAdvisers().stream().map(adviser -> adviser.getId())
         .collect(java.util.stream.Collectors.toSet());
     if (currentIds.equals(adviserIds)) return;
     if (topicRepository.hasSubmittedEvaluation(existing.getId())) {

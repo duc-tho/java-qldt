@@ -1,0 +1,47 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="table">
+            <div class="overflow-x-auto rounded-box border border-base-300" th:unless="${#lists.isEmpty(topics)}">
+               <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+                  <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                     <tr>
+                        <th th:text="#{councils.column.topic}"></th>
+                        <th th:text="#{topics.field.advisers}"></th>
+                        <th th:text="#{reviewer-assignments.field.reviewer}"></th>
+                        <th class="text-right" th:if="${managementOpen}" th:text="#{crud.table.actions}"></th>
+                     </tr>
+                  </thead>
+                  <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+                  <tbody>
+                     <tr th:each="topic : ${topics}">
+                        <td class="font-medium" th:text="${topic.title}"></td>
+                        <td>
+                           <span th:each="adviser, status : ${topic.advisers}">
+                              <span th:text="${adviser.fullName}"></span><span th:unless="${status.last}">, </span>
+                           </span>
+                        </td>
+                        <td th:text="${topic.reviewer != null ? topic.reviewer.fullName : '—'}"></td>
+                        <td class="text-right" th:if="${managementOpen}">
+                           <form class="flex justify-end gap-2" method="post" th:action="@{/dot/{periodId}/phan-cong/de-tai/{topicId}(periodId=${period.id},topicId=${topic.id})}">
+                              <select th:replace="~{fragment/base/select :: named('reviewerId', 'select select-md', true, ~{::#reviewer-options})}">
+                                 <th:block id="reviewer-options" th:fragment="reviewer-options">
+                                 <option value="" th:text="#{reviewer-assignments.select-reviewer}"></option>
+                                 <option
+                                    th:each="lecturer : ${lecturers}"
+                                    th:value="${lecturer.id}"
+                                    th:text="${lecturer.fullName}"
+                                    th:selected="${topic.reviewer != null and topic.reviewer.id == lecturer.id}"
+                                    th:disabled="${topic.advisers.contains(lecturer)}"
+                                 ></option>
+                                 </th:block>
+                              </select>
+                              <th:block th:replace="~{fragment/base/button :: submit(#{reviewer-assignments.action.assign}, 'bi:person-check', 'btn btn-primary btn-sm', false)}"></th:block>
+                           </form>
+                        </td>
+                     </tr>
+                  </tbody>
+               
+                  </th:block></th:block>
+            </div>
+   </th:block>
+</html>

@@ -1,297 +1,69 @@
-<ul th:fragment="sidebar-menu" class="menu w-full grow">
-   <li
-      sec:authorize="hasRole('ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title pointer-events-none h-9"
-   >
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.overview}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
-   </li>
+﻿<ul th:fragment="sidebar-menu" class="menu w-full grow">
+   <th:block sec:authorize="hasRole('ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.overview}, 'menu-title pointer-events-none h-9')}"></li>
+   </th:block>
    <li
       sec:authorize="hasRole('ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.home}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:house"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.home}"
-         ></span
-      ></a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/', #{navigation.item.home}, 'bi:house', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.home})}"></th:block>
    </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title pointer-events-none mt-4 h-9"
-   >
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.topic-management}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
+   <li sec:authorize="isAuthenticated()" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/dot', #{navigation.item.registration-periods}, 'bi:calendar-range', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/dot')}, #{navigation.item.registration-periods})}"></th:block>
    </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/registration-periods"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.registration-periods}"
-         th:classappend="${currentPath == '/registration-periods'} ? ' menu-active'"
-      >
-         <span class="iconify block shrink-0" data-icon="bi:calendar-range" data-width="18"></span>
-         <span class="sidebar-item-label" th:text="#{navigation.item.registration-periods}"></span>
-      </a>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/registration-periods/topics"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.topics}"
-         th:classappend="${#strings.contains(currentPath, '/topics')} ? ' menu-active'"
-      >
-         <span class="iconify block shrink-0" data-icon="bi:journal-text" data-width="18"></span>
-         <span class="sidebar-item-label" th:text="#{navigation.item.topics}"></span>
-      </a>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/registration-periods/groups"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.groups}"
-         th:classappend="${#strings.contains(currentPath, '/groups')} ? ' menu-active'"
-      >
-         <span class="iconify block shrink-0" data-icon="bi:people" data-width="18"></span>
-         <span class="sidebar-item-label" th:text="#{navigation.item.groups}"></span>
-      </a>
-   </li>
+   <th:block sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.topic-management}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   </th:block>
+   <th:block sec:authorize="hasRole('LECTURER')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.lecturer}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   </th:block>
    <li
       sec:authorize="hasRole('LECTURER')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title pointer-events-none mt-4 h-9"
    >
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.lecturer}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/dot?congViec=duyet', #{navigation.item.topic-registrations}, 'bi:journal-check', 'flex btn btn-sm btn-ghost text-left justify-start items-center', false, null)}"></th:block>
    </li>
    <li
       sec:authorize="hasRole('LECTURER')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/registration-periods"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         th:classappend="${#strings.startsWith(currentPath, '/registration-periods')} ? ' menu-active'"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:calendar-range"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.registration-periods}"
-         ></span>
-      </a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/dot?congViec=danh-gia', #{navigation.item.council-workspace}, 'bi:clipboard2-check', 'flex btn btn-sm btn-ghost text-left justify-start items-center', false, null)}"></th:block>
    </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/topic-registrations"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:journal-check"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.topic-registrations}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/council-workspace"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         th:classappend="${#strings.startsWith(currentPath, '/council-workspace')} ? ' menu-active'"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:clipboard2-check"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.council-workspace}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/topic-proposals"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:journal-plus"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.topic-proposals}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('STUDENT')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title pointer-events-none mt-4 h-9"
-   >
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.student}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
-   </li>
+   <th:block sec:authorize="hasRole('STUDENT')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.student}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   </th:block>
    <li
       sec:authorize="hasRole('STUDENT')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/student-groups"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         th:classappend="${currentPath == '/student-groups' or #strings.contains(currentPath, '/student-group/')} ? ' menu-active'"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:people"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.student-groups}"
-         ></span
-      ></a>
-   </li>
-   <li sec:authorize="hasRole('STUDENT')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-      <a href="/student-groups/periods" class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right" th:attr="data-tip=#{navigation.item.student-periods}" th:classappend="${currentPath == '/student-groups/periods'} ? ' menu-active'">
-         <span class="iconify block shrink-0" data-icon="bi:calendar-plus" data-width="18"></span>
-         <span class="sidebar-item-label" th:text="#{navigation.item.student-periods}"></span>
-      </a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/dot?coNhom=true', #{navigation.item.student-groups}, 'bi:people', 'flex btn btn-sm btn-ghost text-left justify-start items-center', false, null)}"></th:block>
    </li>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/departments"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.departments}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:diagram-3"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.departments}"
-         ></span
-      ></a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/departments', #{navigation.item.departments}, 'bi:diagram-3', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.departments})}"></th:block>
    </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title pointer-events-none mt-4 h-9"
-   >
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.information}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
-   </li>
+   <th:block sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.information}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   </th:block>
    <li
       sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/announcements"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.announcements}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:megaphone"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.announcements}"
-         ></span
-      ></a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/announcements', #{navigation.item.announcements}, 'bi:megaphone', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.announcements})}"></th:block>
    </li>
-   <li class="menu-title pointer-events-none mt-4 h-9">
-      <span class="is-drawer-close:hidden" th:text="#{navigation.group.system}"></span>
-      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
+   <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.system}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   <li>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/account', #{navigation.item.account}, 'bi:person-circle', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.account})}"></th:block>
    </li>
    <li>
-      <a
-         href="/account"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.account}"
-      >
-         <span
-            class="iconify block shrink-0"
-            data-icon="bi:person-circle"
-            data-width="18"
-         ></span>
-         <span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.account}"
-         ></span>
-      </a>
-   </li>
-   <li>
-      <a
-         href="/settings"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.settings}"
-      >
-         <span
-            class="iconify block shrink-0"
-            data-icon="bi:gear"
-            data-width="18"
-         ></span>
-         <span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.settings}"
-         ></span>
-      </a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/settings', #{navigation.item.settings}, 'bi:gear', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.settings})}"></th:block>
    </li>
    <li
       sec:authorize="hasRole('ADMIN')"
       xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
    >
-      <a
-         href="/users"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.users}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:people"
-            data-width="18"
-         ></span
-         ><span
-            class="sidebar-item-label"
-            th:text="#{navigation.item.users}"
-         ></span
-      ></a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/users', #{navigation.item.users}, 'bi:people', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', false, #{navigation.item.users})}"></th:block>
    </li>
 </ul>

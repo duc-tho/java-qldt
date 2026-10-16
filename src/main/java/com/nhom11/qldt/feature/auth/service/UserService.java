@@ -110,7 +110,7 @@ public class UserService extends BaseCrudService<User, Long> {
       throw new IllegalArgumentException("users.validation.roles.invalid");
     }
 
-    Set<String> roleNames = roles.stream().map(Role::getName).collect(Collectors.toSet());
+    Set<String> roleNames = roles.stream().map(role -> role.getName()).collect(Collectors.toSet());
     boolean validPair =
         roles.size() == 2
             && roleNames.contains("ADMIN")

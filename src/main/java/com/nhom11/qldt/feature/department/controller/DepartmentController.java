@@ -44,13 +44,13 @@ public class DepartmentController {
     view.table(model, service.findAll(query, table), "/departments", query, table);
     model.addAttribute("pageTitle", "departments.page.list.title");
     model.addAttribute("pageIcon", "bi:diagram-3");
-    return "fragment/page/department/list";
+    return "page/department/list";
   }
 
   @GetMapping("/new")
   public String createForm(Model model) {
     form(model, new DepartmentForm(), "/departments", false, "departments.page.create.title");
-    return "fragment/page/department/create";
+    return "page/department/create";
   }
 
   @PostMapping
@@ -58,7 +58,7 @@ public class DepartmentController {
       @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
     if (errors.hasErrors()) {
       form(model, form, "/departments", false, "departments.page.create.title");
-      return "fragment/page/department/create";
+      return "page/department/create";
     }
 
     service.create(form.toEntity());
@@ -72,7 +72,7 @@ public class DepartmentController {
     DepartmentForm form = new DepartmentForm();
     form.fromEntity(department);
     form(model, form, "/departments/" + id, true, "departments.page.detail.title");
-    return "fragment/page/department/detail";
+    return "page/department/detail";
   }
 
   @GetMapping("/{id}/edit")
@@ -82,7 +82,7 @@ public class DepartmentController {
     DepartmentForm form = new DepartmentForm();
     form.fromEntity(department);
     form(model, form, "/departments/" + id, false, "departments.page.edit.title");
-    return "fragment/page/department/detail";
+    return "page/department/detail";
   }
 
   @PostMapping("/{id}")
@@ -95,7 +95,7 @@ public class DepartmentController {
     if (errors.hasErrors()) {
       form.setId(id);
       form(model, form, "/departments/" + id, false, "departments.page.edit.title");
-      return "fragment/page/department/detail";
+      return "page/department/detail";
     }
     Department department = form.toEntity();
     department.setId(id);
@@ -124,7 +124,7 @@ public class DepartmentController {
         "post",
         "/departments",
         readonly,
-        "fragment/page/department/fields",
+        "fragment/feature/department/fields",
         validation.render(DepartmentForm.class));
     model.addAttribute("pageTitle", title);
     model.addAttribute("pageIcon", "bi:diagram-3");

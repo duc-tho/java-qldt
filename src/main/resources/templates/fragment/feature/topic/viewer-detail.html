@@ -1,0 +1,24 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="viewer-detail(topic, showRejectionReason)">
+      <article th:replace="~{fragment/base/card :: card(~{::topic-viewer-header}, ~{::topic-viewer-body}, ~{::topic-viewer-footer})}">
+         <header th:fragment="topic-viewer-header" class="card-body pb-0">
+            <div class="flex flex-wrap items-center gap-2">
+               <h2 class="card-title text-lg font-semibold" th:text="${topic.title}"></h2>
+               <span class="badge badge-soft"
+                  th:classappend="${topic.status.name() == 'APPROVED'} ? ' badge-success' : ' badge-warning'"
+                  th:text="#{__${'topics.status.' + topic.status.name()}__}"></span>
+            </div>
+         </header>
+         <section th:fragment="topic-viewer-body" class="card-body pt-4">
+            <p class="text-sm text-base-content/70" th:text="${topic.department.name}"></p>
+            <p class="whitespace-pre-wrap" th:text="${topic.description}"></p>
+            <p th:text="${#strings.listJoin(topic.advisers.![fullName], ', ')}"></p>
+            <th:block th:if="${showRejectionReason and topic.rejectionReason != null}">
+               <th:block th:replace="~{fragment/base/alert :: text('alert alert-warning alert-soft', 'alert', ${topic.rejectionReason})}"></th:block>
+            </th:block>
+         </section>
+         <th:block th:fragment="topic-viewer-footer"></th:block>
+      </article>
+   </th:block>
+</html>

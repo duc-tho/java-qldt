@@ -1,0 +1,20 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <dialog th:fragment="dialog(id, content, closeLabel)" th:id="${id}" class="modal">
+      <div class="modal-box">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+         <th:block th:replace="~{fragment/base/button :: dialogDismiss(${closeLabel})}"></th:block>
+      </form>
+   </dialog>
+
+   <dialog th:fragment="dialogOpen(id, content, open, closeLabel)" th:id="${id}" class="modal" th:open="${open}">
+      <div class="modal-box">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+         <th:block th:replace="~{fragment/base/button :: dialogDismiss(${closeLabel})}"></th:block>
+      </form>
+   </dialog>
+</html>

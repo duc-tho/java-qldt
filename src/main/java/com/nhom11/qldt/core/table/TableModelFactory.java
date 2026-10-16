@@ -25,6 +25,8 @@ public class TableModelFactory {
     return new TableModel<>(
         data,
         baseUrl,
+        definition.createUrl(baseUrl),
+        definition.bulkDeleteUrl(baseUrl),
         search,
         sortField,
         sortDirection,

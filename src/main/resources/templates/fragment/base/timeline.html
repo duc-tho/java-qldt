@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <li th:fragment="milestone(label, date, active)" class="flex items-start gap-3">
+      <span class="mt-1 size-2 shrink-0 rounded-full"
+         th:classappend="${active} ? ' bg-primary' : ' bg-base-300'"></span>
+      <span class="min-w-0 flex-1" th:text="${label}"></span>
+      <time class="text-sm text-base-content/70"
+         th:text="${#temporals.format(date, 'dd/MM/yyyy HH:mm')}"></time>
+   </li>
+
+   <details th:fragment="phase(title, open, steps)"
+      class="collapse collapse-arrow rounded-box border border-base-300"
+      th:attr="open=${open} ? 'open' : null">
+      <summary class="collapse-title text-sm font-semibold text-primary" th:text="${title}"></summary>
+      <div class="collapse-content space-y-3">
+         <th:block th:replace="${steps}"></th:block>
+      </div>
+   </details>
+
+   <div th:fragment="step(number, title, details, active, completed, completedLabel)"
+      class="rounded-box border p-4 text-center"
+      th:classappend="${active} ? ' border-primary bg-primary/5' : ' border-base-300'">
+      <div class="flex flex-col items-center gap-2">
+         <span class="badge badge-primary badge-soft badge-sm shrink-0" th:text="${number}"></span>
+         <p class="min-w-0 font-semibold" th:text="${title}"></p>
+      </div>
+      <th:block th:replace="${details}"></th:block>
+      <span class="badge badge-success badge-soft badge-sm mt-2"
+         th:if="${completed}" th:text="${completedLabel}"></span>
+   </div>
+</html>

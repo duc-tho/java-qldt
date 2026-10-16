@@ -51,14 +51,14 @@ public class AnnouncementController {
     model.addAttribute("pageTitle", "announcements.page.list.title");
     model.addAttribute("pageIcon", "bi:megaphone");
 
-    return "fragment/page/announcement/list";
+    return "page/announcement/list";
   }
 
   @GetMapping("/new")
   public String createForm(Model model) {
     form(model, new AnnouncementForm(), "/announcements", false, "announcements.page.create.title");
 
-    return "fragment/page/announcement/create";
+    return "page/announcement/create";
   }
 
   @PostMapping
@@ -69,7 +69,7 @@ public class AnnouncementController {
     if (errors.hasErrors()) {
       form(model, form, "/announcements", false, "announcements.page.create.title");
 
-      return "fragment/page/announcement/create";
+      return "page/announcement/create";
     }
 
     service.create(form.toEntity(), form.getRoleIds());
@@ -90,7 +90,7 @@ public class AnnouncementController {
 
     model.addAttribute("canEdit", item.getStatus() == AnnouncementStatus.PUBLISHED);
 
-    return "fragment/page/announcement/detail";
+    return "page/announcement/detail";
   }
 
   @GetMapping("/{id}/edit")
@@ -104,7 +104,7 @@ public class AnnouncementController {
     form.fromEntity(item);
     form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
 
-    return "fragment/page/announcement/detail";
+    return "page/announcement/detail";
   }
 
   @PostMapping("/{id}")
@@ -122,7 +122,7 @@ public class AnnouncementController {
 
     if (errors.hasErrors()) {
       form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
-      return "fragment/page/announcement/detail";
+      return "page/announcement/detail";
     }
     Announcement item = form.toEntity();
     item.setId(id);
@@ -151,7 +151,7 @@ public class AnnouncementController {
         "post",
         "/announcements",
         readonly,
-        "fragment/page/announcement/fields",
+        "fragment/feature/announcement/fields",
         validation.render(AnnouncementForm.class));
 
     model.addAttribute("roles", roles.findAll());

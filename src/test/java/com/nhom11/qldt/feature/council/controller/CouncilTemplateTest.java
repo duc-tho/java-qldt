@@ -15,24 +15,30 @@ class CouncilTemplateTest {
 
     assertThat(create)
         .contains("#fields.hasGlobalErrors()")
-        .contains("th:errors=\"*{memberIds}\"")
         .contains("initialMembers");
-    assertThat(detail).contains("crud-delete-request");
+    assertThat(Files.readString(Path.of("src/main/resources/templates/fragment/feature/council/member-picker.html")))
+        .contains("th:errors=\"*{memberIds}\"");
+    assertThat(detail).contains("fragment/crud/delete-action :: delete(");
+    assertThat(Files.readString(Path.of("src/main/resources/templates/fragment/crud/delete-action.html")))
+        .contains("crud-delete-request");
   }
 
   @Test
   void workspaceExposesDraftSubmitAndFinalizeActions() throws IOException {
-    String workspace = template("workspace.html");
+    String workspace = Files.readString(
+        Path.of("src/main/resources/templates/fragment/feature/evaluation/score-form.html"))
+        + Files.readString(
+            Path.of("src/main/resources/templates/fragment/feature/evaluation/final-result.html"));
 
     assertThat(workspace)
-        .contains("/draft")
-        .contains("/submit")
-        .contains("/finalize")
+        .contains("/luu-nhap")
+        .contains("/nop")
+        .contains("/chot")
         .contains("th:if=\"${councilEvaluation and canFinalize}\"");
   }
 
   private String template(String name) throws IOException {
     return Files.readString(
-        Path.of("src/main/resources/templates/fragment/page/council", name));
+        Path.of("src/main/resources/templates/page/council", name));
   }
 }

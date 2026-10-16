@@ -48,7 +48,7 @@ public class AccountController {
     AccountForm form = new AccountForm();
     form.fromEntity(currentUser(principal));
     prepareModel(model, form, new PasswordChangeForm(), false);
-    return "account";
+    return "page/account/detail";
   }
 
   @PostMapping
@@ -65,7 +65,7 @@ public class AccountController {
 
     if (bindingResult.hasErrors()) {
       prepareModel(model, form, new PasswordChangeForm(), false);
-      return "account";
+      return "page/account/detail";
     }
 
     User user = currentUser(principal);
@@ -98,7 +98,7 @@ public class AccountController {
       AccountForm accountForm = new AccountForm();
       accountForm.fromEntity(user);
       prepareModel(model, accountForm, form, true);
-      return "account";
+      return "page/account/detail";
     }
 
     return "redirect:/account?passwordUpdated";

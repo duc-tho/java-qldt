@@ -1,0 +1,11 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="value(name, value)" th:id="${name}" th:attr="data-readonly-field=${name}"
+      class="min-h-9 select-text whitespace-pre-wrap break-words border-l-2 border-base-300 px-3 py-1.5 font-medium text-base-content"
+      th:text="${#strings.isEmpty(value) ? '—' : value}"></div>
+
+   <div th:fragment="content(name, content)" th:id="${name}" th:attr="data-readonly-field=${name}"
+      class="min-h-9 select-text whitespace-pre-wrap break-words border-l-2 border-base-300 px-3 py-1.5 font-medium text-base-content">
+      <th:block th:replace="${content}"></th:block>
+   </div>
+</html>

@@ -29,11 +29,11 @@ class UserRoleSelectionTest {
   void acceptsSingleRoleAndAllowedAdminPairs() {
     when(userRepository.save(any(User.class))).thenAnswer(call -> call.getArgument(0));
     assertThat(createWithRoles(role(1L, "STUDENT")).getRoles())
-        .extracting(Role::getName).containsExactly("STUDENT");
+        .extracting(role -> role.getName()).containsExactly("STUDENT");
     assertThat(createWithRoles(role(2L, "ADMIN"), role(3L, "LECTURER"))
-        .getRoles()).extracting(Role::getName).containsExactlyInAnyOrder("ADMIN", "LECTURER");
+        .getRoles()).extracting(role -> role.getName()).containsExactlyInAnyOrder("ADMIN", "LECTURER");
     assertThat(createWithRoles(role(2L, "ADMIN"), role(4L, "HEAD_OF_FACULTY"))
-        .getRoles()).extracting(Role::getName).containsExactlyInAnyOrder("ADMIN", "HEAD_OF_FACULTY");
+        .getRoles()).extracting(role -> role.getName()).containsExactlyInAnyOrder("ADMIN", "HEAD_OF_FACULTY");
   }
 
   @Test
@@ -54,7 +54,7 @@ class UserRoleSelectionTest {
   }
 
   private User createWithRoles(Role... roles) {
-    Set<Long> ids = java.util.Arrays.stream(roles).map(Role::getId).collect(java.util.stream.Collectors.toSet());
+    Set<Long> ids = java.util.Arrays.stream(roles).map(role -> role.getId()).collect(java.util.stream.Collectors.toSet());
     when(roleRepository.findAllById(ids)).thenReturn(List.of(roles));
     User user = new User();
     user.setPassword("password");

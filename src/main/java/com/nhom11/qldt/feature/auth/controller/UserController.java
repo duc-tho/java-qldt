@@ -31,10 +31,10 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class UserController {
 
   private static final String BASE_URL = "/users";
-  private static final String TEMPLATE_USER_FIELDS = "fragment/page/user/fields";
-  private static final String VIEW_USER_LIST = "fragment/page/user/list";
-  private static final String VIEW_USER_DETAIL = "fragment/page/user/detail";
-  private static final String VIEW_USER_CREATE = "fragment/page/user/create";
+  private static final String TEMPLATE_USER_FIELDS = "fragment/feature/user/fields";
+  private static final String VIEW_USER_LIST = "page/user/list";
+  private static final String VIEW_USER_DETAIL = "page/user/detail";
+  private static final String VIEW_USER_CREATE = "page/user/create";
   private static final String FORM_METHOD_POST = "post";
   private static final int FORCE_DELETE_PERMANENTLY = 1;
 

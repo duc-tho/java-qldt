@@ -1,0 +1,71 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="timeline">
+      <section th:replace="~{fragment/base/card :: section('card card-border border-base-300 bg-base-100', ~{::#period-timeline-card})}">
+         <th:block id="period-timeline-card" th:fragment="period-timeline-card">
+            <div class="card-body gap-5">
+               <div class="flex items-center gap-2">
+                  <span class="iconify text-primary" data-icon="bi:calendar-week"></span>
+                  <h2 class="card-title text-lg font-semibold"
+                     th:text="#{registration_periods.timeline.title}"></h2>
+               </div>
+
+               <div class="space-y-4">
+                  <details th:replace="~{fragment/base/timeline :: phase(#{registration_periods.timeline.phase-one}, ${now.isBefore(period.studentRegistrationStart)}, ~{::#period-phase-one})}">
+                     <th:block id="period-phase-one" th:fragment="period-phase-one">
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-one}, #{registration_periods.timeline.open}, ~{::#period-step-one-details}, ${currentStep == 1}, false, null)}">
+                           <p id="period-step-one-details" th:fragment="period-step-one-details"
+                              class="mt-1 text-sm text-base-content/70"
+                              th:text="${#temporals.format(period.lecturerRegistrationStart, 'dd/MM/yyyy HH:mm')}"></p>
+                        </div>
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-two}, #{registration_periods.timeline.proposal}, ~{::#period-step-two-details}, ${currentStep == 2}, false, null)}">
+                           <p id="period-step-two-details" th:fragment="period-step-two-details"
+                              class="mt-1 flex flex-wrap justify-center gap-x-1 text-sm text-base-content/70">
+                              <span class="whitespace-nowrap"
+                                 th:text="|${#temporals.format(period.lecturerRegistrationStart, 'dd/MM/yyyy HH:mm')} –|"></span>
+                              <span class="whitespace-nowrap"
+                                 th:text="${#temporals.format(period.lecturerRegistrationEnd, 'dd/MM/yyyy HH:mm')}"></span>
+                           </p>
+                        </div>
+                     </th:block>
+                  </details>
+
+                  <details th:replace="~{fragment/base/timeline :: phase(#{registration_periods.timeline.phase-two}, ${!now.isBefore(period.studentRegistrationStart) and now.isBefore(period.reportDeadline)}, ~{::#period-phase-two})}">
+                     <th:block id="period-phase-two" th:fragment="period-phase-two">
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-three}, #{registration_periods.timeline.student}, ~{::#period-step-three-details}, ${currentStep == 3}, false, null)}">
+                           <p id="period-step-three-details" th:fragment="period-step-three-details"
+                              class="mt-1 flex flex-wrap justify-center gap-x-1 text-sm text-base-content/70">
+                              <span class="whitespace-nowrap"
+                                 th:text="|${#temporals.format(period.studentRegistrationStart, 'dd/MM/yyyy HH:mm')} –|"></span>
+                              <span class="whitespace-nowrap"
+                                 th:text="${#temporals.format(period.studentRegistrationEnd, 'dd/MM/yyyy HH:mm')}"></span>
+                           </p>
+                        </div>
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-four}, #{registration_periods.timeline.report}, ~{::#period-step-four-details}, ${currentStep == 4}, false, null)}">
+                           <p id="period-step-four-details" th:fragment="period-step-four-details"
+                              class="mt-1 text-sm text-base-content/70"
+                              th:text="|#{registration_periods.timeline.deadline}: ${#temporals.format(period.reportDeadline, 'dd/MM/yyyy HH:mm')}|"></p>
+                        </div>
+                     </th:block>
+                  </details>
+
+                  <details th:replace="~{fragment/base/timeline :: phase(#{registration_periods.timeline.phase-three}, ${!now.isBefore(period.reportDeadline) and !resultsPublished}, ~{::#period-phase-three})}">
+                     <th:block id="period-phase-three" th:fragment="period-phase-three">
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-five}, #{registration_periods.timeline.evaluation}, ~{::#period-step-five-details}, ${!now.isBefore(period.reportDeadline) and !canPublishResults}, ${canPublishResults}, #{registration_periods.timeline.completed})}">
+                           <p id="period-step-five-details" th:fragment="period-step-five-details"
+                              class="mt-1 text-sm text-base-content/70"
+                              th:text="#{registration_periods.timeline.evaluation-description}"></p>
+                        </div>
+                        <div th:replace="~{fragment/base/timeline :: step(#{registration_periods.timeline.step-six}, #{registration_periods.timeline.publication}, ~{::#period-step-six-details}, ${!now.isBefore(period.reportDeadline) and canPublishResults and !resultsPublished}, ${resultsPublished}, #{registration_periods.timeline.completed})}">
+                           <p id="period-step-six-details" th:fragment="period-step-six-details"
+                              class="mt-1 text-sm text-base-content/70"
+                              th:text="#{registration_periods.timeline.publication-description}"></p>
+                        </div>
+                     </th:block>
+                  </details>
+               </div>
+            </div>
+         </th:block>
+      </section>
+   </th:block>
+</html>

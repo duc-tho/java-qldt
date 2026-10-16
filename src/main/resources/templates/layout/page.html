@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
    <head>
       <title th:text="${#messages.msg(pageTitle)}"></title>
@@ -8,27 +8,7 @@
       <th:block layout:fragment="main">
          <div class="flex flex-col gap-4">
             <div class="flex items-center gap-1">
-               <button
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-square"
-                  x-data="pageBack"
-                  x-on:click="goBack"
-                  th:attr="data-back-label=#{navigation.action.back}, data-home-label=#{navigation.item.home}"
-                  x-bind:aria-label="hasHistory ? $el.dataset.backLabel : $el.dataset.homeLabel"
-               >
-                  <span
-                     x-show="hasHistory"
-                     class="iconify"
-                     data-icon="bi:arrow-left"
-                     data-width="16"
-                  ></span>
-                  <span
-                     x-show="!hasHistory"
-                     class="iconify"
-                     data-icon="bi:house"
-                     data-width="16"
-                  ></span>
-               </button>
+               <th:block th:replace="~{fragment/ui/navigation-actions :: pageBack(#{navigation.action.back}, #{navigation.item.home})}"></th:block>
                <div class="breadcrumbs text-sm">
                   <ul>
                      <li><a href="/" th:text="#{navigation.item.home}"></a></li>
@@ -60,7 +40,7 @@
                      <div>
                         <div class="flex items-center gap-2">
                            <h1
-                              class="text-2xl font-bold"
+                              class="text-2xl font-semibold leading-tight text-base-content"
                               th:text="${pageHeading != null ? pageHeading : #messages.msg(pageTitle)}"
                            ></h1>
                            <span
@@ -73,7 +53,7 @@
                         <th:block th:with="descriptionKey=${pageDesc != null ? pageDesc : pageTitle.replace('.title', '.description')}">
                            <p
                               th:if="${#messages.msgOrNull(descriptionKey) != null}"
-                              class="mt-1 text-sm text-base-content/60"
+                              class="mt-1 text-sm text-base-content/70"
                               th:text="${#messages.msg(descriptionKey)}"
                            ></p>
                         </th:block>
@@ -89,10 +69,11 @@
 
             <div class="border-t-2 border-dashed border-base-300"></div>
 
-            <div role="alert" class="alert alert-error alert-soft" th:if="${deleteError != null}">
-               <span class="iconify" data-icon="bi:exclamation-circle"></span>
-               <span th:text="#{__${deleteError}__}"></span>
-            </div>
+            <th:block th:if="${deleteError != null}">
+               <div th:replace="~{fragment/base/alert :: alert('error', ~{::span})}">
+                  <span th:text="#{__${deleteError}__}"></span>
+               </div>
+            </th:block>
 
             <th:block layout:fragment="page-content"></th:block>
          </div>

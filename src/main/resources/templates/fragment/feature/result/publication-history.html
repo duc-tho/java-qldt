@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="history">
+         <div class="mt-4 overflow-x-auto" th:unless="${#lists.isEmpty(publicationHistory)}">
+            <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+               <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                  <tr>
+                     <th th:text="#{result-publications.column.action}"></th>
+                     <th th:text="#{result-publications.column.performer}"></th>
+                     <th th:text="#{result-publications.column.time}"></th>
+                     <th th:text="#{result-publications.column.reason}"></th>
+                  </tr>
+               </thead>
+               <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+               <tbody>
+                  <tr th:each="publication : ${publicationHistory}">
+                     <td th:text="#{__${'result-publications.action.' + publication.action.name()}__}"></td>
+                     <td th:text="${publication.performedBy.fullName}"></td>
+                     <td class="tabular-nums" th:text="${#temporals.format(publication.performedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                     <td th:text="${publication.reason != null ? publication.reason : '—'}"></td>
+                  </tr>
+               </tbody>
+            
+               </th:block></th:block>
+         </div>
+   </th:block>
+</html>

@@ -1,0 +1,7 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <li th:fragment="title(label, classes)" th:class="${classes}">
+      <span class="is-drawer-close:hidden" th:text="${label}"></span>
+      <span class="divider relative z-0 m-0 hidden h-5 w-full min-w-0 overflow-hidden is-drawer-close:flex" aria-hidden="true"></span>
+   </li>
+</html>

@@ -5,7 +5,9 @@ import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.dto.FinalResultForm;
 import com.nhom11.qldt.feature.council.service.CouncilService;
+import com.nhom11.qldt.feature.group.model.entity.TopicRegistration;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
@@ -14,9 +16,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-@RequestMapping("/council-evaluations")
+@RequestMapping("/dot/{periodId}/danh-gia")
 public class CouncilEvaluationController {
   private final CouncilService councilService;
   private final UserService userService;
@@ -26,42 +29,46 @@ public class CouncilEvaluationController {
     this.userService = userService;
   }
 
-  @PostMapping("/{registrationId}/draft")
+  @PostMapping("/{registrationId}/luu-nhap")
   public String saveDraft(
+      @PathVariable Long periodId,
       @PathVariable Long registrationId,
       @AuthenticationPrincipal UserDetails principal,
       @Valid @ModelAttribute EvaluationForm form,
       BindingResult errors,
       org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+    requirePeriod(periodId, registrationId, principal);
     if (errors.hasErrors()) {
       attributes.addFlashAttribute("error", evaluationError(errors));
-      return redirect(registrationId);
+      return redirect(periodId, registrationId);
     }
-    return save(registrationId, principal, form, false, attributes);
+    return save(periodId, registrationId, principal, form, false, attributes);
   }
 
-  @PostMapping("/{registrationId}/submit")
-  public String submit(@PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute EvaluationForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+  @PostMapping("/{registrationId}/nop")
+  public String submit(@PathVariable Long periodId, @PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute EvaluationForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+    requirePeriod(periodId, registrationId, principal);
     if (errors.hasErrors()) {
       attributes.addFlashAttribute("error", evaluationError(errors));
-      return redirect(registrationId);
+      return redirect(periodId, registrationId);
     }
-    return save(registrationId, principal, form, true, attributes);
+    return save(periodId, registrationId, principal, form, true, attributes);
   }
 
-  @PostMapping("/{registrationId}/finalize")
-  public String finalizeResult(@PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute FinalResultForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+  @PostMapping("/{registrationId}/chot")
+  public String finalizeResult(@PathVariable Long periodId, @PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute FinalResultForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+    requirePeriod(periodId, registrationId, principal);
     if (errors.hasErrors()) {
       attributes.addFlashAttribute("error", "final-results.validation.summary.max");
-      return redirect(registrationId);
+      return redirect(periodId, registrationId);
     }
     try { councilService.finalizeResult(registrationId, user(principal), form); } catch (IllegalArgumentException exception) { attributes.addFlashAttribute("error", exception.getMessage()); }
-    return redirect(registrationId);
+    return redirect(periodId, registrationId);
   }
 
-  private String save(Long registrationId, UserDetails principal, EvaluationForm form, boolean submit, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
+  private String save(Long periodId, Long registrationId, UserDetails principal, EvaluationForm form, boolean submit, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
     try { councilService.saveEvaluation(registrationId, user(principal), form, submit); } catch (IllegalArgumentException exception) { attributes.addFlashAttribute("error", exception.getMessage()); }
-    return redirect(registrationId);
+    return redirect(periodId, registrationId);
   }
 
   private User user(UserDetails principal) { return userService.findByEmail(principal.getUsername()).orElseThrow(); }
@@ -71,5 +78,19 @@ public class CouncilEvaluationController {
         : "evaluations.validation.score.range";
   }
 
-  private String redirect(Long registrationId) { return "redirect:/council-workspace/" + registrationId; }
+  private void requirePeriod(Long periodId, Long registrationId, UserDetails principal) {
+    TopicRegistration registration;
+    try {
+      registration = councilService.workspaceRegistration(registrationId, user(principal));
+    } catch (IllegalArgumentException exception) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+    if (!registration.getTopic().getRegistrationPeriod().getId().equals(periodId)) {
+      throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+    }
+  }
+
+  private String redirect(Long periodId, Long registrationId) {
+    return "redirect:/dot/" + periodId + "/danh-gia/" + registrationId;
+  }
 }

@@ -1,0 +1,43 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="alert(tone, content)" role="alert" class="alert alert-soft"
+      th:classappend="${tone == 'error'} ? ' alert-error' : (${tone == 'warning'} ? ' alert-warning' : (${tone == 'success'} ? ' alert-success' : ' alert-info'))">
+      <span class="iconify" th:attr="data-icon=${tone == 'error' ? 'bi:exclamation-circle' : (tone == 'warning' ? 'bi:exclamation-triangle' : 'bi:info-circle')}"></span>
+      <th:block th:replace="${content}"></th:block>
+   </div>
+
+   <div th:fragment="text(classes, role, label)" th:class="${classes}"
+      th:attr="role=${role}" th:text="${label}"></div>
+
+   <div th:fragment="iconText(classes, role, label, icon)" th:class="${classes}"
+      th:attr="role=${role}">
+      <span class="iconify" th:attr="data-icon=${icon}" aria-hidden="true"></span>
+      <span th:text="${label}"></span>
+   </div>
+
+   <div th:fragment="validationErrors(classes, ariaLive)" role="alert"
+      th:class="${classes}" th:aria-live="${ariaLive}">
+      <p th:each="error : ${#fields.errors('*')}" th:text="${error}"></p>
+   </div>
+
+   <div th:fragment="globalErrors(classes, icon)" role="alert" th:class="${classes}">
+      <span th:if="${icon != null}" class="iconify" th:attr="data-icon=${icon}" aria-hidden="true"></span>
+      <p th:errors="*{global}"></p>
+   </div>
+
+   <div th:fragment="globalErrorsPlain(classes)" role="alert" th:class="${classes}"
+      th:errors="*{global}"></div>
+
+   <div th:fragment="reason(classes, title, message)" role="alert" th:class="${classes}">
+      <span class="iconify" data-icon="bi:exclamation-circle" aria-hidden="true"></span>
+      <div>
+         <p class="font-semibold" th:text="${title}"></p>
+         <p th:text="${message}"></p>
+      </div>
+   </div>
+
+   <div th:fragment="content(classes, role, slot)" th:class="${classes}"
+      th:attr="role=${role}">
+      <th:block th:replace="${slot}"></th:block>
+   </div>
+</html>

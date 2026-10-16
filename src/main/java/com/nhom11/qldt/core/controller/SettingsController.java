@@ -11,6 +11,6 @@ public class SettingsController {
   public String settings(Model model) {
     model.addAttribute("pageTitle", "settings.page.title");
     model.addAttribute("pageIcon", "bi:gear");
-    return "settings";
+    return "page/settings/index";
   }
 }

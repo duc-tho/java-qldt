@@ -7,80 +7,41 @@
         endPage=${currentPage > totalPages - 5 ? totalPages - 1 : currentPage + 3}"
    >
       <div class="join" th:if="${totalPages > 1}">
-         <button
-            type="button"
-            class="join-item btn btn-sm"
-            th:disabled="${data.first}"
-            th:attr="data-page=${currentPage - 1}, aria-label=#{crud.pagination.previous}"
-            x-on:click="submitQuery($el.dataset.page)"
-         >
-            <span
-               class="iconify"
-               data-icon="bi:chevron-left"
-               aria-hidden="true"
-            ></span>
-         </button>
+         <th:block th:replace="~{fragment/crud/pagination :: pageButton(${currentPage - 1}, null, 'bi:chevron-left', ${data.first}, false, #{crud.pagination.previous})}"></th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm"
-            th:if="${startPage > 0}"
-            data-page="0"
-            x-on:click="submitQuery($el.dataset.page)"
-         >
-            1
-         </button>
+         <th:block th:if="${startPage > 0}">
+            <th:block th:replace="~{fragment/crud/pagination :: pageButton(0, 1, null, false, false, null)}"></th:block>
+         </th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm btn-disabled"
-            th:if="${startPage > 1}"
-            aria-hidden="true"
-         >
-            <span class="iconify" data-icon="bi:three-dots"></span>
-         </button>
+         <th:block th:if="${startPage > 1}">
+            <th:block th:replace="~{fragment/crud/pagination :: ellipsis()}"></th:block>
+         </th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm"
-            th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}"
-            th:classappend="${pageNumber == currentPage} ? 'btn-active'"
-            th:attr="data-page=${pageNumber}"
-            x-on:click="submitQuery($el.dataset.page)"
-            th:text="${pageNumber + 1}"
-         ></button>
+         <th:block th:each="pageNumber : ${#numbers.sequence(startPage, endPage)}">
+            <th:block th:replace="~{fragment/crud/pagination :: pageButton(${pageNumber}, ${pageNumber + 1}, null, false, ${pageNumber == currentPage}, null)}"></th:block>
+         </th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm btn-disabled"
-            th:if="${endPage < totalPages - 2}"
-            aria-hidden="true"
-         >
-            <span class="iconify" data-icon="bi:three-dots"></span>
-         </button>
+         <th:block th:if="${endPage < totalPages - 2}">
+            <th:block th:replace="~{fragment/crud/pagination :: ellipsis()}"></th:block>
+         </th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm"
-            th:if="${endPage < totalPages - 1}"
-            th:attr="data-page=${totalPages - 1}"
-            x-on:click="submitQuery($el.dataset.page)"
-            th:text="${totalPages}"
-         ></button>
+         <th:block th:if="${endPage < totalPages - 1}">
+            <th:block th:replace="~{fragment/crud/pagination :: pageButton(${totalPages - 1}, ${totalPages}, null, false, false, null)}"></th:block>
+         </th:block>
 
-         <button
-            type="button"
-            class="join-item btn btn-sm"
-            th:disabled="${data.last}"
-            th:attr="data-page=${currentPage + 1}, aria-label=#{crud.pagination.next}"
-            x-on:click="submitQuery($el.dataset.page)"
-         >
-            <span
-               class="iconify"
-               data-icon="bi:chevron-right"
-               aria-hidden="true"
-            ></span>
-         </button>
+         <th:block th:replace="~{fragment/crud/pagination :: pageButton(${currentPage + 1}, null, 'bi:chevron-right', ${data.last}, false, #{crud.pagination.next})}"></th:block>
       </div>
    </th:block>
+
+   <button th:fragment="pageButton(page, label, icon, disabled, active, ariaLabel)"
+      type="button" class="join-item btn btn-sm" th:classappend="${active} ? ' btn-active'"
+      th:disabled="${disabled}" th:attr="data-page=${page}, aria-label=${ariaLabel}"
+      x-on:click="submitQuery($el.dataset.page)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="ellipsis()" type="button"
+      class="join-item btn btn-sm btn-disabled" disabled aria-hidden="true">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(null, 'bi:three-dots')}"></th:block>
+   </button>
 </html>
