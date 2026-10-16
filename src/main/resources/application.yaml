@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: dev-win
+    active: ${PROFILES_ACTIVE:dev-win}
   application:
     name: qldt
   messages:
