@@ -10,6 +10,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.RoleRepository;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Set;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -67,6 +68,18 @@ public class AnnouncementService extends BaseCrudService<Announcement, Long> {
 
   public boolean hasValidRoles(Set<Long> roleIds) {
     return roleIds == null || roleRepository.findAllById(roleIds).size() == roleIds.size();
+  }
+
+  public List<Announcement> findPublishedForRoles(Set<String> roleNames) {
+    if (roleNames.isEmpty()) return List.of();
+
+    return announcementRepository.findPublishedForRoles(roleNames);
+  }
+
+  public Announcement findPublishedByIdForRoles(Long id, Set<String> roleNames) {
+    if (roleNames.isEmpty()) return null;
+
+    return announcementRepository.findPublishedByIdForRoles(id, roleNames).orElse(null);
   }
 
   private User currentUser() {

@@ -1,8 +1,18 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
-      <th:block layout:fragment="page-content"
-         ><div th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div
-      ></th:block>
+      <th:block layout:fragment="page-content">
+         <div th:if="${isStaff}" th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
+         <div th:unless="${isStaff}" class="grid gap-4 md:grid-cols-2" th:if="${!#lists.isEmpty(announcements)}">
+            <a th:each="announcement : ${announcements}" th:href="@{/announcements/{id}(id=${announcement.id})}"
+               class="card card-border border-base-300 bg-base-100 transition-colors hover:border-primary">
+               <div class="card-body">
+                  <h2 class="card-title text-lg" th:text="${announcement.title}"></h2>
+                  <p class="line-clamp-3 whitespace-pre-line text-sm text-base-content/70" th:text="${announcement.content}"></p>
+               </div>
+            </a>
+         </div>
+         <div th:unless="${isStaff or !#lists.isEmpty(announcements)}" th:replace="~{fragment/shared/empty-state :: centered('bi:megaphone', #{announcements.read.empty}, null)}"></div>
+      </th:block>
    </body>
 </html>

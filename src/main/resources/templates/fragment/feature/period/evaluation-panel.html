@@ -1,0 +1,41 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel(period, isStaff, isLecturer, councilSummaries, reviewerAssignmentTopics, assignedCount, resultsPublished)">
+      <section class="card card-border border-base-300 bg-base-100">
+         <div class="card-body gap-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+               <div class="flex items-center gap-2">
+                  <span class="iconify text-primary" data-icon="bi:clipboard2-check"></span>
+                  <h2 class="card-title text-base" th:text="${period.periodType.name() == 'KLTN'} ? #{councils.page.list.title} : #{registration_periods.timeline.evaluation}"></h2>
+               </div>
+               <div class="flex flex-wrap gap-2">
+                  <th:block th:if="${isStaff and period.periodType.name() == 'KLTN'}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  <th:block th:if="${isStaff and period.periodType.name() == 'TLCN'}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/phan-cong(id=${period.id})}, #{reviewer-assignments.page.title}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  <th:block th:if="${isLecturer}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/danh-gia(id=${period.id})}, #{councils.workspace.list.title}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  <th:block th:if="${isStaff or resultsPublished}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.title}, 'bi:award', 'btn btn-outline btn-sm', null)}"></th:block>
+               </div>
+            </div>
+            <div class="overflow-x-auto rounded-box border border-base-300" th:if="${isStaff and period.periodType.name() == 'TLCN' and !#lists.isEmpty(reviewerAssignmentTopics)}">
+               <table class="table table-zebra w-full">
+                  <thead class="bg-base-200"><tr><th th:text="#{topics.column.title}"></th><th th:text="#{reviewer-assignments.field.reviewer}"></th></tr></thead>
+                  <tbody><tr th:each="topic : ${reviewerAssignmentTopics}">
+                     <td><a class="link link-primary font-medium" th:href="@{/dot/{periodId}/de-tai/{topicId}(periodId=${period.id},topicId=${topic.id})}" th:text="${topic.title}"></a></td>
+                     <td th:text="${topic.reviewer != null ? topic.reviewer.fullName : '—'}"></td>
+                  </tr></tbody>
+               </table>
+            </div>
+            <div class="overflow-x-auto rounded-box border border-base-300" th:if="${isStaff and period.periodType.name() == 'KLTN' and councilSummaries != null and !#lists.isEmpty(councilSummaries)}">
+               <table class="table table-zebra w-full">
+                  <thead class="bg-base-200"><tr><th th:text="#{councils.field.name}"></th><th th:text="#{councils.column.assignments}"></th></tr></thead>
+                  <tbody><tr th:each="summary : ${councilSummaries}">
+                     <td><a class="link link-primary font-medium" th:href="@{/dot/{periodId}/hoi-dong/{id}(periodId=${period.id},id=${summary.council.id})}" th:text="${summary.council.name}"></a><div class="text-xs text-base-content/60" th:text="#{councils.summary.members(${summary.memberCount})}"></div></td>
+                     <td><span class="badge badge-soft badge-sm" th:text="${summary.assignedCount}"></span></td>
+                  </tr></tbody>
+               </table>
+            </div>
+            <p class="text-sm text-base-content/70" th:if="${isLecturer}" th:text="#{work.evaluation.metric.total(${assignedCount})}"></p>
+            <p class="text-sm text-base-content/70" th:if="${!isLecturer and (!isStaff or period.periodType.name() != 'KLTN' or councilSummaries == null or #lists.isEmpty(councilSummaries))}" th:text="#{registration_periods.evaluation.description}"></p>
+         </div>
+      </section>
+   </th:block>
+</html>

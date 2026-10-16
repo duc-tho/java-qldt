@@ -68,6 +68,12 @@
          <th:block th:unless="${isStaff}">
             <div th:replace="~{fragment/feature/period/viewer-summary :: viewer-summary(${period}, ${periodStage}, ${now}, ${isLecturer}, ${canPropose}, ${canCreateGroup}, ${groupId})}"></div>
          </th:block>
+         <div class="mt-8 space-y-6" th:if="${!isStaff or form.readonly}">
+            <th:block th:replace="~{fragment/feature/period/topics-panel :: panel(${period}, ${periodTopics})}"></th:block>
+            <th:block th:replace="~{fragment/feature/period/groups-panel :: panel(${period}, ${groupSummaries}, ${canCreateGroup}, ${groupId})}"></th:block>
+            <th:block th:replace="~{fragment/feature/period/evaluation-panel :: panel(${period}, ${isStaff}, ${isLecturer}, ${councilSummaries}, ${reviewerAssignmentTopics}, ${assignedCount}, ${resultsPublished})}"></th:block>
+            <th:block th:if="${isStaff}" th:replace="~{fragment/feature/result/publication :: result-publication(${period})}"></th:block>
+         </div>
       </th:block>
    </body>
 </html>

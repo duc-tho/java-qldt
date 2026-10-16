@@ -64,6 +64,7 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
       select distinct topic from Topic topic
       left join fetch topic.department
       left join fetch topic.advisers
+      left join fetch topic.reviewer
       where topic.registrationPeriod.id = :periodId
       order by topic.title
       """)
@@ -74,6 +75,10 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
 
   @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds and (topic.status = com.nhom11.qldt.feature.topic.model.enums.TopicStatus.APPROVED or topic.proposedBy.id = :lecturerId) order by topic.title")
   List<TopicProposalSummary> findVisibleProposalSummariesByPeriodIds(
+      @Param("periodIds") List<Long> periodIds, @Param("lecturerId") Long lecturerId);
+
+  @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds and topic.proposedBy.id = :lecturerId order by topic.title")
+  List<TopicProposalSummary> findProposalSummariesByPeriodIdsAndProposedById(
       @Param("periodIds") List<Long> periodIds, @Param("lecturerId") Long lecturerId);
 
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);

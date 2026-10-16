@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div class="space-y-10">
+            <section aria-labelledby="open-proposals-heading">
+               <h2 id="open-proposals-heading" class="mb-4 text-xl font-semibold" th:text="#{topics.proposals.open-section}"></h2>
+               <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(openPeriods)}">
+                  <th:block th:each="period : ${openPeriods}">
+                     <article th:replace="~{fragment/feature/period/proposal-card :: period-card(${period}, ${topicsByPeriodId[period.id]}, true)}"></article>
+                  </th:block>
+               </div>
+               <div th:unless="${!#lists.isEmpty(openPeriods)}" th:replace="~{fragment/shared/empty-state :: centered('bi:calendar-x', #{topics.proposals.open-empty}, null)}"></div>
+            </section>
+            <section aria-labelledby="closed-proposals-heading">
+               <h2 id="closed-proposals-heading" class="mb-4 text-xl font-semibold" th:text="#{topics.proposals.closed-section}"></h2>
+               <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(closedPeriods)}">
+                  <th:block th:each="period : ${closedPeriods}">
+                     <article th:replace="~{fragment/feature/period/proposal-card :: period-card(${period}, ${topicsByPeriodId[period.id]}, false)}"></article>
+                  </th:block>
+               </div>
+               <div th:unless="${!#lists.isEmpty(closedPeriods)}" th:replace="~{fragment/shared/empty-state :: centered('bi:archive', #{topics.proposals.closed-empty}, null)}"></div>
+            </section>
+         </div>
+      </th:block>
+   </body>
+</html>

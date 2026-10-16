@@ -1,0 +1,12 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div class="space-y-10">
+            <th:block th:each="section : ${workSections}">
+               <th:block th:replace="~{fragment/feature/work/section :: section(${section})}"></th:block>
+            </th:block>
+         </div>
+      </th:block>
+   </body>
+</html>

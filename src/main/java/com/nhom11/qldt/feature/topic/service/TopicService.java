@@ -132,6 +132,13 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         : topicRepository.findVisibleProposalSummariesByPeriodIds(periodIds, lecturerId);
   }
 
+  public List<TopicProposalSummary> findProposalSummariesByPeriodIdsAndProposedById(
+      List<Long> periodIds, Long lecturerId) {
+    return periodIds.isEmpty()
+        ? List.of()
+        : topicRepository.findProposalSummariesByPeriodIdsAndProposedById(periodIds, lecturerId);
+  }
+
   public Topic create(
       Topic topic, RegistrationPeriod registrationPeriod, Long departmentId, Set<Long> adviserIds) {
     requireStaff(registrationPeriod);

@@ -14,10 +14,8 @@ import com.nhom11.qldt.feature.period.view.RegistrationPeriodTableDefinition;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import jakarta.validation.Valid;
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -28,7 +26,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -62,7 +59,7 @@ public class PeriodPageController {
     this.staffPages = staffPages;
   }
 
-  @GetMapping("/dot/{id}")
+  @GetMapping("/dot/{id:\\d+}")
   public String detail(@PathVariable Long id, Authentication authentication, Model model) {
     if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_HEAD_OF_FACULTY")) {
       return staffPages.detail(id, model);
@@ -94,12 +91,17 @@ public class PeriodPageController {
     model.addAttribute("isLecturer", isLecturer);
     model.addAttribute("resultsPublished", councilService.resultsPublished(id));
     model.addAttribute("canPublishResults", false);
+    model.addAttribute("reviewerAssignmentTopics", List.of());
     model.addAttribute(
         "canPropose",
         isLecturer
             && !now.isBefore(period.getLecturerRegistrationStart())
             && !now.isAfter(period.getLecturerRegistrationEnd()));
     if (isLecturer) {
+      model.addAttribute(
+          "periodTopics",
+          topicService.findVisibleProposalSummariesByPeriodIds(List.of(id), viewer.getId()));
+      model.addAttribute("groupSummaries", groupService.groupSummariesForLecturer(id, viewer, false));
       model.addAttribute(
           "pendingCount",
           groupService.adviserRegistrations(viewer).stream()
@@ -115,6 +117,13 @@ public class PeriodPageController {
                   registration ->
                       registration.getTopic().getRegistrationPeriod().getId().equals(id))
               .count());
+    } else {
+      model.addAttribute("periodTopics", topicService.findApprovedByRegistrationPeriodId(id));
+      model.addAttribute(
+          "groupSummaries",
+          groupService.groupSummariesForStudent(viewer).stream()
+              .filter(summary -> summary.group().getRegistrationPeriod().getId().equals(id))
+              .toList());
     }
     model.addAttribute(
         "canCreateGroup",
@@ -138,19 +147,9 @@ public class PeriodPageController {
     return "page/period/detail";
   }
 
-  @GetMapping("/dot/new")
-  public String oldCreateUrl() {
-    return "redirect:/dot/tao";
-  }
-
   @GetMapping("/dot/tao")
   public String createForm(Model model) {
     return staffPages.newForm(model);
-  }
-
-  @GetMapping("/dot/{id}/edit")
-  public String oldEditUrl(@PathVariable Long id) {
-    return "redirect:/dot/" + id + "/sua";
   }
 
   @GetMapping("/dot/{id}/sua")
@@ -184,18 +183,11 @@ public class PeriodPageController {
   @GetMapping("/dot")
   public String list(
       @ModelAttribute TableQuery query,
-      @RequestParam(name = "congViec", required = false) String work,
-      @RequestParam(name = "coNhom", defaultValue = "false") boolean withGroup,
       Authentication authentication,
       Model model) {
     model.addAttribute("pageTitle", "registration_periods.page.list.title");
     model.addAttribute("pageDesc", "registration_periods.page.list.description");
     model.addAttribute("pageIcon", "bi:calendar-range");
-
-    if (withGroup && hasRole(authentication, "ROLE_STUDENT")) {
-      User viewer = userService.findByEmail(authentication.getName()).orElseThrow();
-      return studentList(viewer, true, model);
-    }
 
     if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_HEAD_OF_FACULTY")) {
       model.addAttribute("periodView", "staff");
@@ -205,92 +197,26 @@ public class PeriodPageController {
 
     User viewer = userService.findByEmail(authentication.getName()).orElseThrow();
     if (hasRole(authentication, "ROLE_LECTURER")) {
-      model.addAttribute("periodView", "lecturer");
       List<RegistrationPeriod> periods = periodService.findVisibleForLecturer(viewer.getId());
-      if ("duyet".equals(work)) {
-        Map<Long, Long> taskCounts =
-            groupService.adviserRegistrations(viewer).stream()
-                .filter(registration -> registration.getStatus() == TopicRegistrationStatus.PENDING)
-                .collect(
-                    Collectors.groupingBy(
-                        registration -> registration.getTopic().getRegistrationPeriod().getId(),
-                        Collectors.counting()));
-        model.addAttribute("work", work);
-        model.addAttribute("taskCounts", taskCounts);
-        model.addAttribute(
-            "workPeriods",
-            periods.stream().filter(period -> taskCounts.containsKey(period.getId())).toList());
-        model.addAttribute("pageTitle", "navigation.item.topic-registrations");
-        return "page/period/list";
-      } else if ("danh-gia".equals(work)) {
-        Map<Long, Long> taskCounts =
-            councilService.workspaceRegistrations(viewer).stream()
-                .collect(
-                    Collectors.groupingBy(
-                        registration -> registration.getTopic().getRegistrationPeriod().getId(),
-                        Collectors.counting()));
-        model.addAttribute("work", work);
-        model.addAttribute("taskCounts", taskCounts);
-        model.addAttribute(
-            "workPeriods",
-            periods.stream().filter(period -> taskCounts.containsKey(period.getId())).toList());
-        model.addAttribute("pageTitle", "navigation.item.council-workspace");
-        return "page/period/list";
-      }
-      LocalDateTime now = LocalDateTime.now();
-      model.addAttribute(
-          "openPeriods",
-          periods.stream()
-              .filter(period -> !now.isAfter(period.getLecturerRegistrationEnd()))
-              .sorted(Comparator.comparing(period -> period.getLecturerRegistrationEnd()))
-              .toList());
-      model.addAttribute(
-          "closedPeriods",
-          periods.stream()
-              .filter(period -> now.isAfter(period.getLecturerRegistrationEnd()))
-              .sorted(
-                  Comparator.comparing(
-                          (RegistrationPeriod period) -> period.getLecturerRegistrationEnd())
-                      .reversed())
-              .toList());
-      model.addAttribute(
-          "topicsByPeriodId",
-          topicService
-              .findVisibleProposalSummariesByPeriodIds(
-                  periods.stream().map(period -> period.getId()).toList(), viewer.getId())
-              .stream()
-              .collect(Collectors.groupingBy(summary -> summary.periodId())));
-      return "page/period/list";
+      return viewerList(periods, Map.of(), false, model);
     }
 
-    return studentList(viewer, withGroup, model);
+    List<RegistrationPeriod> periods = periodService.findVisibleForStudent(viewer.getId());
+    var groupsByPeriod = groupService.groupsForStudent(viewer).stream()
+        .collect(Collectors.toMap(
+            group -> group.getRegistrationPeriod().getId(), group -> group.getId()));
+    return viewerList(periods, groupsByPeriod, true, model);
   }
 
-  private String studentList(User viewer, boolean withGroup, Model model) {
-    model.addAttribute("periodView", "student");
-    List<RegistrationPeriod> periods = periodService.findVisibleForStudent(viewer.getId());
-    var groupsByPeriod =
-        groupService.groupsForStudent(viewer).stream()
-            .collect(
-                Collectors.toMap(
-                    group -> group.getRegistrationPeriod().getId(), group -> group.getId()));
-    if (withGroup) {
-      periods =
-          periods.stream().filter(period -> groupsByPeriod.containsKey(period.getId())).toList();
-      Set<Long> visiblePeriodIds =
-          periods.stream().map(period -> period.getId()).collect(Collectors.toSet());
-      model.addAttribute(
-          "groups",
-          groupService.groupSummariesForStudent(viewer).stream()
-              .filter(
-                  summary ->
-                      visiblePeriodIds.contains(summary.group().getRegistrationPeriod().getId()))
-              .toList());
-      model.addAttribute("pageTitle", "student-groups.page.mine.title");
-    }
-    model.addAttribute("showGroups", withGroup);
+  private String viewerList(
+      List<RegistrationPeriod> periods,
+      Map<Long, Long> groupsByPeriod,
+      boolean isStudent,
+      Model model) {
+    model.addAttribute("periodView", "viewer");
     model.addAttribute("periods", periods);
     model.addAttribute("groupsByPeriod", groupsByPeriod);
+    model.addAttribute("isStudent", isStudent);
     model.addAttribute("now", LocalDateTime.now());
     return "page/period/list";
   }

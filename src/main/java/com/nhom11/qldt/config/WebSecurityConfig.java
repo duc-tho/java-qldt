@@ -38,8 +38,19 @@ public class WebSecurityConfig {
                     // --------
                     .requestMatchers("/users/**")
                     .hasRole("ADMIN")
-                    .requestMatchers(
-                        "/dot/tao", "/dot/new", "/dot/*/sua", "/dot/*/edit")
+                    .requestMatchers("/hoi-dong", "/cong-bo-diem")
+                    .hasRole("HEAD_OF_FACULTY")
+                    .requestMatchers("/phe-duyet-dang-ky", "/de-xuat-de-tai", "/cham-diem")
+                    .hasRole("LECTURER")
+                    .requestMatchers("/nhom-cua-toi")
+                    .hasRole("STUDENT")
+                    .requestMatchers(HttpMethod.GET, "/announcements/new", "/announcements/*/edit")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
+                    .requestMatchers(HttpMethod.POST, "/announcements/**")
+                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
+                    .requestMatchers(HttpMethod.GET, "/announcements", "/announcements/*")
+                    .authenticated()
+                    .requestMatchers("/dot/tao", "/dot/*/sua")
                     .hasAnyRole("ADMIN", "HEAD_OF_FACULTY")
                     .requestMatchers(HttpMethod.POST, "/dot", "/dot/*", "/dot/*/xoa")
                     .hasAnyRole("ADMIN", "HEAD_OF_FACULTY")
@@ -99,44 +110,7 @@ public class WebSecurityConfig {
                         "/dot/*/nhom/*/gui-duyet",
                         "/dot/*/nhom/*/de-tai")
                     .hasRole("STUDENT")
-                    // --------
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*/reports/files/*")
-                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*")
-                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/*/topic")
-                    .hasAnyRole("STUDENT", "LECTURER", "HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/student-group/**")
-                    .hasRole("STUDENT")
-                    .requestMatchers(HttpMethod.GET, "/student-groups/**")
-                    .hasRole("STUDENT")
-                    .requestMatchers(HttpMethod.GET, "/topic-registrations/**")
-                    .hasRole("LECTURER")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/councils")
-                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/councils/**")
-                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/council-workspace/**")
-                    .hasRole("LECTURER")
-                    .requestMatchers(HttpMethod.GET, "/topic-proposals/**")
-                    .hasRole("LECTURER")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/{periodId}/topics/propose")
-                    .hasRole("LECTURER")
-                    .requestMatchers(HttpMethod.GET, "/registration-periods/*/topics/new")
-                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(
-                        HttpMethod.GET,
-                        "/registration-periods",
-                        "/registration-periods/*",
-                        "/registration-periods/*/groups",
-                        "/registration-periods/*/topics",
-                        "/registration-periods/*/topics/*")
-                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN", "LECTURER")
-                    // --------
-                    .requestMatchers(
-                        HttpMethod.GET, "/registration-periods/**")
-                    .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers("/announcements/**", "/departments/**")
+                    .requestMatchers("/departments/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     // --------
                     .anyRequest()

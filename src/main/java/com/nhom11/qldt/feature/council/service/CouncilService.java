@@ -91,6 +91,41 @@ public class CouncilService {
     return councilRepository.countByRegistrationPeriodId(periodId);
   }
 
+  public Map<Long, Long> councilCounts(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Map.of();
+
+    return counts(councilRepository.countByRegistrationPeriodIdIn(periodIds));
+  }
+
+  public Set<Long> publishedPeriodIds(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Set.of();
+
+    Map<Long, ResultPublicationAction> latestActions = new LinkedHashMap<>();
+    publicationRepository.findAllByRegistrationPeriodIdInOrderByIdDesc(periodIds).forEach(
+        publication -> latestActions.putIfAbsent(
+            publication.getRegistrationPeriod().getId(), publication.getAction()));
+    return latestActions.entrySet().stream()
+        .filter(entry -> entry.getValue() == ResultPublicationAction.PUBLISHED)
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
+  }
+
+  public Set<Long> publishablePeriodIds(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Set.of();
+
+    Map<Long, Long> approvedCounts = counts(
+        registrationRepository.countByPeriodIdsAndStatus(
+            periodIds, TopicRegistrationStatus.APPROVED));
+    Map<Long, Long> finalizedCounts = counts(
+        finalResultRepository.countByPeriodIdsAndStatus(
+            periodIds, FinalResultStatus.FINALIZED));
+    return periodIds.stream()
+        .filter(periodId -> approvedCounts.getOrDefault(periodId, 0L) > 0)
+        .filter(periodId -> approvedCounts.get(periodId).equals(
+            finalizedCounts.getOrDefault(periodId, 0L)))
+        .collect(Collectors.toSet());
+  }
+
   public List<CouncilSummary> councilSummaries(Long periodId, List<Council> councils) {
     if (councils.isEmpty()) return List.of();
 
@@ -511,6 +546,18 @@ public class CouncilService {
         .orElse(null);
   }
 
+  public Map<Long, EvaluationStatus> evaluationStatuses(
+      List<Long> registrationIds, Long evaluatorId) {
+    if (registrationIds.isEmpty()) return Map.of();
+
+    return evaluationRepository
+        .findAllByTopicRegistrationIdInAndEvaluatorId(registrationIds, evaluatorId)
+        .stream()
+        .collect(Collectors.toMap(
+            evaluation -> evaluation.getTopicRegistration().getId(),
+            Evaluation::getStatus));
+  }
+
   public CouncilMember membership(Long councilId, Long lecturerId) {
     return members(councilId).stream()
         .filter(member -> member.getLecturer().getId().equals(lecturerId))
@@ -670,7 +717,7 @@ public class CouncilService {
     }
   }
 
-  private boolean isCouncilManagementOpen(RegistrationPeriod period) {
+  public boolean isCouncilManagementOpen(RegistrationPeriod period) {
     LocalDateTime registrationEnd = period.getStudentRegistrationEnd();
     LocalDateTime councilDate = period.getCouncilDate();
     LocalDateTime now = LocalDateTime.now();
@@ -683,6 +730,11 @@ public class CouncilService {
   private boolean isPublished(Long periodId) {
     ResultPublication latest = latestPublication(periodId);
     return latest != null && latest.getAction() == ResultPublicationAction.PUBLISHED;
+  }
+
+  private Map<Long, Long> counts(List<Object[]> rows) {
+    return rows.stream().collect(Collectors.toMap(
+        row -> (Long) row[0], row -> (Long) row[1]));
   }
 
   private ResultPublication publication(Long periodId, User performer, ResultPublicationAction action, String reason) {

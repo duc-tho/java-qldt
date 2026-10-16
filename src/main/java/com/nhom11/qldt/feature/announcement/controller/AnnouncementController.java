@@ -10,7 +10,11 @@ import com.nhom11.qldt.feature.announcement.service.AnnouncementService;
 import com.nhom11.qldt.feature.announcement.view.AnnouncementTableDefinition;
 import com.nhom11.qldt.feature.auth.repository.RoleRepository;
 import jakarta.validation.Valid;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/announcements")
@@ -43,13 +48,21 @@ public class AnnouncementController {
   }
 
   @GetMapping
-  public String list(@ModelAttribute TableQuery query, Model model) {
+  public String list(@ModelAttribute TableQuery query, Authentication authentication, Model model) {
+    if (!isStaff(authentication)) {
+      model.addAttribute("announcements", service.findPublishedForRoles(roleNames(authentication)));
+      model.addAttribute("pageTitle", "announcements.page.list.title");
+      model.addAttribute("pageIcon", "bi:megaphone");
+      return "page/announcement/list";
+    }
+
     Page<Announcement> data = service.findAll(query, table);
 
     view.table(model, data, "/announcements", query, table);
 
     model.addAttribute("pageTitle", "announcements.page.list.title");
     model.addAttribute("pageIcon", "bi:megaphone");
+    model.addAttribute("isStaff", true);
 
     return "page/announcement/list";
   }
@@ -78,10 +91,23 @@ public class AnnouncementController {
   }
 
   @GetMapping("/{id}")
-  public String detail(@PathVariable Long id, Model model) {
-    Announcement item = service.findById(id);
+  public String detail(@PathVariable Long id, Authentication authentication, Model model) {
+    boolean staff = isStaff(authentication);
+    Announcement item = staff
+        ? service.findById(id)
+        : service.findPublishedByIdForRoles(id, roleNames(authentication));
 
-    if (item == null) return "redirect:/announcements";
+    if (item == null) {
+      if (!staff) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      return "redirect:/announcements";
+    }
+
+    if (!staff) {
+      model.addAttribute("announcement", item);
+      model.addAttribute("pageTitle", "announcements.page.detail.title");
+      model.addAttribute("pageIcon", "bi:megaphone");
+      return "page/announcement/read-detail";
+    }
 
     AnnouncementForm form = new AnnouncementForm();
     form.fromEntity(item);
@@ -157,5 +183,19 @@ public class AnnouncementController {
     model.addAttribute("roles", roles.findAll());
     model.addAttribute("pageTitle", pageTitle);
     model.addAttribute("pageIcon", "bi:megaphone");
+  }
+
+  private boolean isStaff(Authentication authentication) {
+    return authentication.getAuthorities().stream().anyMatch(authority ->
+        authority.getAuthority().equals("ROLE_ADMIN")
+            || authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY"));
+  }
+
+  private Set<String> roleNames(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+        .map(authority -> authority.getAuthority())
+        .filter(authority -> authority.startsWith("ROLE_"))
+        .map(authority -> authority.substring("ROLE_".length()))
+        .collect(Collectors.toSet());
   }
 }

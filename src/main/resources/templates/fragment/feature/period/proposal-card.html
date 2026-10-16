@@ -34,7 +34,7 @@
             th:text="#{topics.lecturer-list.empty}"></p>
 
          <div class="mt-5 grid grid-cols-2 gap-3 border-t border-base-300 pt-4">
-            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai(periodId=${period.id})}, #{crud.action.detail}, null, 'btn btn-sm btn-outline w-full active:translate-y-px', null)}"></th:block>
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai(periodId=${period.id},cuaToi=true)}, #{crud.action.detail}, null, 'btn btn-sm btn-outline w-full active:translate-y-px', null)}"></th:block>
             <th:block th:if="${isOpen}">
                <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai/tao(periodId=${period.id})}, #{topics.action.new-proposal}, null, 'btn btn-sm btn-primary w-full active:translate-y-px', null)}"></th:block>
             </th:block>

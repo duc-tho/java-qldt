@@ -1,0 +1,25 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <article th:fragment="card(card)"
+      th:replace="~{fragment/base/card :: cardStyled('card card-border h-full border-base-300 bg-base-100 shadow-sm', ~{::#period-work-card})}">
+      <div id="period-work-card" th:fragment="period-work-card" class="card-body gap-4">
+         <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+               <h3 class="card-title text-lg font-semibold" th:text="${card.period.name}"></h3>
+               <p class="mt-1 text-sm text-base-content/70"
+                  th:text="#{period-types.__${card.period.periodType.name()}__}"></p>
+            </div>
+            <span class="badge badge-soft shrink-0" th:classappend="${card.statusClass}" th:text="${card.status}"></span>
+         </div>
+
+         <div class="space-y-2 text-sm" th:if="${card.primaryMetric != null or card.secondaryMetric != null}">
+            <p class="text-base-content/80" th:if="${card.primaryMetric != null}" th:text="${card.primaryMetric}"></p>
+            <p class="text-base-content/70" th:if="${card.secondaryMetric != null}" th:text="${card.secondaryMetric}"></p>
+         </div>
+
+         <div class="card-actions mt-auto justify-end border-t border-base-300 pt-4">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(${card.destination}, ${card.actionLabel}, 'bi:arrow-up-right', 'btn btn-sm btn-outline', null)}"></th:block>
+         </div>
+      </div>
+   </article>
+</html>

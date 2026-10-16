@@ -1,6 +1,6 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-   <th:block th:fragment="student-list(periods, groupsByPeriod, now)">
+   <th:block th:fragment="student-list(periods, groupsByPeriod, now, canManageGroup)">
       <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(periods)}">
          <th:block th:each="period : ${periods}" th:with="currentGroupId=${groupsByPeriod[period.id]}, isOpen=${!now.isBefore(period.studentRegistrationStart) and !now.isAfter(period.studentRegistrationEnd)}">
             <article th:replace="~{fragment/base/card :: card(~{::student-period-header}, ~{::student-period-body}, ~{::student-period-footer})}">
@@ -11,10 +11,10 @@
                   <p class="text-sm text-base-content/70"
                      th:text="#{student-groups.period.end(${#temporals.format(period.studentRegistrationEnd, 'dd/MM/yyyy HH:mm')})}"></p>
                   <div class="card-actions justify-end">
-                     <th:block th:if="${currentGroupId == null and isOpen}">
+                     <th:block th:if="${canManageGroup and currentGroupId == null and isOpen}">
                         <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/tao(periodId=${period.id})}, #{student-groups.action.create}, null, 'btn btn-sm btn-primary', null)}"></th:block>
                      </th:block>
-                     <th:block th:if="${currentGroupId != null}">
+                     <th:block th:if="${canManageGroup and currentGroupId != null}">
                         <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${currentGroupId})}, #{student-groups.action.open}, null, 'btn btn-sm btn-outline', null)}"></th:block>
                      </th:block>
                   </div>

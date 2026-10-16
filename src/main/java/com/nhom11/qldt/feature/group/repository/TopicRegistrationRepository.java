@@ -10,6 +10,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface TopicRegistrationRepository extends BaseRepository<TopicRegistration, Long> {
+  @Query(
+      "select registration.studentGroup.registrationPeriod.id, count(registration) from TopicRegistration registration where registration.studentGroup.registrationPeriod.id in :periodIds and registration.status = :status group by registration.studentGroup.registrationPeriod.id")
+  List<Object[]> countByPeriodIdsAndStatus(
+      @Param("periodIds") List<Long> periodIds,
+      @Param("status") TopicRegistrationStatus status);
+
   @EntityGraph(attributePaths = {"topic", "topic.department"})
   List<TopicRegistration> findAllByStudentGroupIdIn(List<Long> groupIds);
 
@@ -35,6 +41,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       })
   Optional<TopicRegistration> findByStudentGroupId(Long studentGroupId);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select distinct registration from TopicRegistration registration
@@ -46,6 +53,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
   List<TopicRegistration> findAllByAdviserIdAndStatus(
       @Param("lecturerId") Long lecturerId, @Param("status") TopicRegistrationStatus status);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select distinct registration from TopicRegistration registration
@@ -74,6 +82,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       """)
   List<TopicRegistration> findAllByAdviserId(@Param("lecturerId") Long lecturerId);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select distinct registration from TopicRegistration registration
@@ -85,6 +94,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
   List<TopicRegistration> findAllByReviewerIdAndStatus(
       @Param("lecturerId") Long lecturerId, @Param("status") TopicRegistrationStatus status);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select registration from TopicRegistration registration
@@ -96,6 +106,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       """)
   List<TopicRegistration> findAllByRegistrationPeriodId(@Param("periodId") Long periodId);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select distinct registration from TopicRegistration registration
@@ -107,6 +118,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
   Optional<TopicRegistration> findByIdAndAdviserId(
       @Param("registrationId") Long registrationId, @Param("lecturerId") Long lecturerId);
 
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
       select distinct registration from TopicRegistration registration

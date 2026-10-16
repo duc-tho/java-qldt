@@ -3,6 +3,7 @@ package com.nhom11.qldt.feature.period.controller;
 import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
 import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.service.UserService;
+import com.nhom11.qldt.feature.council.model.dto.PublicationRevocationForm;
 import com.nhom11.qldt.feature.council.model.enums.ResultPublicationAction;
 import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.group.service.StudentGroupService;
@@ -18,14 +19,11 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/registration-periods")
 public class RegistrationPeriodController {
   private final RegistrationPeriodService service;
   private final UserService users;
@@ -52,11 +50,6 @@ public class RegistrationPeriodController {
     this.groupService = groupService;
   }
 
-  @GetMapping
-  public String list() {
-    return "redirect:/dot";
-  }
-
   public String newForm(Model model) {
     form(
         model,
@@ -66,26 +59,6 @@ public class RegistrationPeriodController {
         "registration_periods.page.create.title");
 
     return "page/period/create";
-  }
-
-  @GetMapping("/new")
-  public String legacyCreate() {
-    return "redirect:/dot/tao";
-  }
-
-  @GetMapping("/topics")
-  public String topicPeriods() {
-    return "redirect:/dot";
-  }
-
-  @GetMapping("/groups")
-  public String groupPeriods() {
-    return "redirect:/dot";
-  }
-
-  @GetMapping("/{id}/groups")
-  public String groups(@PathVariable Long id) {
-    return "redirect:/dot/" + id + "/nhom";
   }
 
   public String create(
@@ -118,11 +91,6 @@ public class RegistrationPeriodController {
     return "redirect:/dot";
   }
 
-  @GetMapping("/{id}")
-  public String oldDetail(@PathVariable Long id) {
-    return "redirect:/dot/" + id;
-  }
-
   public String detail(@PathVariable Long id, Model model) {
 
     RegistrationPeriod item = service.findById(id);
@@ -136,13 +104,27 @@ public class RegistrationPeriodController {
         model, form, "/dot/" + id, true, "registration_periods.page.detail.title");
     addPeriodOverview(model, item);
     addResultStatus(model, id);
+    model.addAttribute("periodTopics", topicService.findAllWithDetailsByRegistrationPeriodId(id));
+    model.addAttribute("groupSummaries", groupService.groupSummaries(id));
     model.addAttribute("topicCount", topicService.countByPeriod(id));
     model.addAttribute("groupCount", groupService.countByPeriod(id));
     if (item.getPeriodType() == PeriodType.KLTN) {
-      model.addAttribute("councilCount", councilService.countCouncils(id));
+      var councils = councilService.councils(id);
+      model.addAttribute("councilSummaries", councilService.councilSummaries(id, councils));
+      model.addAttribute("councilCount", councils.size());
+    } else if (item.getPeriodType() == PeriodType.TLCN) {
+      model.addAttribute(
+          "reviewerAssignmentTopics", councilService.reviewerAssignmentTopics(id));
     }
     model.addAttribute("pageHeading", item.getName());
     model.addAttribute("isStaff", true);
+    model.addAttribute("isLecturer", false);
+    model.addAttribute("canCreateGroup", false);
+    model.addAttribute("groupId", null);
+    model.addAttribute("assignedCount", 0L);
+    if (!model.containsAttribute("reviewerAssignmentTopics")) {
+      model.addAttribute("reviewerAssignmentTopics", java.util.List.of());
+    }
 
     return "page/period/detail";
   }
@@ -158,11 +140,6 @@ public class RegistrationPeriodController {
     form(model, form, "/dot/" + id, false, "registration_periods.page.edit.title");
 
     return "page/period/detail";
-  }
-
-  @GetMapping("/{id}/edit")
-  public String legacyEdit(@PathVariable Long id) {
-    return "redirect:/dot/" + id + "/sua";
   }
 
   public String update(
@@ -242,10 +219,15 @@ public class RegistrationPeriodController {
   }
 
   private void addResultStatus(Model model, Long periodId) {
-    var latestPublication = councilService.latestPublication(periodId);
+    var publicationHistory = councilService.publicationHistory(periodId);
+    var latestPublication = publicationHistory.isEmpty() ? null : publicationHistory.getFirst();
+    model.addAttribute("latestPublication", latestPublication);
+    model.addAttribute("publicationHistory", publicationHistory);
+    model.addAttribute("revocationForm", new PublicationRevocationForm());
     model.addAttribute("resultsPublished", latestPublication != null
         && latestPublication.getAction() == ResultPublicationAction.PUBLISHED);
-    model.addAttribute("canPublishResults", councilService.canPublishResults(periodId));
+    model.addAttribute(
+        "canPublishResults", councilService.publishablePeriodIds(java.util.List.of(periodId)).contains(periodId));
   }
 
   private void addPeriodOverview(Model model, RegistrationPeriod period) {

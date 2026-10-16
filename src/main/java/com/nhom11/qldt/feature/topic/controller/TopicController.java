@@ -24,16 +24,13 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/registration-periods/{periodId}/topics")
 public class TopicController {
   private final TopicService topicService;
   private final TopicTableDefinition tableDefinition;
@@ -61,11 +58,6 @@ public class TopicController {
     this.departmentService = departmentService;
     this.userService = userService;
     this.studentGroupService = studentGroupService;
-  }
-
-  @GetMapping
-  public String oldList(@PathVariable Long periodId) {
-    return "redirect:/dot/" + periodId + "/de-tai";
   }
 
   public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query,
@@ -121,11 +113,6 @@ public class TopicController {
     return "page/topic/create";
   }
 
-  @GetMapping("/new")
-  public String legacyCreate(@PathVariable Long periodId) {
-    return "redirect:/dot/" + periodId + "/de-tai/tao";
-  }
-
   public String create(
       @PathVariable Long periodId,
       @Valid @ModelAttribute("data") TopicForm form,
@@ -155,11 +142,6 @@ public class TopicController {
     return "redirect:" + baseUrl(periodId);
   }
 
-  @GetMapping("/{id}")
-  public String oldDetail(@PathVariable Long periodId, @PathVariable Long id) {
-    return "redirect:/dot/" + periodId + "/de-tai/" + id;
-  }
-
   public String detail(@PathVariable Long periodId, @PathVariable Long id, Model model) {
     Topic topic = findTopic(periodId, id);
     if (topic == null) {
@@ -185,11 +167,6 @@ public class TopicController {
     model.addAttribute("isStaff", true);
     model.addAttribute("rejectForm", new RejectTopicForm());
     return "page/topic/create";
-  }
-
-  @GetMapping("/{id}/edit")
-  public String legacyEdit(@PathVariable Long periodId, @PathVariable Long id) {
-    return "redirect:/dot/" + periodId + "/de-tai/" + id + "/sua";
   }
 
   public String update(
@@ -334,11 +311,6 @@ public class TopicController {
     User proposer = userService.findByEmail(principal.getUsername()).orElseThrow();
     prepareProposal(model, form, periodId, proposer);
     return "page/topic/create";
-  }
-
-  @GetMapping("/propose")
-  public String legacyPropose(@PathVariable Long periodId) {
-    return "redirect:/dot/" + periodId + "/de-tai/tao";
   }
 
   public String propose(
