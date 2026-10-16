@@ -69,7 +69,7 @@ Không yêu cầu thành viên phải làm TDD, nhưng thay đổi phải đư�
 - `application.yaml` hiện kích hoạt profile `dev-win`; thành viên phải kiểm tra profile thực tế trước khi chạy.
 - Thông tin database, SMTP, storage, URL production và secret phải lấy từ configuration hoặc environment variable.
 - Flyway tự chạy migration khi ứng dụng khởi động.
-- Thư mục lưu báo cáo mặc định là `./local-report-storage`; không dùng dữ liệu local này làm dữ liệu deploy.
+- Thư mục lưu báo cáo mặc định là `./local-report-storage`; cấu hình `REPORT_STORAGE_ROOT` theo mount path khi deploy. Với Cloud Run, mount ephemeral disk tại `/mnt/report-storage` và đặt `REPORT_STORAGE_ROOT=/mnt/report-storage`. Dữ liệu trên ephemeral disk không được đảm bảo tồn tại sau khi instance dừng.
 
 ---
 
@@ -535,7 +535,7 @@ Khi thay đổi nhóm 03–05 hoặc thêm người chấm độc lập, ngườ
 - Kiểm tra extension, số file, kích thước và trạng thái đăng ký ở backend.
 - Chỉ người có quan hệ hợp lệ với đề tài mới tải được file.
 - Không log nội dung file hoặc path nhạy cảm.
-- Local filesystem có thể mất dữ liệu trên hosting ephemeral; trước deploy phải chọn persistent volume hoặc object storage.
+- Local filesystem có thể mất dữ liệu trên hosting ephemeral; Cloud Run có thể mount ephemeral disk cho storage tạm thời, còn dữ liệu cần lưu bền vững phải dùng persistent volume hoặc object storage.
 - Không commit file trong `local-report-storage`.
 
 ---

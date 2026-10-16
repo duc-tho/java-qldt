@@ -13,4 +13,4 @@ spring:
 
 qldt:
   report-storage:
-    root: ./local-report-storage
+    root: ${REPORT_STORAGE_ROOT:./local-report-storage}
