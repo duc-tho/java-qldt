@@ -19,7 +19,15 @@
          </span>
       </div>
       <th:block th:unless="${readonly}">
-         <th:block th:replace="~{fragment/base/input :: datePicker(${name}, ${validationRule}, ${!isReviewer and !isCouncil}, ${isReviewer} ? '$el.disabled = !(periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;); $el.required = !$el.disabled' : (${isCouncil} ? '$el.disabled = periodType !== &quot;KLTN&quot;; $el.required = !$el.disabled' : null))}"></th:block>
+         <th:block th:replace="~{fragment/base/input :: datePicker(
+            ${name},
+            ${validationRule},
+            ${!isReviewer and !isCouncil},
+            ${isReviewer} ? '$el.disabled = !(periodType === &quot;TLCN&quot; || periodType === &quot;KLTN&quot;); $el.required = !$el.disabled' : (${isCouncil} ? '$el.disabled = periodType !== &quot;KLTN&quot;; $el.required = !$el.disabled' : null),
+            ${isReviewer or isCouncil} ? 'periodType' : null,
+            ${isReviewer} ? 'TLCN,KLTN' : (${isCouncil} ? 'KLTN' : null),
+            ${isReviewer} ? #{registration_periods.validation.reviewer_deadline.required} : (${isCouncil} ? #{registration_periods.validation.council_date.required} : null)
+         )}"></th:block>
       </th:block>
       <th:block th:if="${readonly}" th:with="value=*{__${name}__}">
          <th:block th:replace="~{fragment/base/readonly-value :: value(${name}, ${value == null ? '—' : #temporals.format(value, 'dd/MM/yyyy HH:mm')})}"></th:block>

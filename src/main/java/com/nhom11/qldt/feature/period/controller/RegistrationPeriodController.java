@@ -215,7 +215,26 @@ public class RegistrationPeriodController {
   }
 
   private void addBusinessValidationErrors(RegistrationPeriod period, BindingResult errors) {
-    service.validationErrors(period).forEach(error -> errors.reject(error.messageCode()));
+    service
+        .validationErrors(period)
+        .forEach(
+            error -> {
+              switch (error) {
+                case TIMELINE -> errors.reject(error.messageCode());
+                case REVIEWER_DEADLINE ->
+                    errors.rejectValue(
+                        "reviewerDeadline",
+                        period.getReviewerDeadline() == null
+                            ? "registration_periods.validation.reviewer_deadline.required"
+                            : error.messageCode());
+                case COUNCIL_DATE ->
+                    errors.rejectValue(
+                        "councilDate",
+                        period.getCouncilDate() == null
+                            ? "registration_periods.validation.council_date.required"
+                            : error.messageCode());
+              }
+            });
   }
 
   private void addResultStatus(Model model, Long periodId) {
