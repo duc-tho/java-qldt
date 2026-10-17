@@ -36,7 +36,7 @@ public class WebSecurityConfig {
                         "/site.webmanifest")
                     .permitAll()
                     // --------
-                    .requestMatchers("/users/**")
+                    .requestMatchers("/nguoi-dung/**")
                     .hasRole("ADMIN")
                     .requestMatchers("/hoi-dong", "/cong-bo-diem")
                     .hasRole("HEAD_OF_FACULTY")
@@ -44,11 +44,11 @@ public class WebSecurityConfig {
                     .hasRole("LECTURER")
                     .requestMatchers("/nhom-cua-toi")
                     .hasRole("STUDENT")
-                    .requestMatchers(HttpMethod.GET, "/announcements/new", "/announcements/*/edit")
+                    .requestMatchers(HttpMethod.GET, "/thong-bao/new", "/thong-bao/*/edit")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.POST, "/announcements/**")
+                    .requestMatchers(HttpMethod.POST, "/thong-bao/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
-                    .requestMatchers(HttpMethod.GET, "/announcements", "/announcements/*")
+                    .requestMatchers(HttpMethod.GET, "/thong-bao", "/thong-bao/*")
                     .authenticated()
                     .requestMatchers("/dot/tao", "/dot/*/sua")
                     .hasAnyRole("ADMIN", "HEAD_OF_FACULTY")
@@ -110,7 +110,7 @@ public class WebSecurityConfig {
                         "/dot/*/nhom/*/gui-duyet",
                         "/dot/*/nhom/*/de-tai")
                     .hasRole("STUDENT")
-                    .requestMatchers("/departments/**")
+                    .requestMatchers("/bo-mon/**")
                     .hasAnyRole("HEAD_OF_FACULTY", "ADMIN")
                     // --------
                     .anyRequest()

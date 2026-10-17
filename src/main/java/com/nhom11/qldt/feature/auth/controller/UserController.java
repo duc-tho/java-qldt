@@ -27,10 +27,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/nguoi-dung")
 public class UserController {
 
-  private static final String BASE_URL = "/users";
+  private static final String BASE_URL = "/nguoi-dung";
   private static final String TEMPLATE_USER_FIELDS = "fragment/feature/user/fields";
   private static final String VIEW_USER_LIST = "page/user/list";
   private static final String VIEW_USER_DETAIL = "page/user/detail";

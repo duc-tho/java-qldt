@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-@RequestMapping("/announcements")
+@RequestMapping("/thong-bao")
 public class AnnouncementController {
   private final AnnouncementService service;
   private final AnnouncementTableDefinition table;
@@ -58,7 +58,7 @@ public class AnnouncementController {
 
     Page<Announcement> data = service.findAll(query, table);
 
-    view.table(model, data, "/announcements", query, table);
+    view.table(model, data, "/thong-bao", query, table);
 
     model.addAttribute("pageTitle", "announcements.page.list.title");
     model.addAttribute("pageIcon", "bi:megaphone");
@@ -69,7 +69,7 @@ public class AnnouncementController {
 
   @GetMapping("/new")
   public String createForm(Model model) {
-    form(model, new AnnouncementForm(), "/announcements", false, "announcements.page.create.title");
+    form(model, new AnnouncementForm(), "/thong-bao", false, "announcements.page.create.title");
 
     return "page/announcement/create";
   }
@@ -80,14 +80,14 @@ public class AnnouncementController {
     validateAudience(form, errors);
 
     if (errors.hasErrors()) {
-      form(model, form, "/announcements", false, "announcements.page.create.title");
+      form(model, form, "/thong-bao", false, "announcements.page.create.title");
 
       return "page/announcement/create";
     }
 
     service.create(form.toEntity(), form.getRoleIds());
 
-    return "redirect:/announcements";
+    return "redirect:/thong-bao";
   }
 
   @GetMapping("/{id}")
@@ -99,7 +99,7 @@ public class AnnouncementController {
 
     if (item == null) {
       if (!staff) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-      return "redirect:/announcements";
+      return "redirect:/thong-bao";
     }
 
     if (!staff) {
@@ -112,7 +112,7 @@ public class AnnouncementController {
     AnnouncementForm form = new AnnouncementForm();
     form.fromEntity(item);
 
-    form(model, form, "/announcements/" + id, true, "announcements.page.detail.title");
+    form(model, form, "/thong-bao/" + id, true, "announcements.page.detail.title");
 
     model.addAttribute("canEdit", item.getStatus() == AnnouncementStatus.PUBLISHED);
 
@@ -124,11 +124,11 @@ public class AnnouncementController {
     Announcement item = service.findById(id);
 
     if (item == null || item.getStatus() == AnnouncementStatus.WITHDRAWN)
-      return "redirect:/announcements";
+      return "redirect:/thong-bao";
 
     AnnouncementForm form = new AnnouncementForm();
     form.fromEntity(item);
-    form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
+    form(model, form, "/thong-bao/" + id, false, "announcements.page.edit.title");
 
     return "page/announcement/detail";
   }
@@ -141,25 +141,25 @@ public class AnnouncementController {
       Model model) {
     Announcement existing = service.findById(id);
     if (existing == null || existing.getStatus() == AnnouncementStatus.WITHDRAWN) {
-      return "redirect:/announcements";
+      return "redirect:/thong-bao";
     }
 
     validateAudience(form, errors);
 
     if (errors.hasErrors()) {
-      form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
+      form(model, form, "/thong-bao/" + id, false, "announcements.page.edit.title");
       return "page/announcement/detail";
     }
     Announcement item = form.toEntity();
     item.setId(id);
     service.update(item, form.getRoleIds());
-    return "redirect:/announcements/" + id;
+    return "redirect:/thong-bao/" + id;
   }
 
   @PostMapping("/{id}/withdraw")
   public String withdraw(@PathVariable Long id) {
     service.withdraw(id);
-    return "redirect:/announcements";
+    return "redirect:/thong-bao";
   }
 
   private void validateAudience(AnnouncementForm form, BindingResult errors) {
@@ -175,7 +175,7 @@ public class AnnouncementController {
         data,
         action,
         "post",
-        "/announcements",
+        "/thong-bao",
         readonly,
         "fragment/feature/announcement/fields",
         validation.render(AnnouncementForm.class));

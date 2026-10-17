@@ -1,4 +1,4 @@
-﻿<div class="navbar relative z-30 bg-base-200">
+<div class="navbar relative z-30 bg-base-200">
    <div class="navbar-start gap-1">
       <th:block th:replace="~{fragment/ui/navigation-actions :: drawerToggle('my-drawer-4', #{navigation.action.close-sidebar}, 'sidebar-toggle-open btn btn-sm btn-square btn-ghost drawer-button', 'bi:arrow-bar-left')}"></th:block>
       <th:block th:replace="~{fragment/ui/navigation-actions :: drawerToggle('my-drawer-4', #{navigation.action.open-sidebar}, 'sidebar-toggle-closed btn btn-sm btn-square btn-ghost drawer-button', 'bi:arrow-bar-right')}"></th:block>
@@ -6,7 +6,7 @@
    </div>
    <div class="navbar-end gap-1">
       <th:block sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-         <th:block th:replace="~{fragment/ui/navigation-actions :: navLink('/announcements', #{navigation.action.notifications}, 'bi:bell', 'btn btn-sm btn-square btn-ghost', false)}"></th:block>
+         <th:block th:replace="~{fragment/ui/navigation-actions :: navLink('/thong-bao', #{navigation.action.notifications}, 'bi:bell', 'btn btn-sm btn-square btn-ghost', false)}"></th:block>
       </th:block>
       <span
          class="flex size-10 items-center justify-center text-base-content/70"
@@ -48,7 +48,7 @@
                ></span>
             </li>
             <li>
-               <a href="/account"
+               <a href="/tai-khoan"
                   ><span class="iconify" data-icon="bi:person-gear"></span
                   ><span th:text="#{navigation.item.account}"></span
                ></a>

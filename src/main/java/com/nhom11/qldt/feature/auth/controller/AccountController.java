@@ -25,7 +25,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/account")
+@RequestMapping("/tai-khoan")
 public class AccountController {
 
   private final UserService userService;
@@ -73,7 +73,7 @@ public class AccountController {
     if (!principal.getUsername().equals(form.getEmail())) {
       refreshAuthentication(form.getEmail(), principal, request, response);
     }
-    return "redirect:/account?updated";
+    return "redirect:/tai-khoan?updated";
   }
 
   @PostMapping("/password")
@@ -101,7 +101,7 @@ public class AccountController {
       return "page/account/detail";
     }
 
-    return "redirect:/account?passwordUpdated";
+    return "redirect:/tai-khoan?passwordUpdated";
   }
 
   private User currentUser(UserDetails principal) {

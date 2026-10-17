@@ -24,6 +24,17 @@ class SharedUiFragmentUsageTest {
     private static final Pattern AMBIGUOUS_SLOT = Pattern.compile("~\\{::(?:header|section|footer)\\}");
 
     @Test
+    void templatesDoNotStartWithByteOrderMark() throws IOException {
+        try (var files = Files.walk(TEMPLATES)) {
+            for (Path file : files.filter(path -> path.toString().endsWith(".html")).toList()) {
+                assertThat(Files.readString(file))
+                    .as("UTF-8 BOM rendered as text in %s", file)
+                    .doesNotStartWith("\uFEFF");
+            }
+        }
+    }
+
+    @Test
     void pagesAndFeatureFragmentsUseSharedButtonsCardsAndAlerts() throws IOException {
         try (var files = Files.walk(TEMPLATES)) {
             for (Path file : files.filter(path -> path.toString().endsWith(".html") && !path.startsWith(BASE)).toList()) {
