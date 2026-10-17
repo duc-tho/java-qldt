@@ -1,20 +1,24 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-   <th:block th:fragment="panel(period, groupSummaries, canCreateGroup, groupId)">
+   <th:block th:fragment="panel(period, groupSummaries, finalizedRegistrationIds)">
       <section class="card card-border border-base-300 bg-base-100">
-         <div class="card-body gap-4">
+         <div class="card-body min-w-0 gap-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                <div class="flex items-center gap-2">
                   <span class="iconify text-primary" data-icon="bi:people"></span>
-                  <h2 class="card-title text-base" th:text="#{student-groups.section.period-groups}"></h2>
+                  <h2 class="card-title text-base" th:text="#{__${groupsSectionTitle}__}"></h2>
                   <span class="badge badge-primary badge-soft badge-sm" th:text="${#lists.size(groupSummaries)}"></span>
                </div>
                <div class="flex flex-wrap gap-2">
-                  <th:block th:if="${canCreateGroup != null and canCreateGroup and groupId == null}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom/tao(id=${period.id})}, #{student-groups.action.create}, 'bi:plus-lg', 'btn btn-primary btn-sm', null)}"></th:block>
                   <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
                </div>
             </div>
-            <th:block th:replace="~{fragment/feature/period/registrations :: registrations(${groupSummaries})}"></th:block>
+            <th:block th:if="${!#lists.isEmpty(groupSummaries)}">
+               <th:block th:replace="~{fragment/feature/period/registrations :: registrations(${groupSummaries}, ${finalizedRegistrationIds})}"></th:block>
+            </th:block>
+            <th:block th:if="${#lists.isEmpty(groupSummaries)}">
+               <div th:replace="~{fragment/shared/empty-state :: centered('bi:people', #{registration_periods.groups.empty}, null)}"></div>
+            </th:block>
          </div>
       </section>
    </th:block>

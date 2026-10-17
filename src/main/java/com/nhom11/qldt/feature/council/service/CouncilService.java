@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.council.model.dto.CouncilLecturerOption;
 import com.nhom11.qldt.feature.council.model.dto.CouncilSummary;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.dto.FinalResultForm;
+import com.nhom11.qldt.feature.council.model.dto.RegistrationResultSummary;
 import com.nhom11.qldt.feature.council.model.entity.Council;
 import com.nhom11.qldt.feature.council.model.entity.CouncilMember;
 import com.nhom11.qldt.feature.council.model.entity.Evaluation;
@@ -134,6 +135,9 @@ public class CouncilService {
         .stream().collect(Collectors.groupingBy(member -> member.getCouncil().getId()));
     Map<Long, Long> assignedCounts = topicRepository.countByCouncilInPeriod(periodId).stream()
         .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+    Map<Long, Long> finalizedCounts = counts(
+        finalResultRepository.countByCouncilIdsAndPeriodIdAndStatus(
+            councilIds, periodId, FinalResultStatus.FINALIZED));
 
     return councils.stream().map(council -> {
       var members = membersByCouncil.getOrDefault(council.getId(), List.of());
@@ -141,8 +145,15 @@ public class CouncilService {
           .filter(member -> member.getMemberRole() == CouncilMemberRole.CHAIRPERSON)
           .map(member -> member.getLecturer().getFullName()).findFirst().orElse("");
       return new CouncilSummary(council, chairpersonName, members.size(),
-          assignedCounts.getOrDefault(council.getId(), 0L));
+          assignedCounts.getOrDefault(council.getId(), 0L),
+          finalizedCounts.getOrDefault(council.getId(), 0L));
     }).toList();
+  }
+
+  public Set<Long> finalizedRegistrationIds(Long periodId) {
+    return Set.copyOf(
+        finalResultRepository.findRegistrationIdsByPeriodIdAndStatus(
+            periodId, FinalResultStatus.FINALIZED));
   }
 
   public Council findCouncil(Long periodId, Long councilId) {
@@ -463,6 +474,26 @@ public class CouncilService {
   public List<ResultPublication> publicationHistory(Long periodId) {
     periodRepository.findById(periodId).orElseThrow();
     return publicationRepository.findAllByRegistrationPeriodIdOrderByIdDesc(periodId);
+  }
+
+  public List<RegistrationResultSummary> resultSummaries(Long periodId) {
+    List<TopicRegistration> registrations =
+        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
+            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
+            .toList();
+    if (registrations.isEmpty()) return List.of();
+
+    List<Long> groupIds = registrations.stream()
+        .map(registration -> registration.getStudentGroup().getId())
+        .toList();
+    Map<Long, FinalResult> resultsByRegistrationId =
+        finalResultRepository.findAllByPeriodAndGroupIds(periodId, groupIds).stream()
+            .collect(Collectors.toMap(result -> result.getTopicRegistration().getId(), result -> result));
+
+    return registrations.stream()
+        .map(registration -> new RegistrationResultSummary(
+            registration, resultsByRegistrationId.get(registration.getId())))
+        .toList();
   }
 
   public boolean canPublishResults(Long periodId) {

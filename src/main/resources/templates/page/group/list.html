@@ -8,7 +8,7 @@
       </th:block>
       <th:block layout:fragment="page-content">
          <th:block th:unless="${isStudent}">
-            <th:block th:replace="~{fragment/feature/period/registrations :: registrations(${groupSummaries})}"></th:block>
+            <th:block th:replace="~{fragment/feature/period/registrations :: registrations(${groupSummaries}, null)}"></th:block>
          </th:block>
          <th:block th:if="${isStudent}">
             <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(groupSummaries)}">

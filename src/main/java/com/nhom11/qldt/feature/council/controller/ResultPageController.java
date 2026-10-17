@@ -50,6 +50,7 @@ public class ResultPageController {
     if (isStaff) {
       model.addAttribute("latestPublication", councilService.latestPublication(periodId));
       model.addAttribute("publicationHistory", councilService.publicationHistory(periodId));
+      model.addAttribute("resultSummaries", councilService.resultSummaries(periodId));
       model.addAttribute("canPublishResults", councilService.canPublishResults(periodId));
       model.addAttribute("revocationForm", new PublicationRevocationForm());
       return "page/result/detail";

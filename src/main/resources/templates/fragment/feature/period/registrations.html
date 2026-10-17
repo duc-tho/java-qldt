@@ -1,6 +1,6 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org">
-   <th:block th:fragment="registrations(groupSummaries)">
+   <th:block th:fragment="registrations(groupSummaries, finalizedRegistrationIds)">
       <div class="mt-4 min-h-0 grow overflow-x-auto rounded-box border-2 border-base-300">
          <th:block th:replace="~{fragment/base/table :: table('table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32 table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
             <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
@@ -24,9 +24,13 @@
                         th:if="${summary.registration == null}"
                         th:text="#{student-groups.registration.empty}"></span>
                      <span class="badge badge-soft badge-sm"
-                        th:if="${summary.registration != null}"
+                        th:if="${summary.registration != null and (finalizedRegistrationIds == null or summary.registration.status.name() != 'APPROVED')}"
                         th:classappend="${summary.registration.status.name() == 'APPROVED'} ? 'badge-success' : (${summary.registration.status.name() == 'REJECTED'} ? 'badge-error' : (${summary.registration.status.name() == 'PENDING'} ? 'badge-warning' : 'badge-ghost'))"
                         th:text="#{topic-registrations.status.__${summary.registration.status.name()}__}"></span>
+                     <span class="badge badge-soft badge-sm"
+                        th:if="${summary.registration != null and finalizedRegistrationIds != null and summary.registration.status.name() == 'APPROVED'}"
+                        th:classappend="${finalizedRegistrationIds.contains(summary.registration.id)} ? 'badge-success' : 'badge-warning'"
+                        th:text="${finalizedRegistrationIds.contains(summary.registration.id)} ? #{student-groups.evaluation.completed} : #{student-groups.evaluation.waiting}"></span>
                   </td>
                </tr>
                <tr th:if="${#lists.isEmpty(groupSummaries)}">

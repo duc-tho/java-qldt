@@ -1,22 +1,33 @@
 <!doctype html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
    <th:block th:fragment="panel(period, isStaff, isLecturer, councilSummaries, reviewerAssignmentTopics, assignedCount, resultsPublished)">
       <section class="card card-border border-base-300 bg-base-100">
-         <div class="card-body gap-4">
+         <div class="card-body min-w-0 gap-4">
             <div class="flex flex-wrap items-center justify-between gap-3">
                <div class="flex items-center gap-2">
                   <span class="iconify text-primary" data-icon="bi:clipboard2-check"></span>
-                  <h2 class="card-title text-base" th:text="${period.periodType.name() == 'KLTN'} ? #{councils.page.list.title} : #{registration_periods.timeline.evaluation}"></h2>
+                  <h2 class="card-title text-base" th:text="${isLecturer} ? #{work.evaluation.title} : (${period.periodType.name() == 'KLTN'} ? #{councils.page.list.title} : #{registration_periods.timeline.evaluation})"></h2>
+                  <span class="badge badge-primary badge-soft badge-sm"
+                     th:if="${isStaff and period.periodType.name() == 'KLTN' and councilSummaries != null}"
+                     th:text="${#lists.size(councilSummaries)}"></span>
+                  <span class="badge badge-primary badge-soft badge-sm"
+                     th:if="${isStaff and period.periodType.name() == 'TLCN'}"
+                     th:text="${#lists.size(reviewerAssignmentTopics)}"></span>
                </div>
                <div class="flex flex-wrap gap-2">
-                  <th:block th:if="${isStaff and period.periodType.name() == 'KLTN'}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
-                  <th:block th:if="${isStaff and period.periodType.name() == 'TLCN'}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/phan-cong(id=${period.id})}, #{reviewer-assignments.page.title}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
-                  <th:block th:if="${isLecturer}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/danh-gia(id=${period.id})}, #{councils.workspace.list.title}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
-                  <th:block th:if="${isStaff or resultsPublished}" th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.title}, 'bi:award', 'btn btn-outline btn-sm', null)}"></th:block>
+                  <th:block th:if="${isStaff and period.periodType.name() == 'KLTN'}">
+                     <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  </th:block>
+                  <th:block th:if="${isStaff and period.periodType.name() == 'TLCN'}">
+                     <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/phan-cong(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  </th:block>
+                  <th:block th:if="${isLecturer}">
+                     <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/danh-gia(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  </th:block>
                </div>
             </div>
             <div class="overflow-x-auto rounded-box border border-base-300" th:if="${isStaff and period.periodType.name() == 'TLCN' and !#lists.isEmpty(reviewerAssignmentTopics)}">
-               <table class="table table-zebra w-full">
+               <table class="table table-zebra w-full text-center">
                   <thead class="bg-base-200"><tr><th th:text="#{topics.column.title}"></th><th th:text="#{reviewer-assignments.field.reviewer}"></th></tr></thead>
                   <tbody><tr th:each="topic : ${reviewerAssignmentTopics}">
                      <td><a class="link link-primary font-medium" th:href="@{/dot/{periodId}/de-tai/{topicId}(periodId=${period.id},topicId=${topic.id})}" th:text="${topic.title}"></a></td>
@@ -26,15 +37,51 @@
             </div>
             <div class="overflow-x-auto rounded-box border border-base-300" th:if="${isStaff and period.periodType.name() == 'KLTN' and councilSummaries != null and !#lists.isEmpty(councilSummaries)}">
                <table class="table table-zebra w-full">
-                  <thead class="bg-base-200"><tr><th th:text="#{councils.field.name}"></th><th th:text="#{councils.column.assignments}"></th></tr></thead>
+                  <thead class="bg-base-200">
+                     <tr>
+                        <th th:text="#{councils.field.name}"></th>
+                        <th class="text-center" th:text="#{councils.column.assignments}"></th>
+                        <th class="text-center" th:text="#{councils.column.grading-progress}"></th>
+                        <th class="text-right" th:text="#{crud.table.actions}"></th>
+                     </tr>
+                  </thead>
                   <tbody><tr th:each="summary : ${councilSummaries}">
-                     <td><a class="link link-primary font-medium" th:href="@{/dot/{periodId}/hoi-dong/{id}(periodId=${period.id},id=${summary.council.id})}" th:text="${summary.council.name}"></a><div class="text-xs text-base-content/60" th:text="#{councils.summary.members(${summary.memberCount})}"></div></td>
-                     <td><span class="badge badge-soft badge-sm" th:text="${summary.assignedCount}"></span></td>
+                     <td>
+                        <div class="font-medium" th:text="${summary.council.name}"></div>
+                        <div class="text-xs text-base-content/60" th:text="#{councils.summary.chairperson(${summary.chairpersonName})}"></div>
+                        <div class="text-xs text-base-content/60" th:text="#{councils.summary.members(${summary.memberCount})}"></div>
+                     </td>
+                     <td class="text-center">
+                        <span class="badge badge-soft badge-sm"
+                           th:classappend="${summary.assignedCount > 0} ? 'badge-success' : 'badge-ghost'"
+                           th:text="${summary.assignedCount}"></span>
+                     </td>
+                     <td class="text-center">
+                        <div class="flex flex-wrap items-center justify-center gap-2">
+                           <span class="tabular-nums font-medium" th:text="#{councils.grading.progress(${summary.finalizedCount}, ${summary.assignedCount})}"></span>
+                           <span class="badge badge-soft badge-sm"
+                              th:classappend="${summary.assignedCount == 0} ? 'badge-ghost' : (${summary.finalizedCount == summary.assignedCount} ? 'badge-success' : 'badge-warning')"
+                              th:text="${summary.assignedCount == 0} ? #{councils.grading.unassigned} : (${summary.finalizedCount == summary.assignedCount} ? #{councils.grading.completed} : #{councils.grading.waiting})"></span>
+                        </div>
+                     </td>
+                     <td class="text-right">
+                        <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/hoi-dong/{id}(periodId=${period.id},id=${summary.council.id})}, #{councils.action.view}, null, 'btn btn-ghost btn-xs', null)}"></th:block>
+                     </td>
                   </tr></tbody>
                </table>
             </div>
+            <th:block th:if="${isStaff and period.periodType.name() == 'KLTN' and (councilSummaries == null or #lists.isEmpty(councilSummaries))}">
+               <div th:replace="~{fragment/shared/empty-state :: centered('bi:people', #{registration_periods.councils.empty}, #{registration_periods.evaluation.description})}"></div>
+            </th:block>
+            <th:block th:if="${isStaff and period.periodType.name() == 'TLCN' and #lists.isEmpty(reviewerAssignmentTopics)}">
+               <div th:replace="~{fragment/shared/empty-state :: centered('bi:person-badge', #{reviewer-assignments.empty}, #{registration_periods.evaluation.description})}"></div>
+            </th:block>
             <p class="text-sm text-base-content/70" th:if="${isLecturer}" th:text="#{work.evaluation.metric.total(${assignedCount})}"></p>
-            <p class="text-sm text-base-content/70" th:if="${!isLecturer and (!isStaff or period.periodType.name() != 'KLTN' or councilSummaries == null or #lists.isEmpty(councilSummaries))}" th:text="#{registration_periods.evaluation.description}"></p>
+            <p class="text-center text-sm text-base-content/70" th:if="${!isLecturer and !isStaff}" th:text="#{registration_periods.evaluation.description}"></p>
+            <th:block th:if="${isStaff}" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
+               <th:block th:replace="~{fragment/feature/result/publication-history :: history}"></th:block>
+               <th:block th:replace="~{fragment/feature/result/publication :: revokeDialog(${period})}"></th:block>
+            </th:block>
          </div>
       </section>
    </th:block>

@@ -2,12 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="page-content">
-         <th:block th:if="${periodView == 'staff'}">
-            <div th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
-         </th:block>
-         <th:block th:if="${periodView == 'viewer'}">
-            <th:block th:replace="~{fragment/feature/period/student-list :: student-list(${periods}, ${groupsByPeriod}, ${now}, ${isStudent})}"></th:block>
-         </th:block>
+         <div th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
       </th:block>
    </body>
 </html>

@@ -1,6 +1,9 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
+      <th:block layout:fragment="actions" th:if="${isStaff}">
+         <th:block th:replace="~{fragment/feature/result/publication :: actions(${period})}"></th:block>
+      </th:block>
       <th:block layout:fragment="page-content">
          <th:block th:if="${isStaff}">
             <div th:replace="~{fragment/feature/result/publication :: result-publication(${period})}"></div>

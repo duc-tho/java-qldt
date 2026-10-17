@@ -97,28 +97,20 @@ public class RegistrationPeriodController {
 
     if (item == null) return "redirect:/dot";
 
-    RegistrationPeriodForm form = new RegistrationPeriodForm();
-    form.fromEntity(item);
-
-    form(
-        model, form, "/dot/" + id, true, "registration_periods.page.detail.title");
-    addPeriodOverview(model, item);
+    prepareReadonlyDetail(model, item);
     addResultStatus(model, id);
     model.addAttribute("periodTopics", topicService.findAllWithDetailsByRegistrationPeriodId(id));
     model.addAttribute("groupSummaries", groupService.groupSummaries(id));
-    model.addAttribute("topicCount", topicService.countByPeriod(id));
-    model.addAttribute("groupCount", groupService.countByPeriod(id));
     if (item.getPeriodType() == PeriodType.KLTN) {
       var councils = councilService.councils(id);
       model.addAttribute("councilSummaries", councilService.councilSummaries(id, councils));
-      model.addAttribute("councilCount", councils.size());
     } else if (item.getPeriodType() == PeriodType.TLCN) {
       model.addAttribute(
           "reviewerAssignmentTopics", councilService.reviewerAssignmentTopics(id));
     }
-    model.addAttribute("pageHeading", item.getName());
     model.addAttribute("isStaff", true);
     model.addAttribute("isLecturer", false);
+    model.addAttribute("isStudent", false);
     model.addAttribute("canCreateGroup", false);
     model.addAttribute("groupId", null);
     model.addAttribute("assignedCount", 0L);
@@ -127,6 +119,18 @@ public class RegistrationPeriodController {
     }
 
     return "page/period/detail";
+  }
+
+  public void prepareReadonlyDetail(Model model, RegistrationPeriod item) {
+    RegistrationPeriodForm form = new RegistrationPeriodForm();
+    form.fromEntity(item);
+
+    form(
+        model, form, "/dot/" + item.getId(), true, "registration_periods.page.detail.title");
+    addPeriodOverview(model, item);
+    model.addAttribute("pageHeading", item.getName());
+    model.addAttribute("topicsSectionTitle", "topics.section.title");
+    model.addAttribute("groupsSectionTitle", "student-groups.section.period-groups");
   }
 
   public String edit(@PathVariable Long id, Model model) {
@@ -242,6 +246,8 @@ public class RegistrationPeriodController {
     var latestPublication = publicationHistory.isEmpty() ? null : publicationHistory.getFirst();
     model.addAttribute("latestPublication", latestPublication);
     model.addAttribute("publicationHistory", publicationHistory);
+    model.addAttribute(
+        "finalizedRegistrationIds", councilService.finalizedRegistrationIds(periodId));
     model.addAttribute("revocationForm", new PublicationRevocationForm());
     model.addAttribute("resultsPublished", latestPublication != null
         && latestPublication.getAction() == ResultPublicationAction.PUBLISHED);

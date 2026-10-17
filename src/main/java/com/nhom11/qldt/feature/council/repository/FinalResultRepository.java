@@ -15,6 +15,18 @@ public interface FinalResultRepository extends BaseRepository<FinalResult, Long>
   List<Object[]> countByPeriodIdsAndStatus(
       @Param("periodIds") List<Long> periodIds, @Param("status") FinalResultStatus status);
 
+  @Query(
+      "select result.topicRegistration.topic.council.id, count(result) from FinalResult result where result.topicRegistration.topic.registrationPeriod.id = :periodId and result.topicRegistration.topic.council.id in :councilIds and result.status = :status group by result.topicRegistration.topic.council.id")
+  List<Object[]> countByCouncilIdsAndPeriodIdAndStatus(
+      @Param("councilIds") List<Long> councilIds,
+      @Param("periodId") Long periodId,
+      @Param("status") FinalResultStatus status);
+
+  @Query(
+      "select result.topicRegistration.id from FinalResult result where result.topicRegistration.topic.registrationPeriod.id = :periodId and result.status = :status")
+  List<Long> findRegistrationIdsByPeriodIdAndStatus(
+      @Param("periodId") Long periodId, @Param("status") FinalResultStatus status);
+
   Optional<FinalResult> findByTopicRegistrationId(Long registrationId);
 
   @EntityGraph(attributePaths = {"topicRegistration.studentGroup", "topicRegistration.topic"})
