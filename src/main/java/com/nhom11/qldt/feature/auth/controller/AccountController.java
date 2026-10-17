@@ -5,17 +5,10 @@ import com.nhom11.qldt.feature.auth.model.dto.AccountForm;
 import com.nhom11.qldt.feature.auth.model.dto.PasswordChangeForm;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import java.util.Objects;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.SecurityContextRepository;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -30,8 +23,6 @@ public class AccountController {
 
   private final UserService userService;
   private final ClientValidationRuleRenderer validationRuleRenderer;
-  private final SecurityContextRepository securityContextRepository =
-      new HttpSessionSecurityContextRepository();
 
   public AccountController(
       UserService userService, ClientValidationRuleRenderer validationRuleRenderer) {
@@ -56,23 +47,21 @@ public class AccountController {
       @AuthenticationPrincipal UserDetails principal,
       @Valid @ModelAttribute("data") AccountForm form,
       BindingResult bindingResult,
-      Model model,
-      HttpServletRequest request,
-      HttpServletResponse response) {
+      Model model) {
     if (principal == null) {
       return "redirect:/login";
     }
+
+    User user = currentUser(principal);
+    form.setEmail(user.getEmail());
+    form.setUserCode(user.getUserCode());
 
     if (bindingResult.hasErrors()) {
       prepareModel(model, form, new PasswordChangeForm(), false);
       return "page/account/detail";
     }
 
-    User user = currentUser(principal);
     userService.updateAccount(user.getId(), form);
-    if (!principal.getUsername().equals(form.getEmail())) {
-      refreshAuthentication(form.getEmail(), principal, request, response);
-    }
     return "redirect:/tai-khoan?updated";
   }
 
@@ -120,19 +109,5 @@ public class AccountController {
     model.addAttribute(
         "passwordValidationRules", validationRuleRenderer.render(PasswordChangeForm.class));
     model.addAttribute("passwordDialogOpen", passwordDialogOpen);
-  }
-
-  private void refreshAuthentication(
-      String email,
-      UserDetails principal,
-      HttpServletRequest request,
-      HttpServletResponse response) {
-    var authentication =
-        new UsernamePasswordAuthenticationToken(
-            email, principal.getPassword(), principal.getAuthorities());
-    SecurityContext context = SecurityContextHolder.createEmptyContext();
-    context.setAuthentication(authentication);
-    SecurityContextHolder.setContext(context);
-    securityContextRepository.saveContext(context, request, response);
   }
 }

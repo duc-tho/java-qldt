@@ -11,6 +11,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 public interface UserRepository extends BaseRepository<User, Long> {
+  boolean existsByEmail(String email);
+
+  boolean existsByEmailAndIdNot(String email, Long id);
+
+  boolean existsByUserCode(String userCode);
+
+  boolean existsByUserCodeAndIdNot(String userCode, Long id);
+
   @EntityGraph(attributePaths = "roles")
   Optional<User> findByEmail(String email);
 

@@ -1,7 +1,6 @@
 package com.nhom11.qldt.feature.auth.model.dto;
 
 import com.nhom11.qldt.feature.auth.model.entity.User;
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
@@ -12,9 +11,9 @@ import lombok.Setter;
 @Setter
 public class AccountForm {
 
-  @NotBlank(message = "{users.validation.email.required}")
-  @Email(message = "{users.validation.email.invalid}")
   private String email;
+
+  private String userCode;
 
   @Size(max = 20, message = "{users.validation.phone.max}")
   @Pattern(regexp = "^$|^0\\d{9}$", message = "{users.validation.phone.invalid}")
@@ -26,6 +25,7 @@ public class AccountForm {
 
   public void fromEntity(User user) {
     email = user.getEmail();
+    userCode = user.getUserCode();
     phone = user.getPhone();
     fullName = user.getFullName();
   }

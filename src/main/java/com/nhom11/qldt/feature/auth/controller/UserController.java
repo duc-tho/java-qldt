@@ -113,6 +113,8 @@ public class UserController {
               "users.validation.password.required", null, LocaleContextHolder.getLocale()));
     }
 
+    validateUniqueFields(form, null, bindingResult);
+
     if (!bindingResult.hasErrors()) {
       try {
         userService.create(form.toEntity(), form.getRoleIds());
@@ -214,6 +216,9 @@ public class UserController {
       return "redirect:" + BASE_URL;
     }
 
+    form.setId(id);
+    validateUniqueFields(form, id, bindingResult);
+
     if (!bindingResult.hasErrors()) {
       User updates = form.toEntity();
       updates.setId(id);
@@ -275,5 +280,31 @@ public class UserController {
   @ModelAttribute
   public void selectionData(Model model) {
     model.addAttribute("roles", roleRepository.findAll());
+  }
+
+  private void validateUniqueFields(UserForm form, Long excludedId, BindingResult bindingResult) {
+    if (!bindingResult.hasFieldErrors("email")) {
+      boolean emailExists =
+          excludedId == null
+              ? userService.existsByEmail(form.getEmail())
+              : userService.existsByEmailAndIdNot(form.getEmail(), excludedId);
+      if (emailExists) {
+        bindingResult.rejectValue("email", "users.validation.email.duplicate");
+      }
+    }
+
+    if (form.getUserCode() == null
+        || form.getUserCode().isBlank()
+        || bindingResult.hasFieldErrors("userCode")) {
+      return;
+    }
+
+    boolean userCodeExists =
+        excludedId == null
+            ? userService.existsByUserCode(form.getUserCode())
+            : userService.existsByUserCodeAndIdNot(form.getUserCode(), excludedId);
+    if (userCodeExists) {
+      bindingResult.rejectValue("userCode", "users.validation.user_code.duplicate");
+    }
   }
 }

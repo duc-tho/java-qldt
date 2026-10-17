@@ -49,20 +49,19 @@ public class AnnouncementController {
 
   @GetMapping
   public String list(@ModelAttribute TableQuery query, Authentication authentication, Model model) {
-    if (!isStaff(authentication)) {
+    boolean staff = isStaff(authentication);
+    model.addAttribute("pageTitle", "announcements.page.list.title");
+    model.addAttribute("pageIcon", "bi:megaphone");
+    model.addAttribute("isStaff", staff);
+
+    if (!staff) {
       model.addAttribute("announcements", service.findPublishedForRoles(roleNames(authentication)));
-      model.addAttribute("pageTitle", "announcements.page.list.title");
-      model.addAttribute("pageIcon", "bi:megaphone");
       return "page/announcement/list";
     }
 
     Page<Announcement> data = service.findAll(query, table);
 
     view.table(model, data, "/thong-bao", query, table);
-
-    model.addAttribute("pageTitle", "announcements.page.list.title");
-    model.addAttribute("pageIcon", "bi:megaphone");
-    model.addAttribute("isStaff", true);
 
     return "page/announcement/list";
   }

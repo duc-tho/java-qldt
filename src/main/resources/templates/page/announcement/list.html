@@ -2,8 +2,10 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="page-content">
-         <div th:if="${isStaff}" th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
-         <div th:unless="${isStaff}" class="grid gap-4 md:grid-cols-2" th:if="${!#lists.isEmpty(announcements)}">
+         <th:block th:if="${isStaff}">
+            <div th:replace="~{fragment/crud/table :: crud-table(${table}, null)}"></div>
+         </th:block>
+         <div th:if="${!isStaff and !#lists.isEmpty(announcements)}" class="grid gap-4 md:grid-cols-2">
             <a th:each="announcement : ${announcements}" th:href="@{/thong-bao/{id}(id=${announcement.id})}"
                class="card card-border border-base-300 bg-base-100 transition-colors hover:border-primary">
                <div class="card-body">
@@ -12,7 +14,9 @@
                </div>
             </a>
          </div>
-         <div th:unless="${isStaff or !#lists.isEmpty(announcements)}" th:replace="~{fragment/shared/empty-state :: centered('bi:megaphone', #{announcements.read.empty}, null)}"></div>
+         <th:block th:if="${!isStaff and #lists.isEmpty(announcements)}">
+            <div th:replace="~{fragment/shared/empty-state :: centered('bi:megaphone', #{announcements.read.empty}, null)}"></div>
+         </th:block>
       </th:block>
    </body>
 </html>

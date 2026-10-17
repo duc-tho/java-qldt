@@ -24,7 +24,9 @@
 
                <div th:replace="~{fragment/shared/validated-field :: field('account-full-name', #{users.field.full_name}, true, ~{fragment/base/input :: validatedBound('fullName', 'account-full-name', 'text', true, ${validationRules.fullName})}, null, null)}"></div>
 
-               <div th:replace="~{fragment/shared/validated-field :: field('account-email', #{users.field.email}, true, ~{fragment/base/input :: validatedBound('email', 'account-email', 'email', true, ${validationRules.email})}, null, null)}"></div>
+               <div th:replace="~{fragment/shared/validated-field :: field('account-email', #{users.field.email}, false, ~{fragment/base/readonly-value :: value('account-email', ${data.email})}, null, null)}"></div>
+
+               <div th:replace="~{fragment/shared/validated-field :: field('account-user-code', #{users.field.user_code}, false, ~{fragment/base/readonly-value :: value('account-user-code', ${data.userCode})}, null, null)}"></div>
 
                <div th:replace="~{fragment/shared/validated-field :: field('account-phone', #{users.field.phone}, false, ~{fragment/base/input :: validatedBound('phone', 'account-phone', 'text', false, ${validationRules.phone})}, null, null)}"></div>
 

@@ -41,6 +41,22 @@ public class UserService extends BaseCrudService<User, Long> {
     return userRepository.findByEmail(email);
   }
 
+  public boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  public boolean existsByEmailAndIdNot(String email, Long id) {
+    return userRepository.existsByEmailAndIdNot(email, id);
+  }
+
+  public boolean existsByUserCode(String userCode) {
+    return userRepository.existsByUserCode(userCode);
+  }
+
+  public boolean existsByUserCodeAndIdNot(String userCode, Long id) {
+    return userRepository.existsByUserCodeAndIdNot(userCode, id);
+  }
+
   public List<User> findAllLecturers() {
     return userRepository.findAllLecturers();
   }
@@ -85,7 +101,6 @@ public class UserService extends BaseCrudService<User, Long> {
   @Transactional
   public User updateAccount(Long id, AccountForm form) {
     User user = userRepository.findById(id).orElseThrow();
-    user.setEmail(form.getEmail());
     user.setPhone(form.getPhone());
     user.setFullName(form.getFullName());
 
