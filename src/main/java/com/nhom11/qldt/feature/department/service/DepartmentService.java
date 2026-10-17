@@ -24,6 +24,14 @@ public class DepartmentService extends BaseCrudService<Department, Long> {
     return departmentRepository;
   }
 
+  public boolean existsByCode(String code) {
+    return departmentRepository.existsByCode(code);
+  }
+
+  public boolean existsByCodeAndIdNot(String code, Long id) {
+    return departmentRepository.existsByCodeAndIdNot(code, id);
+  }
+
   @Override
   public void delete(Long id) {
     if (topicRepository.existsByDepartmentId(id)) {

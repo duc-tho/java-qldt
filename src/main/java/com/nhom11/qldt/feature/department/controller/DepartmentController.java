@@ -61,6 +61,12 @@ public class DepartmentController {
       return "page/department/create";
     }
 
+    if (service.existsByCode(form.getCode())) {
+      errors.rejectValue("code", "departments.validation.code.duplicate");
+      form(model, form, "/bo-mon", false, "departments.page.create.title");
+      return "page/department/create";
+    }
+
     service.create(form.toEntity());
     return "redirect:/bo-mon";
   }
@@ -97,6 +103,14 @@ public class DepartmentController {
       form(model, form, "/bo-mon/" + id, false, "departments.page.edit.title");
       return "page/department/detail";
     }
+
+    if (service.existsByCodeAndIdNot(form.getCode(), id)) {
+      errors.rejectValue("code", "departments.validation.code.duplicate");
+      form.setId(id);
+      form(model, form, "/bo-mon/" + id, false, "departments.page.edit.title");
+      return "page/department/detail";
+    }
+
     Department department = form.toEntity();
     department.setId(id);
     service.update(department);
