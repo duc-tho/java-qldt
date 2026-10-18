@@ -89,6 +89,10 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     return repository.findOpenForStudents(LocalDateTime.now());
   }
 
+  public long countOpenCouncilPeriods() {
+    return repository.countOpenCouncilPeriods(LocalDateTime.now());
+  }
+
   public List<RegistrationPeriod> findVisibleForLecturers() {
     return repository.findVisibleForLecturers(LocalDateTime.now());
   }

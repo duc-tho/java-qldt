@@ -2,6 +2,7 @@ package com.nhom11.qldt.feature.announcement.service;
 
 import com.nhom11.qldt.core.repository.BaseRepository;
 import com.nhom11.qldt.core.service.BaseCrudService;
+import com.nhom11.qldt.feature.announcement.model.dto.AnnouncementSummary;
 import com.nhom11.qldt.feature.announcement.model.entity.Announcement;
 import com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus;
 import com.nhom11.qldt.feature.announcement.repository.AnnouncementRepository;
@@ -12,6 +13,7 @@ import com.nhom11.qldt.feature.auth.service.UserService;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Set;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
@@ -74,6 +76,13 @@ public class AnnouncementService extends BaseCrudService<Announcement, Long> {
     if (roleNames.isEmpty()) return List.of();
 
     return announcementRepository.findPublishedForRoles(roleNames);
+  }
+
+  public List<AnnouncementSummary> findRecentPublishedForRoles(Set<String> roleNames, int limit) {
+    if (roleNames.isEmpty()) return List.of();
+
+    return announcementRepository.findRecentPublishedForRoles(
+        roleNames, PageRequest.of(0, limit));
   }
 
   public Announcement findPublishedByIdForRoles(Long id, Set<String> roleNames) {

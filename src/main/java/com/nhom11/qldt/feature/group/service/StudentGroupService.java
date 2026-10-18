@@ -7,6 +7,7 @@ import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.group.model.dto.GroupSummary;
 import com.nhom11.qldt.feature.group.model.enums.GroupActivityType;
+import com.nhom11.qldt.feature.group.model.enums.StudentGroupProgress;
 import com.nhom11.qldt.feature.group.model.entity.GroupMember;
 import com.nhom11.qldt.feature.group.model.entity.StudentGroup;
 import com.nhom11.qldt.feature.group.model.entity.TopicRegistration;
@@ -20,6 +21,7 @@ import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -280,6 +282,14 @@ public class StudentGroupService {
     return topicRegistrationRepository.findAllByAdviserId(lecturer.getId());
   }
 
+  public long countPendingAdviserRegistrations(Long lecturerId) {
+    return topicRegistrationRepository.countPendingByAdviserId(lecturerId);
+  }
+
+  public long countPendingEvaluations(Long lecturerId) {
+    return topicRegistrationRepository.countPendingEvaluations(lecturerId);
+  }
+
   public List<TopicRegistration> registrations(Long periodId) {
     return topicRegistrationRepository.findAllByRegistrationPeriodId(periodId);
   }
@@ -305,6 +315,15 @@ public class StudentGroupService {
 
   public List<GroupSummary> groupSummariesForStudent(User student) {
     return summarizeGroups(groupsForStudent(student));
+  }
+
+  public StudentGroupProgress progress(
+      StudentGroup group, Set<Long> publishedPeriodIds, LocalDateTime now) {
+    RegistrationPeriod period = group.getRegistrationPeriod();
+    if (publishedPeriodIds.contains(period.getId())) return StudentGroupProgress.PUBLISHED;
+    if (now.isAfter(period.getReportDeadline())) return StudentGroupProgress.WAITING;
+
+    return StudentGroupProgress.IN_PROGRESS;
   }
 
   public List<GroupSummary> groupSummariesForLecturer(Long periodId, User lecturer, boolean pendingOnly) {

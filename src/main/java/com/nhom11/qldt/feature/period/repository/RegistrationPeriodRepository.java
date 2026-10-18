@@ -12,6 +12,15 @@ import org.springframework.data.repository.query.Param;
 public interface RegistrationPeriodRepository extends BaseRepository<RegistrationPeriod, Long> {
   @Query(
       """
+      select count(period) from RegistrationPeriod period
+      where period.periodType = com.nhom11.qldt.feature.period.model.enums.PeriodType.KLTN
+        and period.studentRegistrationEnd < :now
+        and period.councilDate > :now
+      """)
+  long countOpenCouncilPeriods(@Param("now") LocalDateTime now);
+
+  @Query(
+      """
       select period from RegistrationPeriod period
       where period.studentRegistrationStart <= :now
         and period.studentRegistrationEnd >= :now

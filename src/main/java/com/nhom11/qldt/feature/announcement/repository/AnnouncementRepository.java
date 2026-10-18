@@ -1,10 +1,12 @@
 package com.nhom11.qldt.feature.announcement.repository;
 
 import com.nhom11.qldt.core.repository.BaseRepository;
+import com.nhom11.qldt.feature.announcement.model.dto.AnnouncementSummary;
 import com.nhom11.qldt.feature.announcement.model.entity.Announcement;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -16,6 +18,14 @@ public interface AnnouncementRepository extends BaseRepository<Announcement, Lon
           + "where announcement.status = com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus.PUBLISHED "
           + "and role.name in :roleNames order by announcement.createdAt desc")
   List<Announcement> findPublishedForRoles(@Param("roleNames") Set<String> roleNames);
+
+  @Query(
+      "select distinct new com.nhom11.qldt.feature.announcement.model.dto.AnnouncementSummary(announcement.id, announcement.title, announcement.createdAt) "
+          + "from Announcement announcement join announcement.roles role "
+          + "where announcement.status = com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus.PUBLISHED "
+          + "and role.name in :roleNames order by announcement.createdAt desc")
+  List<AnnouncementSummary> findRecentPublishedForRoles(
+      @Param("roleNames") Set<String> roleNames, Pageable pageable);
 
   @EntityGraph(attributePaths = "roles")
   @Query(

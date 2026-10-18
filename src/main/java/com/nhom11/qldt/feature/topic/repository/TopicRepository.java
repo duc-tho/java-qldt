@@ -15,6 +15,17 @@ import org.springframework.data.repository.query.Param;
 public interface TopicRepository extends BaseRepository<Topic, Long> {
   long countByRegistrationPeriodId(Long registrationPeriodId);
 
+  long countByProposedById(Long proposedById);
+
+  @Query(
+      """
+      select count(topic) from Topic topic
+      where topic.status = com.nhom11.qldt.feature.topic.model.enums.TopicStatus.PROPOSED
+        and topic.registrationPeriod.lecturerRegistrationStart <= :now
+        and topic.registrationPeriod.lecturerRegistrationEnd >= :now
+      """)
+  long countPendingApprovals(@Param("now") java.time.LocalDateTime now);
+
   @Query("select topic.council.id, count(topic) from Topic topic where topic.registrationPeriod.id = :periodId and topic.council is not null group by topic.council.id")
   List<Object[]> countByCouncilInPeriod(@Param("periodId") Long periodId);
 

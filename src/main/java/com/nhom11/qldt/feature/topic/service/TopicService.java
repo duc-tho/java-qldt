@@ -125,6 +125,14 @@ public class TopicService extends BaseCrudService<Topic, Long> {
     return periodIds.isEmpty() ? List.of() : topicRepository.findProposalSummariesByPeriodIds(periodIds);
   }
 
+  public long countPendingApprovals() {
+    return topicRepository.countPendingApprovals(LocalDateTime.now());
+  }
+
+  public long countProposalsBy(Long lecturerId) {
+    return topicRepository.countByProposedById(lecturerId);
+  }
+
   public List<TopicProposalSummary> findVisibleProposalSummariesByPeriodIds(
       List<Long> periodIds, Long lecturerId) {
     return periodIds.isEmpty()

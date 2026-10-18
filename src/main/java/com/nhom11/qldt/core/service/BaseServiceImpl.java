@@ -21,6 +21,10 @@ public abstract class BaseServiceImpl<T, ID extends Serializable> implements Bas
     return getRepository().findAll(pageable);
   }
 
+  public long count() {
+    return getRepository().count();
+  }
+
   public T create(T entity) {
     return getRepository().save(entity);
   }

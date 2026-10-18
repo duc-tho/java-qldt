@@ -11,6 +11,37 @@ import org.springframework.data.repository.query.Param;
 
 public interface TopicRegistrationRepository extends BaseRepository<TopicRegistration, Long> {
   @Query(
+      """
+      select count(distinct registration) from TopicRegistration registration
+      join registration.topic.advisers adviser
+      where adviser.id = :lecturerId
+        and registration.status = com.nhom11.qldt.feature.group.model.enums.TopicRegistrationStatus.PENDING
+      """)
+  long countPendingByAdviserId(@Param("lecturerId") Long lecturerId);
+
+  @Query(
+      """
+      select count(distinct registration) from TopicRegistration registration
+      left join registration.topic.advisers adviser
+      where registration.status = com.nhom11.qldt.feature.group.model.enums.TopicRegistrationStatus.APPROVED
+        and (
+          (adviser.id = :lecturerId and registration.topic.registrationPeriod.periodType in (
+            com.nhom11.qldt.feature.period.model.enums.PeriodType.MON_HOC,
+            com.nhom11.qldt.feature.period.model.enums.PeriodType.NCKH
+          ))
+          or registration.topic.reviewer.id = :lecturerId
+          or exists (select member.id from CouncilMember member
+            where member.council = registration.topic.council
+              and member.lecturer.id = :lecturerId)
+        )
+        and not exists (select evaluation.id from Evaluation evaluation
+          where evaluation.topicRegistration = registration
+            and evaluation.evaluator.id = :lecturerId
+            and evaluation.status = com.nhom11.qldt.feature.council.model.enums.EvaluationStatus.SUBMITTED)
+      """)
+  long countPendingEvaluations(@Param("lecturerId") Long lecturerId);
+
+  @Query(
       "select registration.studentGroup.registrationPeriod.id, count(registration) from TopicRegistration registration where registration.studentGroup.registrationPeriod.id in :periodIds and registration.status = :status group by registration.studentGroup.registrationPeriod.id")
   List<Object[]> countByPeriodIdsAndStatus(
       @Param("periodIds") List<Long> periodIds,

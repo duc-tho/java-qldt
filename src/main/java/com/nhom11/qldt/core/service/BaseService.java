@@ -10,6 +10,8 @@ public interface BaseService<T, ID> {
 
   Page<T> findAll(Pageable pageable);
 
+  long count();
+
   T create(T entity);
 
   T update(T entity);

@@ -12,5 +12,7 @@ spring:
       max-request-size: 500MB
 
 qldt:
+  dashboard:
+    announcement-limit: 8
   report-storage:
     root: ./local-report-storage

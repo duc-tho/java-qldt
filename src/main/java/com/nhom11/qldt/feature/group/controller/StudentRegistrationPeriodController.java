@@ -4,6 +4,7 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.group.model.dto.GroupSummary;
+import com.nhom11.qldt.feature.group.model.enums.StudentGroupProgress;
 import com.nhom11.qldt.feature.group.service.StudentGroupService;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -45,13 +46,12 @@ public class StudentRegistrationPeriodController {
     List<GroupSummary> published = new ArrayList<>();
 
     groups.forEach(summary -> {
-      var period = summary.group().getRegistrationPeriod();
-      if (publishedPeriodIds.contains(period.getId())) {
-        published.add(summary);
-      } else if (now.isAfter(period.getReportDeadline())) {
-        waiting.add(summary);
-      } else {
-        inProgress.add(summary);
+      StudentGroupProgress progress =
+          groupService.progress(summary.group(), publishedPeriodIds, now);
+      switch (progress) {
+        case PUBLISHED -> published.add(summary);
+        case WAITING -> waiting.add(summary);
+        case IN_PROGRESS -> inProgress.add(summary);
       }
     });
 
