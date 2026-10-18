@@ -102,11 +102,8 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
   }
 
   private boolean canEditOwnProposal(Topic topic) {
-    return topic.getProposedBy() != null
-        && topic.getProposedBy().getEmail().equals(
-            SecurityContextHolder.getContext().getAuthentication().getName())
-        && (topic.getStatus() == TopicStatus.PROPOSED || topic.getStatus() == TopicStatus.REJECTED)
-        && topicService.isProposalWindowOpen(topic.getRegistrationPeriod());
+    return topicService.canEditOwnProposal(
+        topic, SecurityContextHolder.getContext().getAuthentication().getName());
   }
 
   @Override

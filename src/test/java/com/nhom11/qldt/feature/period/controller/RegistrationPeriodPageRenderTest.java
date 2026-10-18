@@ -330,8 +330,8 @@ class RegistrationPeriodPageRenderTest {
     second.setName("Council B");
     when(councilService.councils(1L)).thenReturn(List.of(first, second));
     when(councilService.councilSummaries(eq(1L), any())).thenReturn(List.of(
-        new CouncilSummary(first, "Chair A", 3, 2),
-        new CouncilSummary(second, "Chair B", 4, 1)));
+        new CouncilSummary(first, "Chair A", 3, 2L, 0L),
+        new CouncilSummary(second, "Chair B", 4, 1L, 0L)));
 
     mockMvc.perform(get("/dot/1"))
         .andExpect(status().isOk())

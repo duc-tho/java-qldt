@@ -10,7 +10,6 @@ import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import com.nhom11.qldt.feature.topic.model.dto.TopicForm;
 import com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
-import com.nhom11.qldt.feature.topic.model.enums.TopicStatus;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import jakarta.validation.Valid;
 import java.util.LinkedHashSet;
@@ -81,11 +80,12 @@ public class TopicProposalController {
     if (principal == null) return "redirect:/dot/" + periodId + "/de-tai";
     User proposer = currentUser(principal);
     Topic topic = topicService.findByIdAndRegistrationPeriodId(topicId, periodId);
-    if (!isProposalOwner(topic, proposer)) return "redirect:/dot/" + periodId + "/de-tai";
-    if (!topicService.isProposalWindowOpen(topic.getRegistrationPeriod())) return "redirect:/dot/" + periodId + "/de-tai";
+    if (!topicService.canEditOwnProposal(topic, proposer.getEmail())) {
+      return "redirect:/dot/" + periodId + "/de-tai";
+    }
     TopicForm form = new TopicForm();
     form.fromEntity(topic);
-    prepare(model, periodId, topicId, form, proposer);
+    prepare(model, topic, form, proposer);
     return "page/topic/create";
   }
 
@@ -93,19 +93,18 @@ public class TopicProposalController {
     if (principal == null) return "redirect:/dot/" + periodId + "/de-tai";
     User proposer = currentUser(principal);
     Topic existing = topicService.findByIdAndRegistrationPeriodId(topicId, periodId);
-    if (!isProposalOwner(existing, proposer)
-        || !topicService.isProposalWindowOpen(existing.getRegistrationPeriod())) {
+    if (!topicService.canEditOwnProposal(existing, proposer.getEmail())) {
       return "redirect:/dot/" + periodId + "/de-tai";
     }
     if (errors.hasErrors()) {
-      prepare(model, periodId, topicId, form, proposer);
+      prepare(model, existing, form, proposer);
       return "page/topic/create";
     }
     try {
       topicService.updateProposal(topicId, periodId, proposer, form.toEntity(), form.getDepartmentId(), form.getAdviserIds());
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
-      prepare(model, periodId, topicId, form, proposer);
+      prepare(model, existing, form, proposer);
       return "page/topic/create";
     }
     return "redirect:/dot/" + periodId + "/de-tai/" + topicId;
@@ -127,7 +126,10 @@ public class TopicProposalController {
     return "redirect:/dot/" + periodId + "/de-tai";
   }
 
-  private void prepare(Model model, Long periodId, Long topicId, TopicForm form, User proposer) {
+  private void prepare(Model model, Topic topic, TopicForm form, User proposer) {
+    Long periodId = topic.getRegistrationPeriod().getId();
+    Long topicId = topic.getId();
+
     if (form.getAdviserIds() == null) form.setAdviserIds(new LinkedHashSet<>());
     form.getAdviserIds().add(proposer.getId());
     crudView.form(
@@ -150,7 +152,7 @@ public class TopicProposalController {
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("showProposalRules", true);
     model.addAttribute("breadcrumbParentUrl", "/dot/" + periodId + "/de-tai");
+    model.addAttribute("breadcrumbParentLabel", topic.getRegistrationPeriod().getName());
   }
   private User currentUser(UserDetails principal) { return userService.findByEmail(principal.getUsername()).orElseThrow(); }
-  private boolean isProposalOwner(Topic topic, User user) { return topic != null && (topic.getStatus() == TopicStatus.PROPOSED || topic.getStatus() == TopicStatus.REJECTED) && topic.getProposedBy() != null && topic.getProposedBy().getId().equals(user.getId()); }
 }

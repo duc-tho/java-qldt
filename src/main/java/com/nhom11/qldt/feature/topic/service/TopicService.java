@@ -336,6 +336,16 @@ public class TopicService extends BaseCrudService<Topic, Long> {
         && !now.isAfter(registrationPeriod.getLecturerRegistrationEnd());
   }
 
+  public boolean canEditOwnProposal(Topic topic, String lecturerEmail) {
+    if (topic == null || lecturerEmail == null || topic.getProposedBy() == null) {
+      return false;
+    }
+
+    return topic.getProposedBy().getEmail().equals(lecturerEmail)
+        && (topic.getStatus() == TopicStatus.PROPOSED || topic.getStatus() == TopicStatus.REJECTED)
+        && isProposalWindowOpen(topic.getRegistrationPeriod());
+  }
+
   public boolean canManageTopicsAsStaff(RegistrationPeriod registrationPeriod) {
     var authentication = SecurityContextHolder.getContext().getAuthentication();
     return authentication != null

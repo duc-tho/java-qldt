@@ -80,7 +80,7 @@ public class TopicController {
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("tableCanCreate", topicService.canManageTopicsAsStaff(period));
     model.addAttribute("departments", departmentService.findAll());
-    model.addAttribute("periods", registrationPeriodService.findAll());
+    model.addAttribute("period", period);
     model.addAttribute("statuses", TopicStatus.values());
     model.addAttribute("departmentId", departmentId);
     model.addAttribute("selectedStatus", status);
@@ -389,6 +389,9 @@ public class TopicController {
     prepare(model, form, topicUrl(periodId, topic.getId()), true, "topics.page.detail.title", periodId);
     model.addAttribute("topic", topic);
     model.addAttribute("isStaff", true);
+    model.addAttribute(
+        "canEditTopic", topicService.canManageTopicsAsStaff(topic.getRegistrationPeriod()));
+    model.addAttribute("pageTitleArg", topic.getRegistrationPeriod().getName());
     model.addAttribute("groupRegistrations", studentGroupService.registrationsForTopic(topic.getId()));
     if (!model.containsAttribute("rejectForm")) {
       model.addAttribute("rejectForm", new RejectTopicForm());

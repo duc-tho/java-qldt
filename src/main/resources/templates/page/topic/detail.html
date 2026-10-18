@@ -13,18 +13,17 @@
          <th:block th:if="${form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}">
             <th:block th:replace="~{fragment/base/button :: modalOpen('reject_topic', #{topics.action.reject}, 'bi:x-circle', 'btn btn-error btn-outline btn-sm')}"></th:block>
          </th:block>
-         <th:block th:if="${form.readonly and canManageTopic}">
-            <th:block th:replace="~{fragment/base/button :: linkStyled(${form.actionUrl + '/sua'}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
-            <th:block th:replace="~{fragment/crud/delete-action :: delete(${form.actionUrl + '/xoa'}, ${form.data.title}, #{crud.action.delete})}"></th:block>
          </th:block>
+         <th:block th:if="${canEditTopic}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai/{topicId}/sua(periodId=${topic.registrationPeriod.id},topicId=${topic.id})}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
+         </th:block>
+         <th:block th:if="${isStaff and form.readonly and canManageTopic}">
+            <th:block th:replace="~{fragment/crud/delete-action :: delete(${form.actionUrl + '/xoa'}, ${form.data.title}, #{crud.action.delete})}"></th:block>
          </th:block>
       </th:block>
       <th:block layout:fragment="page-content">
+         <div th:replace="~{fragment/feature/topic/viewer-detail :: viewer-detail(${topic}, ${isStaff or showRejectionReason == true})}"></div>
          <th:block th:if="${isStaff}">
-         <th:block th:if="${topic.rejectionReason != null}">
-            <th:block th:replace="~{fragment/base/alert :: reason('alert alert-error alert-soft mb-5', #{topics.field.rejection-reason}, ${topic.rejectionReason})}"></th:block>
-         </th:block>
-         <div th:replace="~{fragment/crud/form :: crud-form(${form})}"></div>
          <th:block th:replace="~{fragment/feature/topic/registered-groups :: groups}"></th:block>
          <dialog th:replace="~{fragment/base/dialog :: dialog('reject_topic', ~{::#reject-topic-content}, #{crud.delete.close})}">
             <section id="reject-topic-content">
@@ -40,7 +39,6 @@
          </dialog>
          </th:block>
          <th:block th:unless="${isStaff}">
-            <div th:replace="~{fragment/feature/topic/viewer-detail :: viewer-detail(${topic}, ${showRejectionReason})}"></div>
             <div class="mt-4 flex flex-wrap justify-end gap-2" th:if="${selectionGroupId != null}">
                <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}(periodId=${topic.registrationPeriod.id},groupId=${selectionGroupId})}, #{navigation.action.back}, 'bi:arrow-left', 'btn btn-sm btn-outline', null)}"></th:block>
                <form th:if="${canChooseTopic == true and selectedTopicId != topic.id}" method="post"

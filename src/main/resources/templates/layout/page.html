@@ -1,11 +1,12 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
    <head>
-      <title th:text="${#messages.msg(pageTitle)}"></title>
+      <title th:text="${pageTitleArg != null ? #messages.msg(pageTitle, pageTitleArg) : #messages.msg(pageTitle)}"></title>
    </head>
 
    <body>
-      <th:block layout:fragment="main">
+      <th:block layout:fragment="main"
+         th:with="resolvedPageTitle=${pageTitleArg != null ? #messages.msg(pageTitle, pageTitleArg) : #messages.msg(pageTitle)}">
          <div class="flex flex-col gap-4">
             <div class="flex items-center gap-1">
                <th:block th:replace="~{fragment/ui/navigation-actions :: pageBack(#{navigation.action.back}, #{navigation.item.home})}"></th:block>
@@ -18,15 +19,15 @@
                            th:text="${#messages.msgOrNull(breadcrumbParentLabel) ?: breadcrumbParentLabel}"
                         ></a>
                      </li>
-                     <li th:text="${#messages.msg(pageTitle)}"></li>
+                     <li th:text="${resolvedPageTitle}"></li>
                   </ul>
                </div>
             </div>
             <div
-               class="flex flex-wrap items-center justify-between gap-4 gap-y-3"
+               class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
-               <div class="min-w-0">
-                  <div class="flex items-center gap-3">
+               <div class="min-w-0 flex-1">
+                  <div class="flex min-w-0 items-center gap-3">
                      <div
                         th:if="${pageIcon}"
                         class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
@@ -37,12 +38,14 @@
                            data-width="22"
                         ></span>
                      </div>
-                     <div>
-                        <div class="flex items-center gap-2">
-                           <h1
-                              class="text-2xl font-semibold leading-tight text-base-content"
-                              th:text="${pageHeading != null ? pageHeading : #messages.msg(pageTitle)}"
-                           ></h1>
+                     <div class="min-w-0 flex-1"
+                        th:with="resolvedPageHeading=${pageHeading != null ? pageHeading : resolvedPageTitle}">
+                        <div class="flex min-w-0 items-center gap-2">
+                           <div class="tooltip tooltip-bottom tooltip-start block min-w-0 flex-1"
+                              tabindex="0" th:attr="data-tip=${resolvedPageHeading}">
+                              <h1 class="truncate text-2xl font-semibold leading-tight text-base-content"
+                                 th:text="${resolvedPageHeading}"></h1>
+                           </div>
                            <span
                               th:if="${table != null}"
                               class="badge badge-primary badge-soft"
@@ -62,7 +65,7 @@
                   <th:block layout:fragment="page-meta"></th:block>
                </div>
 
-               <div class="flex items-center gap-2">
+               <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
                   <th:block layout:fragment="actions"></th:block>
                </div>
             </div>

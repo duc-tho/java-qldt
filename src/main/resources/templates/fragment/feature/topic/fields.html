@@ -3,7 +3,7 @@
    <th:block th:fragment="form-fields">
       <div class="flex flex-col gap-3">
          <div th:replace="~{fragment/base/input :: field('title', #{topics.field.title}, 'text', null, ${form.readonly}, ${form.validationRules.title}, true, null)}"></div>
-         <div th:replace="~{fragment/base/select :: field('departmentId', #{topics.field.department}, ${form.readonly}, null, true, null, ${topic == null ? null : topic.department.name}, ~{::option})}">
+         <div th:replace="~{fragment/base/select :: field('departmentId', #{topics.field.department}, ${form.readonly}, ${form.validationRules.departmentId}, true, null, ${topic == null ? null : topic.department.name}, ~{::option})}">
                <option
                   value=""
                   th:text="#{topics.field.department.placeholder}"

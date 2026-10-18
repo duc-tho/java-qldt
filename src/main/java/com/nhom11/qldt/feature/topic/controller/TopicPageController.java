@@ -119,7 +119,6 @@ public class TopicPageController {
         "/dot/" + periodId + "/de-tai",
         query,
         table);
-    model.addAttribute("periods", periodService.findVisibleForLecturer(viewer.getId()));
     model.addAttribute("statuses", TopicStatus.values());
     model.addAttribute("selectedStatus", status);
     model.addAttribute("adviserSearch", adviserSearch);
@@ -162,8 +161,11 @@ public class TopicPageController {
     model.addAttribute("isStaff", false);
     model.addAttribute("topic", topic);
     model.addAttribute("showRejectionReason", isOwner);
+    model.addAttribute(
+        "canEditTopic",
+        isLecturer && topicService.canEditOwnProposal(topic, viewer.getEmail()));
     model.addAttribute("pageTitle", "topics.page.detail.title");
-    model.addAttribute("pageHeading", topic.getTitle());
+    model.addAttribute("pageTitleArg", period.getName());
     model.addAttribute("pageIcon", "bi:journal-text");
     model.addAttribute("breadcrumbParentUrl", "/dot/" + periodId + "/de-tai");
     model.addAttribute("breadcrumbParentLabel", period.getName());
