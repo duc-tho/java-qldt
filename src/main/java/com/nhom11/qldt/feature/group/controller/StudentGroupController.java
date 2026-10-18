@@ -1,5 +1,7 @@
 package com.nhom11.qldt.feature.group.controller;
 
+import com.nhom11.qldt.core.validation.ClientValidationRuleRenderer;
+import com.nhom11.qldt.core.view.CrudViewSupport;
 import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.service.UserService;
 import com.nhom11.qldt.feature.council.service.CouncilService;
@@ -46,6 +48,8 @@ public class StudentGroupController {
   private final ReportSubmissionService reportSubmissionService;
   private final CouncilService councilService;
   private final GroupActivityService groupActivityService;
+  private final CrudViewSupport crudView;
+  private final ClientValidationRuleRenderer validationRuleRenderer;
 
   public StudentGroupController(
       StudentGroupService studentGroupService,
@@ -53,13 +57,17 @@ public class StudentGroupController {
       UserService userService,
       ReportSubmissionService reportSubmissionService,
       CouncilService councilService,
-      GroupActivityService groupActivityService) {
+      GroupActivityService groupActivityService,
+      CrudViewSupport crudView,
+      ClientValidationRuleRenderer validationRuleRenderer) {
     this.studentGroupService = studentGroupService;
     this.registrationPeriodService = registrationPeriodService;
     this.userService = userService;
     this.reportSubmissionService = reportSubmissionService;
     this.councilService = councilService;
     this.groupActivityService = groupActivityService;
+    this.crudView = crudView;
+    this.validationRuleRenderer = validationRuleRenderer;
   }
 
   @GetMapping("/tao")
@@ -73,13 +81,7 @@ public class StudentGroupController {
         || studentGroupService.findCurrentGroup(periodId, student) != null) {
       return "redirect:/dot/" + periodId + "/nhom";
     }
-    if (!model.containsAttribute("data")) {
-      model.addAttribute("data", new CreateStudentGroupForm());
-    }
-    model.addAttribute("periodId", periodId);
-    model.addAttribute("pageTitle", "student-groups.page.create.title");
-    model.addAttribute("pageIcon", "bi:people");
-    return "page/group/create";
+    return createView(model, new CreateStudentGroupForm(), periodId);
   }
 
   @PostMapping
@@ -90,21 +92,25 @@ public class StudentGroupController {
       BindingResult errors,
       Model model) {
     if (principal == null || findPeriod(periodId) == null) return "redirect:/dot";
-    if (errors.hasErrors()) return createForm(periodId, principal, model);
+    validateUniqueName(periodId, form, errors);
+    if (errors.hasErrors()) return createView(model, form, periodId);
+
     try {
       StudentGroup group =
           studentGroupService.createGroup(periodId, currentUser(principal), form.getName());
       return redirectDetail(periodId, group.getId());
     } catch (IllegalArgumentException exception) {
-      errors.reject(exception.getMessage());
-      model.addAttribute("periodId", periodId);
-      model.addAttribute("pageTitle", "student-groups.page.create.title");
-      model.addAttribute("pageIcon", "bi:people");
-      return "page/group/create";
+      if (StudentGroupService.DUPLICATE_NAME_ERROR.equals(exception.getMessage())) {
+        errors.rejectValue("name", StudentGroupService.DUPLICATE_NAME_ERROR);
+      } else {
+        errors.reject(exception.getMessage());
+      }
     } catch (DataIntegrityViolationException exception) {
-      errors.reject("student-groups.error.already-member");
-      return createForm(periodId, principal, model);
+      validateUniqueName(periodId, form, errors);
+      if (!errors.hasErrors()) errors.reject("student-groups.error.already-member");
     }
+
+    return createView(model, form, periodId);
   }
 
   @GetMapping("/{groupId}")
@@ -342,6 +348,35 @@ public class StudentGroupController {
 
   private RegistrationPeriod findPeriod(Long periodId) {
     return registrationPeriodService.findById(periodId);
+  }
+
+  private String createView(Model model, CreateStudentGroupForm form, Long periodId) {
+    String groupListUrl = "/dot/" + periodId + "/nhom";
+    crudView.form(
+        model,
+        form,
+        groupListUrl,
+        "post",
+        groupListUrl,
+        false,
+        "fragment/feature/group/fields",
+        validationRuleRenderer.render(CreateStudentGroupForm.class));
+    model.addAttribute("pageTitle", "student-groups.page.create.title");
+    model.addAttribute("pageIcon", "bi:people");
+    model.addAttribute("breadcrumbParentUrl", groupListUrl);
+    model.addAttribute("breadcrumbParentLabel", "student-groups.page.list.title");
+
+    return "page/group/create";
+  }
+
+  private void validateUniqueName(
+      Long periodId, CreateStudentGroupForm form, BindingResult errors) {
+    if (errors.hasFieldErrors("name")
+        || !studentGroupService.existsByName(periodId, form.getName())) {
+      return;
+    }
+
+    errors.rejectValue("name", StudentGroupService.DUPLICATE_NAME_ERROR);
   }
 
   private User currentUser(UserDetails principal) {

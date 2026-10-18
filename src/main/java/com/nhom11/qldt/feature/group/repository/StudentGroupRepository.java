@@ -13,6 +13,8 @@ import org.springframework.data.repository.query.Param;
 public interface StudentGroupRepository extends BaseRepository<StudentGroup, Long> {
   long countByRegistrationPeriodId(Long registrationPeriodId);
 
+  boolean existsByRegistrationPeriodIdAndNameIgnoreCase(Long registrationPeriodId, String name);
+
   @EntityGraph(attributePaths = {"registrationPeriod"})
   Optional<StudentGroup> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 

@@ -26,6 +26,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class StudentGroupService {
+  public static final String DUPLICATE_NAME_ERROR = "student-groups.validation.name.duplicate";
+
   private static final int MIN_MEMBERS = 3;
   private static final int MAX_MEMBERS = 5;
 
@@ -66,9 +68,14 @@ public class StudentGroupService {
       throw new IllegalArgumentException("student-groups.error.already-member");
     }
 
+    String normalizedName = name.trim();
+    if (existsByName(periodId, normalizedName)) {
+      throw new IllegalArgumentException(DUPLICATE_NAME_ERROR);
+    }
+
     StudentGroup group = new StudentGroup();
     group.setRegistrationPeriod(period);
-    group.setName(name.trim());
+    group.setName(normalizedName);
     studentGroupRepository.save(group);
 
     GroupMember member = new GroupMember();
@@ -287,6 +294,13 @@ public class StudentGroupService {
 
   public long countByPeriod(Long periodId) {
     return studentGroupRepository.countByRegistrationPeriodId(periodId);
+  }
+
+  public boolean existsByName(Long periodId, String name) {
+    if (name == null || name.isBlank()) return false;
+
+    return studentGroupRepository.existsByRegistrationPeriodIdAndNameIgnoreCase(
+        periodId, name.trim());
   }
 
   public List<GroupSummary> groupSummariesForStudent(User student) {
