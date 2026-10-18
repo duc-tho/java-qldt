@@ -38,7 +38,7 @@ public class WebSecurityConfig {
                     // --------
                     .requestMatchers("/nguoi-dung/**")
                     .hasRole("ADMIN")
-                    .requestMatchers("/hoi-dong", "/cong-bo-diem")
+                    .requestMatchers("/hoi-dong", "/cong-bo-diem", "/phe-duyet-de-tai")
                     .hasRole("HEAD_OF_FACULTY")
                     .requestMatchers("/phe-duyet-dang-ky", "/de-xuat-de-tai", "/cham-diem")
                     .hasRole("LECTURER")

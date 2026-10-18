@@ -6,6 +6,7 @@ import com.nhom11.qldt.feature.period.model.dto.PeriodWorkCard;
 import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
 import com.nhom11.qldt.feature.period.model.enums.PeriodType;
 import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -32,8 +33,12 @@ public class CouncilWorkPageController {
 
   @GetMapping("/hoi-dong")
   public String councils(Model model) {
+    LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll().stream()
         .filter(period -> period.getPeriodType() == PeriodType.KLTN)
+        .filter(period -> period.getStudentRegistrationEnd() != null
+            && period.getCouncilDate() != null
+            && now.isAfter(period.getStudentRegistrationEnd()))
         .sorted(periodOrder())
         .toList();
     Map<Long, Long> counts = councilService.councilCounts(periodIds(periods));
@@ -64,7 +69,10 @@ public class CouncilWorkPageController {
 
   @GetMapping("/cong-bo-diem")
   public String publications(Model model) {
+    LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll().stream()
+        .filter(period -> period.getReportDeadline() != null
+            && !now.isBefore(period.getReportDeadline()))
         .sorted(periodOrder())
         .toList();
     List<Long> periodIds = periodIds(periods);
