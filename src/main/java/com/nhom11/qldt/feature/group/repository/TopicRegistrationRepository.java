@@ -140,6 +140,19 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
   @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
   @Query(
       """
+      select registration from TopicRegistration registration
+      join fetch registration.studentGroup studentGroup
+      join fetch registration.topic topic
+      where studentGroup.registrationPeriod.id = :periodId
+        and registration.status = :status
+      order by registration.updatedAt desc
+      """)
+  List<TopicRegistration> findAllByRegistrationPeriodIdAndStatus(
+      @Param("periodId") Long periodId, @Param("status") TopicRegistrationStatus status);
+
+  @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
+  @Query(
+      """
       select distinct registration from TopicRegistration registration
       join fetch registration.studentGroup studentGroup
       join fetch registration.topic topic

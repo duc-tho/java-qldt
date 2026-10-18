@@ -13,6 +13,7 @@ import com.nhom11.qldt.feature.council.model.entity.CouncilMember;
 import com.nhom11.qldt.feature.council.model.entity.Evaluation;
 import com.nhom11.qldt.feature.council.model.entity.FinalResult;
 import com.nhom11.qldt.feature.council.model.entity.ResultPublication;
+import com.nhom11.qldt.feature.council.event.ResultsPublishedEvent;
 import com.nhom11.qldt.feature.council.model.enums.CouncilMemberRole;
 import com.nhom11.qldt.feature.council.model.enums.EvaluationStatus;
 import com.nhom11.qldt.feature.council.model.enums.FinalResultStatus;
@@ -39,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,6 +61,7 @@ public class CouncilService {
   private final TopicRegistrationRepository registrationRepository;
   private final UserRepository userRepository;
   private final ReportSubmissionService reportSubmissionService;
+  private final ApplicationEventPublisher eventPublisher;
 
   public CouncilService(
       CouncilRepository councilRepository,
@@ -70,7 +73,8 @@ public class CouncilService {
       TopicRepository topicRepository,
       TopicRegistrationRepository registrationRepository,
       UserRepository userRepository,
-      ReportSubmissionService reportSubmissionService) {
+      ReportSubmissionService reportSubmissionService,
+      ApplicationEventPublisher eventPublisher) {
     this.councilRepository = councilRepository;
     this.councilMemberRepository = councilMemberRepository;
     this.evaluationRepository = evaluationRepository;
@@ -81,6 +85,7 @@ public class CouncilService {
     this.registrationRepository = registrationRepository;
     this.userRepository = userRepository;
     this.reportSubmissionService = reportSubmissionService;
+    this.eventPublisher = eventPublisher;
   }
 
   public List<Council> councils(Long periodId) {
@@ -423,6 +428,7 @@ public class CouncilService {
       throw new IllegalArgumentException("result-publications.error.results-incomplete");
     }
     publicationRepository.save(publication(periodId, performer, ResultPublicationAction.PUBLISHED, null));
+    eventPublisher.publishEvent(new ResultsPublishedEvent(periodId));
   }
 
   @Transactional
@@ -478,10 +484,8 @@ public class CouncilService {
   }
 
   public List<RegistrationResultSummary> resultSummaries(Long periodId) {
-    List<TopicRegistration> registrations =
-        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
-            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
-            .toList();
+    List<TopicRegistration> registrations = registrationRepository
+        .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
     if (registrations.isEmpty()) return List.of();
 
     List<Long> groupIds = registrations.stream()
@@ -498,10 +502,8 @@ public class CouncilService {
   }
 
   public boolean canPublishResults(Long periodId) {
-    List<TopicRegistration> registrations =
-        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
-            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
-            .toList();
+    List<TopicRegistration> registrations = registrationRepository
+        .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
     return !registrations.isEmpty()
         && registrations.stream()
             .allMatch(
