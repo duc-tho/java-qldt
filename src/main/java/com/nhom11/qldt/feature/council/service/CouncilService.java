@@ -210,6 +210,7 @@ public class CouncilService {
     council.setName(form.getName());
     councilRepository.save(council);
     councilMemberRepository.deleteAll(members(councilId));
+    councilMemberRepository.flush();
     saveMembers(council, form, lecturers);
   }
 
