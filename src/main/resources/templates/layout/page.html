@@ -1,92 +1,82 @@
 <!doctype html>
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/app.html}">
    <head>
-      <title th:text="${#messages.msg(pageTitle)}"></title>
+      <title th:text="${pageTitleArg != null ? #messages.msg(pageTitle, pageTitleArg) : #messages.msg(pageTitle)}"></title>
    </head>
 
    <body>
-      <th:block layout:fragment="main">
+      <th:block layout:fragment="main"
+         th:with="resolvedPageTitle=${pageTitleArg != null ? #messages.msg(pageTitle, pageTitleArg) : #messages.msg(pageTitle)}">
          <div class="flex flex-col gap-4">
             <div class="flex items-center gap-1">
-               <button
-                  type="button"
-                  class="btn btn-ghost btn-sm btn-square"
-                  x-data="pageBack"
-                  x-on:click="goBack"
-                  th:attr="data-back-label=#{navigation.action.back}, data-home-label=#{navigation.item.home}"
-                  x-bind:aria-label="hasHistory ? $el.dataset.backLabel : $el.dataset.homeLabel"
-               >
-                  <span
-                     x-show="hasHistory"
-                     class="iconify"
-                     data-icon="bi:arrow-left"
-                     data-width="16"
-                  ></span>
-                  <span
-                     x-show="!hasHistory"
-                     class="iconify"
-                     data-icon="bi:house"
-                     data-width="16"
-                  ></span>
-               </button>
+               <th:block th:replace="~{fragment/ui/navigation-actions :: pageBack(#{navigation.action.back}, #{navigation.item.home})}"></th:block>
                <div class="breadcrumbs text-sm">
                   <ul>
                      <li><a href="/" th:text="#{navigation.item.home}"></a></li>
                      <li th:if="${breadcrumbParentUrl != null}">
                         <a
                            th:href="${breadcrumbParentUrl}"
-                           th:text="${breadcrumbParentLabel}"
+                           th:text="${#messages.msgOrNull(breadcrumbParentLabel) ?: breadcrumbParentLabel}"
                         ></a>
                      </li>
-                     <li th:text="${#messages.msg(pageTitle)}"></li>
+                     <li th:text="${resolvedPageTitle}"></li>
                   </ul>
                </div>
             </div>
             <div
-               class="flex flex-wrap items-center justify-between gap-4 gap-y-3"
+               class="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between"
             >
-               <div class="flex items-center gap-3">
-                  <div
-                     th:if="${pageIcon}"
-                     class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
-                  >
-                     <span
-                        class="iconify"
-                        th:attr="data-icon=${pageIcon}"
-                        data-width="22"
-                     ></span>
-                  </div>
-                  <div>
-                     <div class="flex items-center gap-2">
-                        <h1
-                           class="text-2xl font-bold"
-                           th:text="${#messages.msg(pageTitle)}"
-                        ></h1>
+               <div class="min-w-0 flex-1">
+                  <div class="flex min-w-0 items-center gap-3">
+                     <div
+                        th:if="${pageIcon}"
+                        class="size-11 shrink-0 rounded-xl bg-primary/10 text-primary flex items-center justify-center shadow-md"
+                     >
                         <span
-                           th:if="${table != null}"
-                           class="badge badge-primary badge-soft"
-                           th:text="${table.data.totalElements}"
+                           class="iconify"
+                           th:attr="data-icon=${pageIcon}"
+                           data-width="22"
                         ></span>
                      </div>
-                     <p
-                        th:if="${pageDesc}"
-                        class="mt-1 text-sm text-base-content/60"
-                        th:text="${#messages.msg(pageDesc)}"
-                     ></p>
+                     <div class="min-w-0 flex-1"
+                        th:with="resolvedPageHeading=${pageHeading != null ? pageHeading : resolvedPageTitle}">
+                        <div class="flex min-w-0 items-center gap-2">
+                           <div class="tooltip tooltip-bottom tooltip-start block min-w-0 flex-1"
+                              tabindex="0" th:attr="data-tip=${resolvedPageHeading}">
+                              <h1 class="truncate text-2xl font-semibold leading-tight text-base-content"
+                                 th:text="${resolvedPageHeading}"></h1>
+                           </div>
+                           <span
+                              th:if="${table != null}"
+                              class="badge badge-primary badge-soft"
+                              th:with="countUnit=${#messages.msgOrNull(pageTitle.replace('.title', '.unit'))}"
+                              th:text="|${table.data.totalElements} ${countUnit != null ? countUnit : #messages.msg('page.count.default')}|"
+                           ></span>
+                        </div>
+                        <th:block th:with="descriptionKey=${pageDesc != null ? pageDesc : pageTitle.replace('.title', '.description')}">
+                           <p
+                              th:if="${#messages.msgOrNull(descriptionKey) != null}"
+                              class="mt-1 text-sm text-base-content/70"
+                              th:text="${#messages.msg(descriptionKey)}"
+                           ></p>
+                        </th:block>
+                     </div>
                   </div>
+                  <th:block layout:fragment="page-meta"></th:block>
                </div>
 
-               <div class="flex items-center gap-2">
+               <div class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
                   <th:block layout:fragment="actions"></th:block>
                </div>
             </div>
 
             <div class="border-t-2 border-dashed border-base-300"></div>
 
-            <div role="alert" class="alert alert-error alert-soft" th:if="${deleteError != null}">
-               <span class="iconify" data-icon="bi:exclamation-circle"></span>
-               <span th:text="#{__${deleteError}__}"></span>
-            </div>
+            <th:block th:if="${deleteError != null}">
+               <div th:replace="~{fragment/base/alert :: alert('error', ~{::span})}">
+                  <span th:text="#{__${deleteError}__}"></span>
+               </div>
+            </th:block>
 
             <th:block layout:fragment="page-content"></th:block>
          </div>

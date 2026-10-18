@@ -1,0 +1,125 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="picker">
+      <div class="flex flex-col gap-3" x-data="topicAdvisers()"
+         th:attr="data-search-url=${lecturerSearchUrl},data-required-adviser-id=${requiredAdviserId}">
+         <div class="flex w-full items-center justify-between gap-3 border-b border-base-300 pb-2">
+            <div th:replace="~{fragment/base/field-label :: label('adviserIds', #{topics.field.advisers}, true, #{topics.field.advisers.hint})}"></div>
+            <span class="badge badge-soft badge-primary badge-sm inline-flex shrink-0 items-center gap-1 whitespace-nowrap" aria-live="polite">
+               <span th:text="#{topics.advisers.selected}"></span>
+               <span><strong x-text="selected.length"></strong>/2</span>
+            </span>
+         </div>
+         <span hidden data-selected-lecturer th:each="lecturer : ${selectedLecturers}"
+            th:attr="data-id=${lecturer.id},data-name=${lecturer.fullName},data-code=${lecturer.userCode}"></span>
+         <div class="space-y-2" x-cloak x-show="selected.length > 0">
+            <template x-for="lecturer in selected" :key="lecturer.id">
+               <div class="flex items-center justify-between gap-3 rounded-field border border-base-300 bg-base-200/60 p-3">
+                  <input type="hidden" name="adviserIds" :value="lecturer.id" />
+                  <div class="flex min-w-0 items-center gap-3">
+                     <div th:replace="~{fragment/base/avatar :: alpine('lecturer.fullName.trim().charAt(0).toUpperCase()', 'w-9', 'shrink-0', 'bg-primary/10 text-primary')}"></div>
+                     <div class="min-w-0">
+                        <p class="truncate text-sm font-semibold" x-text="lecturer.fullName"></p>
+                        <p class="font-mono text-sm text-base-content/70" x-text="lecturer.userCode"></p>
+                     </div>
+                     <span class="badge badge-soft badge-primary badge-sm" x-cloak
+                        x-show="lecturer.id === lockedAdviserId" th:text="#{topics.advisers.owner}"></span>
+                  </div>
+                  <th:block th:replace="~{fragment/feature/topic/adviser-picker :: removeAdviser(#{topics.advisers.remove})}"></th:block>
+               </div>
+            </template>
+         </div>
+         <div class="mt-2 space-y-2">
+            <label class="flex items-center gap-2 text-sm font-medium" for="adviser-search">
+               <span th:text="#{topics.advisers.add-label}"></span>
+            </label>
+            <label class="input flex w-full items-center gap-2" for="adviser-search">
+               <span class="iconify inline-block shrink-0 text-base-content/70" data-icon="bi:search" data-width="18"></span>
+               <input id="adviser-search" type="search" class="min-w-0 grow outline-none"
+                  x-model="search" x-on:input.debounce.250ms="lookup()"
+                  x-on:keydown.enter.prevent="if (results.length > 0) add(results[0])"
+                  x-bind:disabled="selected.length >= 2" autocomplete="off"
+                  th:placeholder="#{topics.advisers.search}" />
+            </label>
+            <div class="overflow-hidden rounded-field border border-base-300 bg-base-100" x-cloak
+               x-show="search.trim().length >= 2">
+               <div class="flex items-center justify-between border-b border-base-300 bg-base-200/60 px-3 py-2 text-sm text-base-content/70">
+                  <span th:text="#{topics.advisers.results}"></span>
+                  <span x-show="!loading && !searchFailed" x-text="results.length"></span>
+               </div>
+               <p class="p-3 text-sm text-base-content/70" x-show="loading" th:text="#{topics.advisers.loading}"></p>
+               <p class="p-3 text-sm text-error" x-show="searchFailed" th:text="#{topics.advisers.search-failed}"></p>
+               <p class="p-3 text-sm text-base-content/70" x-show="!loading && !searchFailed && results.length === 0"
+                  th:text="#{topics.advisers.no-results}"></p>
+               <template x-for="lecturer in results" :key="lecturer.id">
+                  <div class="flex items-center justify-between gap-3 border-t border-base-300 px-3 py-2.5 first:border-t-0">
+                     <div class="flex min-w-0 items-center gap-2.5">
+                        <div th:replace="~{fragment/base/avatar :: alpine('lecturer.fullName.trim().charAt(0).toUpperCase()', 'w-8', 'shrink-0', 'bg-base-200 text-base-content/70')}"></div>
+                        <div class="min-w-0">
+                           <p class="truncate text-sm font-medium" x-text="lecturer.fullName"></p>
+                           <p class="font-mono text-sm text-base-content/70" x-text="lecturer.userCode"></p>
+                        </div>
+                     </div>
+                     <th:block th:replace="~{fragment/feature/topic/adviser-picker :: addAdviser(#{topics.advisers.choose})}"></th:block>
+                  </div>
+               </template>
+            </div>
+         </div>
+      </div>
+      <script>
+         function topicAdvisers() {
+            return {
+               search: '', results: [], selected: [], lockedAdviserId: null, loading: false, searchFailed: false,
+               init() {
+                  const requiredId = this.$root.dataset.requiredAdviserId;
+                  this.lockedAdviserId = requiredId ? Number(requiredId) : null;
+                  this.selected = [...this.$root.querySelectorAll('[data-selected-lecturer]')].map(item => ({
+                     id: Number(item.dataset.id), fullName: item.dataset.name, userCode: item.dataset.code
+                  }));
+               },
+               async lookup() {
+                  const query = this.search.trim();
+                  this.results = [];
+                  this.searchFailed = false;
+                  if (query.length < 2 || this.selected.length >= 2) { this.loading = false; return; }
+                  this.loading = true;
+                  try {
+                     const response = await fetch(this.$root.dataset.searchUrl + '?search=' + encodeURIComponent(query));
+                     if (!response.ok) throw new Error('lecturer search failed');
+                     const matches = await response.json();
+                     if (this.search.trim() === query) {
+                        this.results = matches.filter(item => !this.selected.some(lecturer => lecturer.id === item.id));
+                     }
+                  } catch (error) {
+                     if (this.search.trim() === query) this.searchFailed = true;
+                  } finally {
+                     if (this.search.trim() === query) this.loading = false;
+                  }
+               },
+               add(lecturer) {
+                  if (this.selected.length >= 2 || this.selected.some(item => item.id === lecturer.id)) return;
+                  this.selected.push(lecturer);
+                  this.search = '';
+                  this.results = [];
+                  this.loading = false;
+               },
+               remove(id) {
+                  if (id === this.lockedAdviserId) return;
+                  this.selected = this.selected.filter(item => item.id !== id);
+               }
+            };
+         }
+      </script>
+   </th:block>
+   <button th:fragment="removeAdviser(label)" type="button"
+      class="btn btn-ghost btn-sm text-error" x-cloak
+      x-show="lecturer.id !== lockedAdviserId" x-on:click="remove(lecturer.id)"
+      th:title="${label}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, 'bi:x-lg')}"></th:block>
+   </button>
+
+   <button th:fragment="addAdviser(label)" type="button"
+      class="btn btn-primary btn-sm shrink-0" x-on:click="add(lecturer)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, 'bi:plus-lg')}"></th:block>
+   </button>
+</html>

@@ -1,0 +1,10 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel">
+<section th:replace="~{fragment/base/card :: section('card card-border border-base-300 relative', ~{::#group-activity-card})}">
+      <th:block id="group-activity-card" th:fragment="group-activity-card">
+        <div class="card-body min-h-0 lg:absolute lg:inset-0" th:insert="~{fragment/feature/group/activity :: timeline(${activities})}"></div>
+      </th:block>
+    </section>
+   </th:block>
+</html>

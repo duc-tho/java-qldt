@@ -1,12 +1,13 @@
 {
   "name": "qldt",
   "version": "1.0.0",
+  "type": "module",
   "description": "",
   "license": "ISC",
   "author": "",
   "scripts": {
     "dev": "node scripts/watch-assets.mjs",
-    "build": "vite build"
+    "build": "vite build --configLoader native"
   },
   "devDependencies": {
     "@iconify/iconify": "^3.1.1",

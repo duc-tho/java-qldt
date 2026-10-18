@@ -10,6 +10,19 @@ export function createFormValidator(formElement) {
   formElement.querySelectorAll("[validate-data]").forEach((input) => {
     const rules = JSON.parse(input.getAttribute("validate-data"));
 
+    const requiredWhenField = input.dataset.validateRequiredWhenField;
+    if (requiredWhenField) {
+      const dependentInput = formElement.elements.namedItem(requiredWhenField);
+      const requiredWhenValues = input.dataset.validateRequiredWhenValues.split(",");
+
+      rules.push({
+        validator: (value) =>
+          !requiredWhenValues.includes(dependentInput?.value) ||
+          (value != null && String(value).trim() !== ""),
+        errorMessage: input.dataset.validateRequiredWhenMessage,
+      });
+    }
+
     if (rules.length === 0) {
       return;
     }

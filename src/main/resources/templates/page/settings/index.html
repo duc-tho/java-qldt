@@ -1,0 +1,31 @@
+<!doctype html>
+<html
+   xmlns:th="http://www.thymeleaf.org"
+   layout:decorate="~{layout/page.html}"
+   lang="vi"
+>
+   <head>
+      <title th:text="${#messages.msg(pageTitle)}"></title>
+   </head>
+
+   <body>
+      <th:block layout:fragment="page-content">
+         <section class="w-full lg:w-1/2 mx-auto flex flex-col gap-4">
+            <div>
+               <h2
+                  class="text-xl font-semibold"
+                  th:text="#{settings.language.title}"
+               ></h2>
+               <p
+                  class="mt-1 text-sm text-base-content/70"
+                  th:text="#{settings.language.description}"
+               ></p>
+            </div>
+            <div class="flex flex-wrap gap-2">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/cai-dat(lang='vi')}, #{navigation.language.vietnamese}, null, ${#locale.language == 'vi' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost'}, null)}"></th:block>
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/cai-dat(lang='en')}, #{navigation.language.english}, null, ${#locale.language == 'en' ? 'btn btn-sm btn-primary' : 'btn btn-sm btn-ghost'}, null)}"></th:block>
+            </div>
+         </section>
+      </th:block>
+   </body>
+</html>

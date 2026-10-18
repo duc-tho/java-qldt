@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="table(reportHistory, group)" class="overflow-x-auto">
+      <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#report-history-head}, ~{::#report-history-body})}">
+         <thead id="report-history-head" th:fragment="report-history-head">
+            <tr>
+               <th th:text="#{report-submissions.column.submitted-at}"></th>
+               <th th:text="#{report-submissions.column.status}"></th>
+               <th></th>
+            </tr>
+         </thead>
+         <th:block id="report-history-body" th:fragment="report-history-body">
+            <tbody>
+               <tr th:each="submission : ${reportHistory}">
+                  <td th:text="${#temporals.format(submission.submittedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                  <td>
+                     <span class="badge badge-soft"
+                        th:classappend="${submission.status.name() == 'REPLACED'} ? 'badge-ghost' : 'badge-success'"
+                        th:text="#{__${'report-submissions.status.' + submission.status.name()}__}"></span>
+                  </td>
+                  <td>
+                     <th:block th:each="file : ${submission.files}">
+                        <th:block th:replace="~{fragment/feature/report/files :: button(${file}, ${group.registrationPeriod.id}, ${group.id}, ${file.originalName}, null)}"></th:block>
+                     </th:block>
+                  </td>
+               </tr>
+            </tbody>
+         </th:block>
+      </th:block>
+   </div>
+</html>

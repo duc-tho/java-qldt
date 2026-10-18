@@ -1,0 +1,17 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="decision">
+                  <form id="reject-registration-form" class="space-y-2 border-t border-base-300 pt-5"
+                     th:if="${isOpen and isPending}"
+                     th:action="@{/dot/{periodId}/nhom/{groupId}/tu-choi-de-tai(periodId=${group.registrationPeriod.id},groupId=${group.id})}"
+                     th:object="${rejectForm}" method="post">
+                     <div th:replace="~{fragment/base/field-shell :: field('reason', #{topic-registrations.field.reason}, true, null, false, ~{::#group-rejection-control})}">
+                        <th:block id="group-rejection-control" th:fragment="group-rejection-control"
+                           th:replace="~{fragment/base/textarea :: bound('reason', 'textarea w-full', 3, true, 500)}"></th:block>
+                     </div>
+                     <p class="text-sm text-base-content/70" th:text="#{topic-registrations.reason-guidance}"></p>
+                     <p class="text-sm text-error" th:if="${#fields.hasGlobalErrors()}"
+                        th:errors="*{global}"></p>
+                  </form>
+   </th:block>
+</html>

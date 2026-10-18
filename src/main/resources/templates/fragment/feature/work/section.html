@@ -1,0 +1,17 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <section th:fragment="section(section)"
+      th:replace="~{fragment/shared/list-section :: section(${section.id}, ${section.title}, ${#lists.size(section.cards)}, ~{::#work-section-content})}">
+      <th:block id="work-section-content">
+         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(section.cards)}">
+            <th:block th:each="card : ${section.cards}">
+               <th:block th:replace="~{fragment/feature/work/period-card :: card(${card})}"></th:block>
+            </th:block>
+         </div>
+
+         <th:block th:if="${#lists.isEmpty(section.cards)}">
+            <th:block th:replace="~{fragment/shared/empty-state :: centered('bi:calendar-x', ${section.emptyMessage}, null)}"></th:block>
+         </th:block>
+      </th:block>
+   </section>
+</html>

@@ -39,6 +39,6 @@ public class AuthController {
 
     model.addAttribute("data", loginForm);
 
-    return "auth/login";
+    return "page/auth/login";
   }
 }

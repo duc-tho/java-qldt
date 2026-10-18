@@ -1,0 +1,41 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="table">
+<section>
+               <h2 class="text-xl font-semibold" th:text="#{councils.workspace.evaluations}"></h2>
+               <div class="mt-4 overflow-x-auto rounded-box border border-base-300">
+                  <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+                     <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                        <tr>
+                           <th th:text="#{councils.workspace.evaluator}"></th>
+                           <th th:text="#{councils.workspace.status}"></th>
+                           <th th:text="#{councils.workspace.score}"></th>
+                        </tr>
+                     </thead>
+                     <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+                     <tbody>
+                        <tr th:each="item : ${evaluations}">
+                           <td th:text="${item.evaluator.fullName}"></td>
+                           <td>
+                              <span
+                                 class="badge badge-soft"
+                                 th:classappend="${item.status.name() == 'SUBMITTED'} ? ' badge-success' : ' badge-warning'"
+                                 th:text="#{__${'evaluations.status.' + item.status.name()}__}"
+                              ></span>
+                           </td>
+                           <td th:text="${item.score != null ? item.score : '—'}"></td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(evaluations)}">
+                           <td
+                              class="py-6 text-center text-base-content/70"
+                              colspan="3"
+                              th:text="#{councils.workspace.evaluations-empty}"
+                           ></td>
+                        </tr>
+                     </tbody>
+                  
+                     </th:block></th:block>
+               </div>
+            </section>
+   </th:block>
+</html>

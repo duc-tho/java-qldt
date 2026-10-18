@@ -1,0 +1,13 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="field(bound)" class="flex flex-col gap-1">
+      <div th:replace="~{fragment/base/field-label :: label('reason', #{topics.field.rejection-reason}, true, null)}"></div>
+      <th:block th:if="${bound}">
+         <th:block th:replace="~{fragment/base/textarea :: bound('reason', 'textarea w-full', null, true, 500)}"></th:block>
+      </th:block>
+      <th:block th:unless="${bound}">
+         <th:block th:replace="~{fragment/base/textarea :: named('reason', 'textarea w-full', null, true, 500)}"></th:block>
+      </th:block>
+      <span th:if="${bound}" class="text-error" th:errors="*{reason}"></span>
+   </div>
+</html>

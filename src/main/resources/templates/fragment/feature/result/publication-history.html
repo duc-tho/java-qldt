@@ -1,0 +1,51 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="history">
+         <div class="mt-4 overflow-x-auto" th:unless="${#lists.isEmpty(publicationHistory)}">
+            <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+               <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                  <tr>
+                     <th th:text="#{result-publications.column.action}"></th>
+                     <th th:text="#{result-publications.column.performer}"></th>
+                     <th th:text="#{result-publications.column.time}"></th>
+                     <th th:text="#{result-publications.column.reason}"></th>
+                  </tr>
+               </thead>
+               <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+               <tbody>
+                  <tr th:each="publication : ${publicationHistory}">
+                     <td th:text="#{__${'result-publications.action.' + publication.action.name()}__}"></td>
+                     <td th:text="${publication.performedBy.fullName}"></td>
+                     <td class="tabular-nums" th:text="${#temporals.format(publication.performedAt, 'dd/MM/yyyy HH:mm')}"></td>
+                     <td th:text="${publication.reason != null ? publication.reason : '—'}"></td>
+                  </tr>
+               </tbody>
+            
+               </th:block></th:block>
+         </div>
+   </th:block>
+
+   <th:block th:fragment="compact">
+      <th:block th:if="${#lists.isEmpty(publicationHistory)}">
+         <div th:replace="~{fragment/shared/empty-state :: centered('bi:clock-history', #{result-publications.history.empty}, null)}"></div>
+      </th:block>
+      <ol class="divide-y divide-base-300" th:unless="${#lists.isEmpty(publicationHistory)}">
+         <li class="space-y-2 py-4 first:pt-0 last:pb-0" th:each="publication : ${publicationHistory}">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+               <span class="badge badge-sm badge-soft"
+                  th:classappend="${publication.action.name() == 'PUBLISHED'} ? 'badge-success' : 'badge-warning'"
+                  th:text="#{__${'result-publications.action.' + publication.action.name()}__}"></span>
+               <time class="text-xs tabular-nums text-base-content/60"
+                  th:attr="datetime=${publication.performedAt}"
+                  th:text="${#temporals.format(publication.performedAt, 'dd/MM/yyyy HH:mm')}"></time>
+            </div>
+            <p class="flex items-center gap-2 text-sm font-medium">
+               <span class="iconify text-base-content/50" data-icon="bi:person" aria-hidden="true"></span>
+               <span th:text="${publication.performedBy.fullName}"></span>
+            </p>
+            <p class="text-sm text-base-content/70" th:if="${!#strings.isEmpty(publication.reason)}"
+               th:text="${publication.reason}"></p>
+         </li>
+      </ol>
+   </th:block>
+</html>

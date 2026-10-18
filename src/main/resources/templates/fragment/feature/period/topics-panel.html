@@ -1,0 +1,31 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel(period, topics)">
+      <section class="card card-border border-base-300 bg-base-100">
+         <div class="card-body min-w-0 gap-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+               <div class="flex items-center gap-2">
+                  <span class="iconify text-primary" data-icon="bi:journal-text"></span>
+                  <h2 class="card-title text-base" th:text="#{__${topicsSectionTitle}__}"></h2>
+                  <span class="badge badge-primary badge-soft badge-sm" th:text="${#lists.size(topics)}"></span>
+               </div>
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/de-tai(id=${period.id})}, #{student-groups.action.view-all}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+            </div>
+            <div class="overflow-x-auto rounded-box border border-base-300" th:if="${!#lists.isEmpty(topics)}">
+               <table class="table table-zebra w-full text-center">
+                  <thead class="bg-base-200"><tr><th th:text="#{topics.field.title}"></th><th th:text="#{announcements.column.status}"></th></tr></thead>
+                  <tbody>
+                     <tr th:each="topic : ${topics}">
+                        <td><a class="link link-primary font-medium" th:href="@{/dot/{periodId}/de-tai/{topicId}(periodId=${period.id},topicId=${topic.id})}" th:text="${topic.title}"></a></td>
+                        <td><span class="badge badge-soft badge-sm" th:text="#{__${'topics.status.' + topic.status.name()}__}"></span></td>
+                     </tr>
+                  </tbody>
+               </table>
+            </div>
+            <th:block th:if="${#lists.isEmpty(topics)}">
+               <div th:replace="~{fragment/shared/empty-state :: centered('bi:journal-x', #{topics.lecturer-list.empty}, null)}"></div>
+            </th:block>
+         </div>
+      </section>
+   </th:block>
+</html>

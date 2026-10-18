@@ -1,0 +1,39 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <select th:fragment="query(name, classes, options)" th:name="${name}" th:class="${classes}">
+      <th:block th:replace="${options}"></th:block>
+   </select>
+
+   <select th:fragment="named(name, classes, required, options)" th:name="${name}"
+      th:class="${classes}" th:required="${required}">
+      <th:block th:replace="${options}"></th:block>
+   </select>
+
+   <select th:fragment="alpine(name, classes, required, model, options)"
+      th:id="${name}" th:name="${name}" th:class="${classes}"
+      th:required="${required}" th:attr="x-model=${model}"
+      th:classappend="${#fields.hasErrors(name)} ? ' select-error'">
+      <th:block th:replace="${options}"></th:block>
+   </select>
+
+   <select th:fragment="boundAlpine(name, classes, required, model, validationRule, options)"
+      th:field="*{__${name}__}" th:class="${classes}" th:required="${required}"
+      th:attr="x-model=${model}, validate-data=${validationRule}"
+      th:classappend="${#fields.hasErrors(name)} ? ' select-error'">
+      <th:block th:replace="${options}"></th:block>
+   </select>
+
+   <div th:fragment="field(name, label, readonly, validationRule, required, helpText, readonlyText, options)"
+      th:replace="~{fragment/base/field-shell :: field(${name}, ${label}, ${required}, ${helpText}, ${readonly}, ~{::field-content})}">
+      <th:block th:fragment="field-content">
+         <select th:unless="${readonly}" class="select w-full" th:field="*{__${name}__}" th:required="${required}"
+            th:classappend="${#fields.hasErrors(name)} ? ' select-error'"
+            th:attr="validate-data=${validationRule}">
+            <th:block th:replace="${options}"></th:block>
+         </select>
+         <th:block th:if="${readonly}">
+            <th:block th:replace="~{fragment/base/readonly-value :: value(${name}, ${readonlyText})}"></th:block>
+         </th:block>
+      </th:block>
+   </div>
+</html>

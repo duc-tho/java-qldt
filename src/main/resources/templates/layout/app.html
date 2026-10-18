@@ -14,14 +14,17 @@
                id="my-drawer-4"
                type="checkbox"
                class="drawer-toggle inline"
+               autocomplete="off"
                checked
             />
+            <!-- Seprate this script to avoid defer in app script -->
+            <script th:src="@{/sidebar-state.js}"></script>
 
-            <div class="drawer-content flex min-h-svh flex-col bg-base-200">
+            <div class="drawer-content flex min-h-svh flex-col overflow-x-clip bg-base-200">
                <div th:replace="~{fragment/ui/nav.html}"></div>
 
                <main
-                  class="flex-1 max-w-(--breakpoint-2xl) w-full mx-auto bg-base-100 inset-ring-2 inset-ring-primary/15 rounded-l-lg px-3 py-4 sm:px-4 xl:px-8"
+                  class="relative lg:z-20 ml-4 flex-1 rounded-l-lg border-y-2 border-l-2 border-primary/15 bg-base-100 px-3 py-4 shadow-lg sm:px-4 xl:px-8"
                >
                   <th:block layout:fragment="main"> </th:block>
                </main>
@@ -29,7 +32,7 @@
                <div th:replace="~{fragment/ui/footer.html}"></div>
             </div>
 
-            <div class="drawer-side is-drawer-close:overflow-visible">
+            <div class="drawer-side z-40 lg:z-10 is-drawer-close:overflow-visible">
                <label
                   for="my-drawer-4"
                   th:aria-label="#{navigation.action.close-sidebar}"
@@ -39,9 +42,11 @@
                   class="flex min-h-full flex-col items-start bg-base-200 is-drawer-close:w-16 is-drawer-open:w-64"
                >
                   <div th:replace="~{fragment/ui/header.html}"></div>
-                  <div
-                     th:replace="~{fragment/ui/sidebar.html :: sidebar-menu}"
-                  ></div>
+                  <nav class="w-full grow">
+                     <div th:replace="~{fragment/ui/sidebar-user.html}"></div>
+                     <div th:replace="~{fragment/ui/sidebar.html :: sidebar-menu}"></div>
+                  </nav>
+                  <div th:replace="~{fragment/ui/sidebar-footer.html}"></div>
                </div>
             </div>
          </div>

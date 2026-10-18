@@ -1,0 +1,15 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <section th:fragment="section(id, title, count, content)"
+      class="overflow-hidden rounded-box border border-base-300 bg-base-100"
+      th:attr="aria-labelledby=${id + '-title'}">
+      <header class="flex flex-wrap items-center justify-between gap-3 border-b border-base-300 px-5 py-4 sm:px-6">
+         <h2 class="text-xl font-semibold" th:id="${id + '-title'}" th:text="${title}"></h2>
+         <span class="badge badge-ghost" th:text="${count}"></span>
+      </header>
+
+      <div class="p-5 sm:p-6">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+   </section>
+</html>

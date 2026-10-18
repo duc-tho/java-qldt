@@ -1,0 +1,36 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="rejection-dialog(item, action)">
+      <dialog th:replace="~{fragment/base/dialog :: dialog(|reject_item_${item.id}|, ~{::rejection-dialog-content}, #{crud.delete.close}, 'modal-box p-0')}">
+         <section th:fragment="rejection-dialog-content">
+            <th:block th:replace="~{fragment/base/dialog :: panel(#{topics.action.reject}, 'bi:x-circle', 'text-error', ~{::#rejection-dialog-field}, ~{::#rejection-dialog-actions})}">
+               <div id="rejection-dialog-field" th:replace="~{fragment/feature/topic/rejection-reason :: field(false)}"></div>
+               <th:block id="rejection-dialog-actions">
+                  <th:block th:replace="~{fragment/base/button :: modalClose(|reject_item_${item.id}|, #{crud.form.cancel}, 'btn btn-sm btn-ghost')}"></th:block>
+                  <th:block th:replace="~{fragment/feature/topic/rejection-dialog :: postWithTextarea(${action.getUrl(item)}, #{topics.action.reject}, 'bi:x-circle', 'btn btn-sm btn-error')}"></th:block>
+               </th:block>
+            </th:block>
+         </section>
+      </dialog>
+   </th:block>
+
+   <th:block th:fragment="boundDialog(id, actionUrl)">
+      <dialog th:replace="~{fragment/base/dialog :: dialog(${id}, ~{::bound-dialog-content}, #{crud.delete.close}, 'modal-box p-0')}">
+         <form th:fragment="bound-dialog-content" th:action="${actionUrl}" th:object="${rejectForm}" method="post">
+            <th:block th:replace="~{fragment/base/dialog :: panel(#{topics.action.reject}, 'bi:x-circle', 'text-error', ~{::#bound-rejection-dialog-field}, ~{::#bound-rejection-dialog-actions})}">
+               <div id="bound-rejection-dialog-field" th:replace="~{fragment/feature/topic/rejection-reason :: field(true)}"></div>
+               <th:block id="bound-rejection-dialog-actions">
+                  <th:block th:replace="~{fragment/base/button :: modalClose(${id}, #{crud.form.cancel}, 'btn btn-sm btn-ghost')}"></th:block>
+                  <th:block th:replace="~{fragment/base/button :: submit(#{topics.action.reject}, 'bi:x-circle', 'btn btn-sm btn-error', false)}"></th:block>
+               </th:block>
+            </th:block>
+         </form>
+      </dialog>
+   </th:block>
+
+   <button th:fragment="postWithTextarea(url, label, icon, classes)"
+      type="button" th:class="${classes}" th:attr="data-post-url=${url}"
+      x-on:click="$el.closest('.modal-box').querySelector('textarea').reportValidity() &amp;&amp; postAction($el.dataset.postUrl, $el.closest('.modal-box').querySelector('textarea').value)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+</html>

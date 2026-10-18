@@ -1,0 +1,33 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div class="space-y-10">
+            <section th:replace="~{fragment/shared/list-section :: section('open-proposals', #{topics.proposals.open-section}, ${#lists.size(openPeriods)}, ~{::#open-proposals-content})}">
+               <th:block id="open-proposals-content">
+                  <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(openPeriods)}">
+                     <th:block th:each="period : ${openPeriods}">
+                        <article th:replace="~{fragment/feature/period/proposal-card :: period-card(${period}, ${topicsByPeriodId[period.id]}, true)}"></article>
+                     </th:block>
+                  </div>
+                  <th:block th:if="${#lists.isEmpty(openPeriods)}">
+                     <div th:replace="~{fragment/shared/empty-state :: centered('bi:calendar-x', #{topics.proposals.open-empty}, null)}"></div>
+                  </th:block>
+               </th:block>
+            </section>
+            <section th:replace="~{fragment/shared/list-section :: section('closed-proposals', #{topics.proposals.closed-section}, ${#lists.size(closedPeriods)}, ~{::#closed-proposals-content})}">
+               <th:block id="closed-proposals-content">
+                  <div class="grid gap-5 lg:grid-cols-2 xl:grid-cols-3" th:if="${!#lists.isEmpty(closedPeriods)}">
+                     <th:block th:each="period : ${closedPeriods}">
+                        <article th:replace="~{fragment/feature/period/proposal-card :: period-card(${period}, ${topicsByPeriodId[period.id]}, false)}"></article>
+                     </th:block>
+                  </div>
+                  <th:block th:if="${#lists.isEmpty(closedPeriods)}">
+                     <div th:replace="~{fragment/shared/empty-state :: centered('bi:archive', #{topics.proposals.closed-empty}, null)}"></div>
+                  </th:block>
+               </th:block>
+            </section>
+         </div>
+      </th:block>
+   </body>
+</html>

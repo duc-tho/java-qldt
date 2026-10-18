@@ -1,0 +1,45 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="viewer-detail(topic, showRejectionReason, actions)">
+      <th:block th:with="status=${topic.status.name()}, cardClasses=${'card card-border overflow-hidden bg-base-100 shadow-sm' + (topic.status.name() == 'APPROVED' ? ' border-success/50' : (topic.status.name() == 'REJECTED' ? ' border-error/50' : ' border-warning/50'))}">
+      <article th:replace="~{fragment/base/card :: cardStyled(${cardClasses}, ~{::#topic-detail-card})}">
+         <th:block id="topic-detail-card" th:fragment="topic-detail-card">
+         <header class="border-b border-base-300 p-5 md:px-7"
+            th:classappend="${status == 'APPROVED'} ? ' bg-success/10' : (${status == 'REJECTED'} ? ' bg-error/10' : ' bg-warning/10')">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+               <div class="flex items-center gap-3">
+                  <span class="flex size-9 shrink-0 items-center justify-center rounded-full text-xl leading-none text-white"
+                     th:classappend="${status == 'APPROVED'} ? ' bg-success' : (${status == 'REJECTED'} ? ' bg-error' : ' bg-warning')">
+                     <span class="iconify text-inherit"
+                        th:attr="data-icon=${status == 'APPROVED' ? 'bi:check-circle' : (status == 'REJECTED' ? 'bi:x-circle' : 'bi:hourglass-split')}"></span>
+                  </span>
+                  <div class="min-w-0 text-sm">
+                     <p th:classappend="${status == 'APPROVED'} ? ' text-success' : (${status == 'REJECTED'} ? ' text-error' : ' text-warning')">
+                        <span class="font-semibold" th:text="#{topics.detail.status-label}"></span><span>:</span>
+                        <span th:text="#{__${'topics.status.' + status}__}"></span>
+                     </p>
+                     <p class="mt-1 leading-relaxed text-base-content/70"
+                        th:text="#{__${'topics.detail.status.' + status}__}"></p>
+                  </div>
+               </div>
+               <th:block th:replace="${actions}"></th:block>
+            </div>
+         </header>
+         <section class="card-body gap-4 p-5 md:p-7">
+            <div class="flex flex-wrap items-center gap-2">
+               <h2 class="card-title text-lg font-semibold" th:text="${topic.title}"></h2>
+               <th:block th:replace="~{fragment/base/badge :: text(|#{topics.column.department}: ${topic.department.name}|, 'badge badge-info badge-soft')}"></th:block>
+            </div>
+            <p class="whitespace-pre-wrap" th:text="${topic.description}"></p>
+            <th:block th:if="${showRejectionReason and topic.rejectionReason != null}">
+               <th:block th:replace="~{fragment/base/alert :: text('alert alert-error alert-soft', 'alert', ${topic.rejectionReason})}"></th:block>
+            </th:block>
+         </section>
+         <footer class="border-t border-base-300 bg-base-200/30 px-5 py-4 md:px-7">
+            <th:block th:replace="~{fragment/base/badge :: text(|#{topics.field.advisers}: ${#strings.listJoin(topic.advisers.![fullName], ', ')}|, 'badge badge-primary badge-soft h-auto min-h-7 max-w-full whitespace-normal px-3 py-1.5 text-left leading-relaxed')}"></th:block>
+         </footer>
+         </th:block>
+      </article>
+      </th:block>
+   </th:block>
+</html>

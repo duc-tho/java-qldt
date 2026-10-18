@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <button th:fragment="reload(label)" type="button"
+      class="btn btn-ghost btn-sm btn-square" th:title="${label}" th:aria-label="${label}"
+      x-on:click="submitQuery()">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(null, 'bi:arrow-clockwise')}"></th:block>
+   </button>
+
+   <button th:fragment="search(label)" type="button"
+      class="btn btn-primary btn-sm btn-square" th:title="${label}" th:aria-label="${label}"
+      x-on:click="submitQuery(0)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(null, 'bi:search')}"></th:block>
+   </button>
+
+   <button th:fragment="sort(field, label, isSorted, isAsc, isDesc)" type="button"
+      class="btn btn-ghost btn-sm gap-1 -ml-1"
+      th:attr="data-sort=${isDesc ? '' : field}, data-dir=${isAsc ? 'desc' : 'asc'}"
+      x-on:click="submitQuery(0, $el.dataset.sort, $el.dataset.dir)">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, null)}"></th:block>
+      <span th:if="${!isSorted}" class="iconify text-base-content/40" data-icon="bi:arrow-down-up" data-width="14"></span>
+      <span th:if="${isAsc}" class="iconify" data-icon="bi:sort-down" data-width="14"></span>
+      <span th:if="${isDesc}" class="iconify" data-icon="bi:sort-up" data-width="14"></span>
+   </button>
+
+   <button th:fragment="batchDelete(url, template, label)" type="button"
+      class="btn btn-error btn-outline btn-sm"
+      th:attr="data-batch-delete-url=${url}, data-batch-delete-template=${template}"
+      x-bind:disabled="selectedIds.length === 0"
+      x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.batchDeleteUrl, ids: selectedIds, template: $el.dataset.batchDeleteTemplate })">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, 'bi:trash')}"></th:block>
+   </button>
+</html>

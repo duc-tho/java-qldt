@@ -1,8 +1,11 @@
 package com.nhom11.qldt.core.table;
 
+import java.util.List;
 import java.util.function.Function;
 
 public interface ActionDef {
+  int INLINE_ACTION_LIMIT = 3;
+
   String label();
 
   String icon();
@@ -23,6 +26,10 @@ public interface ActionDef {
 
   default boolean isVisible(Object item) {
     return true;
+  }
+
+  static boolean hasVisibleOverflow(List<ActionDef> actions, Object item) {
+    return actions.stream().skip(INLINE_ACTION_LIMIT).anyMatch(action -> action.isVisible(item));
   }
 
   record Link(
@@ -50,11 +57,25 @@ public interface ActionDef {
       String label,
       String icon,
       Function<Object, String> urlExtractor,
-      Function<Object, String> nameExtractor)
+      Function<Object, String> nameExtractor,
+      java.util.function.Predicate<Object> visiblePredicate)
       implements ActionDef {
+    public Delete(
+        String label,
+        String icon,
+        Function<Object, String> urlExtractor,
+        Function<Object, String> nameExtractor) {
+      this(label, icon, urlExtractor, nameExtractor, item -> true);
+    }
+
     @Override
     public boolean isDelete() {
       return true;
+    }
+
+    @Override
+    public boolean isVisible(Object item) {
+      return visiblePredicate.test(item);
     }
 
     @Override

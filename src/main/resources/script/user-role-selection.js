@@ -6,17 +6,18 @@ function registerUserRoleSelection() {
 
     select(checkbox) {
       const checkboxes = [...this.$root.querySelectorAll('input[name="roleIds"]')];
-      if (checkbox?.checked && checkbox.dataset.roleName === "STUDENT") {
+      const roleName = (input) => input.closest('[data-role-name]')?.dataset.roleName;
+      if (checkbox?.checked && roleName(checkbox) === "STUDENT") {
         checkboxes.filter((input) => input !== checkbox).forEach((input) => {
           input.checked = false;
         });
       }
 
       const selected = checkboxes.filter((input) => input.checked);
-      const selectedRole = selected.length === 1 ? selected[0].dataset.roleName : null;
+      const selectedRole = selected.length === 1 ? roleName(selected[0]) : null;
 
       checkboxes.forEach((input) => {
-        const role = input.dataset.roleName;
+        const role = roleName(input);
         const allowedPair =
           (selectedRole === "ADMIN" && ["LECTURER", "HEAD_OF_FACULTY"].includes(role)) ||
           (role === "ADMIN" && ["LECTURER", "HEAD_OF_FACULTY"].includes(selectedRole));

@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:if="${managementOpen}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/hoi-dong/{id}/sua(periodId=${council.registrationPeriod.id},id=${council.id})}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
+            <th:block th:replace="~{fragment/crud/delete-action :: delete(@{/dot/{periodId}/hoi-dong/{id}/xoa(periodId=${council.registrationPeriod.id},id=${council.id})}, ${council.name}, #{crud.action.delete})}"></th:block>
+         </th:block>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <section class="space-y-6">
+            <th:block th:if="${error != null}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-error alert-soft', 'alert', #{__${error}__}, 'bi:exclamation-circle')}" ></th:block></th:block>
+
+            <th:block th:unless="${managementOpen}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft', 'alert', #{councils.management-closed}, 'bi:info-circle')}" ></th:block></th:block>
+
+            <th:block th:replace="~{fragment/feature/council/roster :: roster}"></th:block>
+
+            <th:block th:replace="~{fragment/feature/council/assignment-tables :: tables}"></th:block>
+         </section>
+      </th:block>
+   </body>
+</html>

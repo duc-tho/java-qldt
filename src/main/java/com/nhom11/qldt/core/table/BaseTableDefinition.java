@@ -22,6 +22,14 @@ public abstract class BaseTableDefinition<T> {
     return true;
   }
 
+  public String createUrl(String baseUrl) {
+    return baseUrl + "/new";
+  }
+
+  public String bulkDeleteUrl(String baseUrl) {
+    return baseUrl + "/delete";
+  }
+
   public int defaultPage() {
     return DEFAULT_PAGE;
   }

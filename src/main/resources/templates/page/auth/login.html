@@ -1,0 +1,89 @@
+<!doctype html>
+<html
+   xmlns:th="http://www.thymeleaf.org"
+   layout:decorate="~{layout/master.html}"
+>
+   <head>
+      <title th:text="#{login.title}">Login</title>
+   </head>
+
+   <body>
+      <div
+         layout:fragment="body"
+         class="flex items-center justify-center h-screen flex-col lg:flex-row"
+      >
+         <div
+            class="hidden lg:block lg:w-1/2 overflow-hidden relative h-full before:absolute before:inset-0 before:content-[''] before:z-10 before:bg-black/60 before:bg-[url('https://www.transparenttextures.com/patterns/batthern.png')] before:bg-size-[15px] before:bg-repeat"
+         >
+            <img
+               th:src="@{/images/app/auth-bg.webp}"
+               class="h-full w-full object-right object-cover relative z-0"
+               th:alt="#{login.background.alt}"
+            />
+            <div class="absolute top-0 w-full text-neutral-content z-20 p-20">
+               <p class="font-bold text-5xl" th:text="#{login.hero.title}"></p>
+               <br />
+               <p
+                  class="text-xl text-neutral-content/80"
+                  th:text="#{login.hero.description}"
+               ></p>
+            </div>
+            <div
+               class="absolute bottom-0 w-full text-neutral-content/80 z-20 p-20"
+            >
+               <p class="text-xl" th:text="#{login.hero.credit}"></p>
+            </div>
+         </div>
+         <div
+            class="w-full lg:w-1/2 flex justify-center items-center flex-col gap-4 box-content h-full bg-base-100"
+            style="
+               background-image:
+                  linear-gradient(
+                     339deg,
+                     rgba(47, 47, 47, 0.02) 0%,
+                     rgba(47, 47, 47, 0.02) 42%,
+                     transparent 42%,
+                     transparent 99%,
+                     rgba(17, 17, 17, 0.02) 99%,
+                     rgba(17, 17, 17, 0.02) 100%
+                  ),
+                  linear-gradient(
+                     257deg,
+                     rgba(65, 65, 65, 0.02) 0%,
+                     rgba(65, 65, 65, 0.02) 11%,
+                     transparent 11%,
+                     transparent 92%,
+                     rgba(53, 53, 53, 0.02) 92%,
+                     rgba(53, 53, 53, 0.02) 100%
+                  ),
+                  linear-gradient(
+                     191deg,
+                     rgba(5, 5, 5, 0.02) 0%,
+                     rgba(5, 5, 5, 0.02) 1%,
+                     transparent 1%,
+                     transparent 45%,
+                     rgba(19, 19, 19, 0.02) 45%,
+                     rgba(19, 19, 19, 0.02) 100%
+                  ),
+                  linear-gradient(
+                     29deg,
+                     rgba(28, 28, 28, 0.02) 0%,
+                     rgba(28, 28, 28, 0.02) 33%,
+                     transparent 33%,
+                     transparent 40%,
+                     rgba(220, 220, 220, 0.02) 40%,
+                     rgba(220, 220, 220, 0.02) 100%
+                  ),
+                  linear-gradient(90deg, rgb(255, 255, 255), rgb(255, 255, 255));
+            "
+         >
+            <p class="text-4xl font-bold" th:text="#{login.welcome.title}"></p>
+            <p
+               class="text-base-content/70 mb-5"
+               th:text="#{login.welcome.description}"
+            ></p>
+            <div layout:replace="~{fragment/form/login-form.html}"></div>
+         </div>
+      </div>
+   </body>
+</html>

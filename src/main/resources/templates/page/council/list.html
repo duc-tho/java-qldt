@@ -1,0 +1,68 @@
+<!doctype html>
+<html
+   xmlns:th="http://www.thymeleaf.org"
+   xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+   layout:decorate="~{layout/page.html}"
+>
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" th:if="${managementOpen}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/hoi-dong/tao(id=${period.id})}, #{councils.action.create}, 'bi:plus-lg', 'btn btn-primary btn-sm', null)}"></th:block>
+         </th:block>
+      </th:block>
+
+      <th:block layout:fragment="page-content">
+         <section class="space-y-6">
+            <div>
+               <p class="text-sm text-base-content/70" th:text="#{registration_periods.page.detail.title}"></p>
+               <h2 class="text-xl font-semibold" th:text="${period.name}"></h2>
+            </div>
+
+            <th:block th:if="${error != null}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-error alert-soft', 'alert', #{__${error}__}, 'bi:exclamation-circle')}" ></th:block></th:block>
+
+            <th:block th:unless="${managementOpen}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft', 'alert', #{councils.management-closed}, 'bi:info-circle')}" ></th:block></th:block>
+
+            <div class="overflow-x-auto rounded-box border border-base-300">
+               <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+                  <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+                     <tr>
+                        <th th:text="#{councils.field.name}"></th>
+                        <th th:text="#{councils.column.members}"></th>
+                        <th th:text="#{councils.column.assignments}"></th>
+                        <th class="text-right" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" th:text="#{crud.table.actions}"></th>
+                     </tr>
+                  </thead>
+                  <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+                  <tbody>
+                     <tr th:each="council : ${councils}">
+                        <td class="font-medium" th:text="${council.name}"></td>
+                        <td class="tabular-nums" th:text="${memberCounts.get(council.id)}"></td>
+                        <td>
+                           <span
+                              class="badge badge-soft"
+                              th:classappend="${assignedCounts.get(council.id) > 0} ? ' badge-success' : ' badge-ghost'"
+                              th:text="${assignedCounts.get(council.id)}"
+                           ></span>
+                        </td>
+                        <td class="text-right" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
+                           <div class="flex justify-end gap-2">
+                              <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/hoi-dong/{id}(periodId=${period.id},id=${council.id})}, #{councils.action.view}, 'bi:eye', 'btn btn-outline btn-sm', null)}"></th:block>
+                              <th:block th:if="${managementOpen}">
+                                 <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/hoi-dong/{id}/sua(periodId=${period.id},id=${council.id})}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-outline btn-sm', null)}"></th:block>
+                                 <th:block th:replace="~{fragment/crud/delete-action :: deleteStyled(@{/dot/{periodId}/hoi-dong/{id}/xoa(periodId=${period.id},id=${council.id})}, ${council.name}, #{crud.action.delete}, 'btn btn-error btn-outline btn-sm', 'bi:trash')}"></th:block>
+                              </th:block>
+                           </div>
+                        </td>
+                     </tr>
+                     <tr th:if="${#lists.isEmpty(councils)}">
+                        <td class="py-8 text-center text-base-content/70" colspan="4" th:text="#{councils.empty}"></td>
+                     </tr>
+                  </tbody>
+               
+                  </th:block></th:block>
+            </div>
+
+         </section>
+      </th:block>
+   </body>
+</html>

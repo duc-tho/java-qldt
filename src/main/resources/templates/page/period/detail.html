@@ -1,0 +1,82 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-meta">
+         <div class="mt-3 ml-14 flex flex-wrap gap-2" th:if="${form.readonly}">
+            <th:block th:replace="~{fragment/feature/period/status-badges :: badges(${period.periodType}, ${periodStage})}"></th:block>
+         </div>
+      </th:block>
+      <th:block layout:fragment="actions">
+         <th:block th:if="${form.readonly and isStaff}" sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.title}, 'bi:award', 'btn btn-outline btn-sm', null)}"></th:block>
+            <th:block th:replace="~{fragment/base/button :: linkStyled(${form.actionUrl + '/sua'}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
+            <th:block th:replace="~{fragment/crud/delete-action :: delete(${form.actionUrl + '/xoa'}, ${form.data.name}, #{crud.action.delete})}"></th:block>
+         </th:block>
+         <th:block th:if="${form.readonly and !isStaff and isLecturer}">
+            <th:block th:if="${canPropose}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/de-tai/tao(id=${period.id})}, #{topics.action.propose}, 'bi:lightbulb', 'btn btn-primary btn-sm', null)}"></th:block>
+            </th:block>
+            <th:block th:if="${assignedCount > 0}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/danh-gia(id=${period.id})}, #{work.evaluation.title}, 'bi:clipboard2-check', 'btn btn-outline btn-sm', null)}"></th:block>
+            </th:block>
+            <th:block th:if="${resultsPublished}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.action.view}, 'bi:award', 'btn btn-outline btn-sm', null)}"></th:block>
+            </th:block>
+         </th:block>
+         <th:block th:if="${form.readonly and isStudent}">
+            <th:block th:if="${canCreateGroup and groupId == null}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/nhom/tao(id=${period.id})}, #{student-groups.action.create}, 'bi:plus-lg', 'btn btn-primary btn-sm', null)}"></th:block>
+            </th:block>
+            <th:block th:if="${groupId != null}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${groupId})}, #{student-groups.action.mine}, 'bi:people', 'btn btn-outline btn-sm', null)}"></th:block>
+            </th:block>
+            <th:block th:if="${resultsPublished and groupId != null}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{id}/ket-qua(id=${period.id})}, #{result-publications.action.view}, 'bi:award', 'btn btn-outline btn-sm', null)}"></th:block>
+            </th:block>
+         </th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <div
+            class="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,2fr)_minmax(18rem,1fr)]"
+         >
+            <div class="min-w-0 space-y-6">
+               <th:block th:if="${form.readonly and nextDeadline != null}">
+                  <th:block th:replace="~{fragment/base/alert :: content('alert alert-warning alert-soft', 'alert', ~{::deadline-alert-content})}">
+                     <th:block th:fragment="deadline-alert-content">
+                  <span class="iconify text-xl" data-icon="bi:alarm"></span>
+                  <div>
+                     <p
+                        class="font-semibold"
+                        th:text="|#{registration_periods.deadline.next}: #{__${nextDeadlineLabel}__} · ${#temporals.format(nextDeadline, 'dd/MM/yyyy HH:mm')}|"
+                     ></p>
+                     <p
+                        class="text-sm"
+                        th:text="#{registration_periods.deadline.description}"
+                     ></p>
+                  </div>
+                     </th:block>
+                  </th:block>
+               </th:block>
+               <div
+                  th:replace="~{fragment/crud/form :: crud-form(${form})}"
+               ></div>
+            </div>
+            <th:block th:if="${form.readonly}">
+            <th:block th:replace="~{fragment/feature/period/timeline :: timeline}"></th:block>
+            </th:block>
+         </div>
+         <div class="mt-8 space-y-6" th:if="${form.readonly}">
+            <th:block th:replace="~{fragment/feature/period/topics-panel :: panel(${period}, ${periodTopics})}"></th:block>
+            <div
+               class="grid items-start gap-6"
+               th:classappend="${isStaff and period.periodType.name() == 'KLTN' and councilSummaries != null and !#lists.isEmpty(councilSummaries)} ? ' xl:grid-cols-2'"
+            >
+               <th:block th:replace="~{fragment/feature/period/groups-panel :: panel(${period}, ${groupSummaries}, ${finalizedRegistrationIds})}"></th:block>
+               <th:block th:if="${isStaff or isLecturer}">
+                  <th:block th:replace="~{fragment/feature/period/evaluation-panel :: panel(${period}, ${isStaff}, ${isLecturer}, ${councilSummaries}, ${reviewerAssignmentTopics}, ${assignedCount}, ${resultsPublished})}"></th:block>
+               </th:block>
+            </div>
+         </div>
+      </th:block>
+   </body>
+</html>

@@ -1,0 +1,117 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <body>
+      <section
+         class="space-y-4"
+         sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+         th:fragment="result-publication(period)"
+      >
+         <th:block th:replace="~{fragment/feature/result/publication :: feedback}"></th:block>
+
+         <div class="grid grid-cols-1 items-stretch gap-6 xl:grid-cols-3">
+            <section class="card card-border h-full overflow-hidden border-base-300 bg-base-100 xl:col-span-2">
+               <div class="card-body gap-4 p-0">
+                  <h2 class="card-title px-5 pt-5 text-lg font-semibold">
+                     <span class="iconify text-primary" data-icon="bi:people" aria-hidden="true"></span>
+                     <span th:text="#{result-publications.groups.title}"></span>
+                  </h2>
+
+                  <th:block th:if="${#lists.isEmpty(resultSummaries)}">
+                     <div th:replace="~{fragment/shared/empty-state :: centered('bi:people', #{result-publications.groups.empty}, #{result-publications.groups.empty-description})}"></div>
+                  </th:block>
+
+                  <div class="overflow-x-auto" th:unless="${#lists.isEmpty(resultSummaries)}">
+                     <table class="table table-md">
+                        <thead class="bg-base-200">
+                           <tr>
+                              <th th:text="#{councils.workspace.group}"></th>
+                              <th th:text="#{councils.workspace.topic}"></th>
+                              <th th:text="#{result-publications.column.score}"></th>
+                              <th th:text="#{result-publications.column.summary}"></th>
+                           </tr>
+                        </thead>
+                        <tbody>
+                           <tr th:each="summary : ${resultSummaries}">
+                              <td>
+                                 <a class="link link-primary font-medium"
+                                    th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${summary.registration.studentGroup.id})}"
+                                    th:text="${summary.registration.studentGroup.name}"></a>
+                              </td>
+                              <td th:text="${summary.registration.topic.title}"></td>
+                              <td>
+                                 <span class="font-semibold tabular-nums text-success"
+                                    th:if="${summary.result != null and summary.result.status.name() == 'FINALIZED'}"
+                                    th:text="${summary.result.finalScore}"></span>
+                                 <span class="badge badge-warning badge-soft badge-sm"
+                                    th:unless="${summary.result != null and summary.result.status.name() == 'FINALIZED'}"
+                                    th:text="#{councils.grading.waiting}"></span>
+                              </td>
+                              <td>
+                                 <span th:if="${summary.result != null and summary.result.status.name() == 'FINALIZED' and !#strings.isEmpty(summary.result.summaryComment)}"
+                                    th:text="${summary.result.summaryComment}"></span>
+                                 <span class="text-base-content/50"
+                                    th:unless="${summary.result != null and summary.result.status.name() == 'FINALIZED' and !#strings.isEmpty(summary.result.summaryComment)}">&mdash;</span>
+                              </td>
+                           </tr>
+                        </tbody>
+                     </table>
+                  </div>
+               </div>
+            </section>
+
+            <aside class="card card-border h-full border-base-300 bg-base-100">
+               <div class="card-body gap-4 p-5">
+                  <h2 class="card-title text-lg font-semibold">
+                     <span class="iconify text-primary" data-icon="bi:clock-history" aria-hidden="true"></span>
+                     <span th:text="#{result-publications.history.title}"></span>
+                  </h2>
+                  <th:block th:replace="~{fragment/feature/result/publication-history :: compact}"></th:block>
+               </div>
+            </aside>
+         </div>
+         <th:block th:replace="~{fragment/feature/result/publication :: revokeDialog(${period})}"></th:block>
+      </section>
+
+      <div th:fragment="actions(period)" class="flex flex-wrap gap-2"
+         sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
+         <div th:if="${latestPublication == null or latestPublication.action.name() == 'REVOKED'}"
+            th:classappend="${!canPublishResults} ? 'tooltip tooltip-left'"
+            th:attr="data-tip=${!canPublishResults} ? #{result-publications.not-ready} : null">
+            <form method="post" th:action="@{/dot/{id}/ket-qua/cong-bo(id=${period.id})}">
+               <th:block th:replace="~{fragment/base/button :: submit(#{result-publications.action.publish}, 'bi:send-check', 'btn btn-sm btn-primary', ${!canPublishResults})}"></th:block>
+            </form>
+         </div>
+         <th:block th:if="${latestPublication != null and latestPublication.action.name() == 'PUBLISHED'}">
+            <th:block th:replace="~{fragment/base/button :: modalOpen('revoke_publication', #{result-publications.action.revoke}, 'bi:x-circle', 'btn btn-sm btn-error btn-outline')}"></th:block>
+         </th:block>
+      </div>
+
+      <div th:fragment="feedback" class="space-y-3"
+         th:if="${error != null or ((latestPublication == null or latestPublication.action.name() == 'REVOKED') and !canPublishResults)}">
+         <th:block th:if="${error != null}">
+            <th:block th:replace="~{fragment/base/alert :: iconText('alert alert-error alert-soft', 'alert', #{__${error}__}, 'bi:exclamation-circle')}"></th:block>
+         </th:block>
+         <th:block th:if="${(latestPublication == null or latestPublication.action.name() == 'REVOKED') and !canPublishResults}">
+            <th:block th:replace="~{fragment/base/alert :: iconText('alert alert-warning alert-soft', 'alert', #{result-publications.not-ready}, 'bi:exclamation-triangle')}"></th:block>
+         </th:block>
+      </div>
+
+      <dialog th:fragment="revokeDialog(period)"
+         th:replace="~{fragment/base/dialog :: dialog('revoke_publication', ~{::#revoke-publication-content}, #{crud.delete.close}, 'modal-box')}">
+            <section id="revoke-publication-content">
+               <form method="post" th:action="@{/dot/{id}/ket-qua/thu-hoi(id=${period.id})}" th:object="${revocationForm}">
+                  <h3 class="text-lg font-semibold" th:text="#{result-publications.action.revoke}"></h3>
+                  <div class="mt-4"
+                     th:replace="~{fragment/base/field-shell :: field('reason', #{result-publications.column.reason}, true, null, false, ~{::#publication-reason-control})}">
+                     <th:block id="publication-reason-control" th:fragment="publication-reason-control"
+                        th:replace="~{fragment/base/textarea :: bound('reason', 'textarea min-h-28 w-full', null, true, 500)}"></th:block>
+                  </div>
+                  <div class="modal-action">
+                     <th:block th:replace="~{fragment/base/button :: submit(#{result-publications.action.revoke}, null, 'btn btn-sm btn-error', false)}"></th:block>
+                     <th:block th:replace="~{fragment/base/button :: modalClose('revoke_publication', #{crud.form.cancel}, 'btn btn-sm')}"></th:block>
+                  </div>
+               </form>
+            </section>
+      </dialog>
+   </body>
+</html>

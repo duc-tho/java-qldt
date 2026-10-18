@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <textarea th:fragment="bound(name, classes, rows, required, maxLength)" th:field="*{__${name}__}"
+      th:class="${classes}" th:rows="${rows}" th:required="${required}" th:maxlength="${maxLength}"></textarea>
+
+   <textarea th:fragment="named(name, classes, rows, required, maxLength)" th:name="${name}"
+      th:id="${name}" th:class="${classes}" th:rows="${rows}" th:required="${required}" th:maxlength="${maxLength}"></textarea>
+
+   <div th:fragment="field(name, label, rows, readonly, validationRule, required, helpText)"
+      th:replace="~{fragment/base/field-shell :: field(${name}, ${label}, ${required}, ${helpText}, ${readonly}, ~{::field-content})}">
+      <th:block th:fragment="field-content">
+         <textarea th:unless="${readonly}" class="textarea w-full" th:field="*{__${name}__}"
+            th:rows="${rows}" th:required="${required}"
+            th:classappend="${#fields.hasErrors(name)} ? ' textarea-error'"
+            th:attr="validate-data=${validationRule}"></textarea>
+         <th:block th:if="${readonly}" th:with="value=*{__${name}__}">
+            <th:block th:replace="~{fragment/base/readonly-value :: value(${name}, ${value})}"></th:block>
+         </th:block>
+      </th:block>
+   </div>
+</html>

@@ -10,66 +10,19 @@
    novalidate
 >
    <fieldset
-      class="fieldset bg-base-200 border-base-300 rounded-box w-sm md:w-md lg:w-lg border p-6 shadow-lg"
+      class="fieldset bg-base-200 border-base-300 rounded-box w-sm md:w-md lg:w-lg border p-6 shadow-lg gap-1"
    >
-      <div
-         th:if="${param.error}"
-         role="alert"
-         class="alert alert-error alert-soft"
-      >
-         <span th:text="#{login.error.invalid}"></span>
-      </div>
-      <div
-         th:if="${param.logout}"
-         role="alert"
-         class="alert alert-success alert-soft"
-      >
-         <span th:text="#{login.logout.success}"></span>
-      </div>
-      <div
-         th:if="${#fields.hasAnyErrors()}"
-         role="alert"
-         class="alert alert-error alert-soft flex gap-2 flex-col"
-      >
-         <p th:each="err : ${#fields.errors('*')}" th:text="${err}"></p>
-      </div>
-      <div class="flex flex-col gap-1.5 my-1.5">
-         <label
-            class="label ml-3 font-bold"
-            for="login-email"
-            th:text="#{login.field.email}"
-         ></label
-         ><input
-            id="login-email"
-            type="email"
-            name="email"
-            class="input w-full"
-            th:placeholder="#{login.field.email}"
-            th:value="*{email}"
-            th:attr="validate-data=${validationRules.email}"
-         />
-         <div id="login-email-error" class="ml-3"></div>
-      </div>
-      <div class="flex flex-col gap-1.5 my-1.5">
-         <label
-            class="label ml-3 font-bold"
-            for="login-password"
-            th:text="#{login.field.password}"
-         ></label
-         ><input
-            id="login-password"
-            type="password"
-            name="password"
-            class="input w-full"
-            th:placeholder="#{login.field.password}"
-            th:attr="validate-data=${validationRules.password}"
-         />
-         <div id="login-password-error" class="ml-3"></div>
-      </div>
-      <button
-         type="submit"
-         class="btn btn-neutral mt-3"
-         th:text="#{login.action.submit}"
-      ></button>
+      <th:block th:if="${param.error}">
+         <th:block th:replace="~{fragment/base/alert :: text('alert alert-error alert-soft', 'alert', #{login.error.invalid})}"></th:block>
+      </th:block>
+      <th:block th:if="${param.logout}">
+         <th:block th:replace="~{fragment/base/alert :: text('alert alert-success alert-soft', 'alert', #{login.logout.success})}"></th:block>
+      </th:block>
+      <th:block th:if="${#fields.hasAnyErrors()}">
+         <th:block th:replace="~{fragment/base/alert :: validationErrors('alert alert-error alert-soft flex gap-2 flex-col', null)}"></th:block>
+      </th:block>
+      <div th:replace="~{fragment/shared/validated-field :: field('login-email', #{login.field.email}, true, ~{fragment/base/input :: validatedNamed('login-email', 'email', 'email', #{login.field.email}, *{email}, ${validationRules.email}, true)}, 'my-1.5 flex flex-col gap-1', 'ml-3')}"></div>
+      <div th:replace="~{fragment/shared/validated-field :: field('login-password', #{login.field.password}, true, ~{fragment/base/input :: validatedNamed('login-password', 'password', 'password', #{login.field.password}, null, ${validationRules.password}, true)}, 'my-1.5 flex flex-col gap-1', 'ml-3')}"></div>
+      <th:block th:replace="~{fragment/base/button :: submit(#{login.action.submit}, null, 'btn btn-sm btn-primary mt-3', false)}"></th:block>
    </fieldset>
 </form>

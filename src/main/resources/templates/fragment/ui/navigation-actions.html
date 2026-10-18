@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <label th:fragment="drawerToggle(target, label, classes, icon)" th:for="${target}"
+      th:aria-label="${label}" th:class="${classes}">
+      <span class="iconify" th:attr="data-icon=${icon}" data-width="20" aria-hidden="true"></span>
+   </label>
+
+   <summary th:fragment="menuSummary(label, classes, content)" th:class="${classes}" th:aria-label="${label}">
+      <th:block th:replace="${content}"></th:block>
+   </summary>
+
+   <a th:fragment="sidebarLink(url, label, icon, classes, active, tooltip)"
+      th:href="${url}" th:class="${classes}" th:classappend="${active} ? ' menu-active'"
+      th:attr="data-tip=${tooltip}">
+      <span class="iconify block shrink-0" th:attr="data-icon=${icon}" data-width="18" aria-hidden="true"></span>
+      <span class="sidebar-item-label" th:text="${label}"></span>
+   </a>
+
+   <a th:fragment="navLink(url, label, icon, classes, showLabel)"
+      th:href="${url}" th:class="${classes}" th:aria-label="${label}">
+      <span class="iconify" th:attr="data-icon=${icon}" data-width="20" aria-hidden="true"></span>
+      <span th:if="${showLabel}" th:text="${label}"></span>
+   </a>
+
+   <button th:fragment="pageBack(backLabel, homeLabel)" type="button"
+      class="btn btn-ghost btn-sm btn-square" x-data="pageBack" x-on:click="goBack"
+      th:attr="data-back-label=${backLabel}, data-home-label=${homeLabel}"
+      x-bind:aria-label="hasHistory ? $el.dataset.backLabel : $el.dataset.homeLabel">
+      <span x-show="hasHistory" class="iconify" data-icon="bi:arrow-left" data-width="16"></span>
+      <span x-show="!hasHistory" class="iconify" data-icon="bi:house" data-width="16"></span>
+   </button>
+</html>

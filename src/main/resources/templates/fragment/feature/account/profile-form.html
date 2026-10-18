@@ -1,0 +1,42 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="form">
+<form
+            method="post"
+            th:action="@{/tai-khoan}"
+            th:object="${data}"
+            class="w-full lg:w-1/2 mx-auto"
+            data-live-validation
+            novalidate
+            x-data="formValidation"
+            @submit.prevent="submit"
+         >
+            <div class="flex flex-col gap-5">
+               <th:block th:if="${param.updated}">
+                  <th:block th:replace="~{fragment/base/alert :: text('alert alert-success alert-soft', 'status', #{account.update.success})}"></th:block>
+               </th:block>
+               <th:block th:if="${param.passwordUpdated}">
+                  <th:block th:replace="~{fragment/base/alert :: text('alert alert-success alert-soft', 'status', #{account.password.update.success})}"></th:block>
+               </th:block>
+               <th:block th:if="${#fields.hasAnyErrors()}">
+                  <th:block th:replace="~{fragment/base/alert :: validationErrors('alert alert-error alert-soft flex flex-col gap-2', null)}"></th:block>
+               </th:block>
+
+               <div th:replace="~{fragment/shared/validated-field :: field('account-full-name', #{users.field.full_name}, true, ~{fragment/base/input :: validatedBound('fullName', 'account-full-name', 'text', true, ${validationRules.fullName})}, null, null)}"></div>
+
+               <div th:replace="~{fragment/shared/validated-field :: field('account-email', #{users.field.email}, false, ~{fragment/base/readonly-value :: value('account-email', ${data.email})}, null, null)}"></div>
+
+               <div th:replace="~{fragment/shared/validated-field :: field('account-user-code', #{users.field.user_code}, false, ~{fragment/base/readonly-value :: value('account-user-code', ${data.userCode})}, null, null)}"></div>
+
+               <div th:replace="~{fragment/shared/validated-field :: field('account-phone', #{users.field.phone}, false, ~{fragment/base/input :: validatedBound('phone', 'account-phone', 'text', false, ${validationRules.phone})}, null, null)}"></div>
+
+               <div
+                  class="flex items-center justify-end gap-3 border-t border-base-300 pt-2"
+               >
+                  <th:block th:replace="~{fragment/base/button :: linkStyled('/', #{crud.form.cancel}, null, 'btn btn-ghost btn-sm', null)}"></th:block>
+                  <th:block th:replace="~{fragment/base/button :: submit(#{crud.form.save}, 'bi:check-lg', 'btn btn-primary btn-sm', false)}"></th:block>
+               </div>
+            </div>
+         </form>
+   </th:block>
+</html>

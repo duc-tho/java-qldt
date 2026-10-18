@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="centered(icon, title, description)"
+      class="flex min-h-52 grow flex-col items-center justify-center gap-2 text-center">
+      <span class="iconify text-3xl text-base-content/40" th:attr="data-icon=${icon}"></span>
+      <p class="grow-0 font-medium" th:text="${title}"></p>
+      <p class="grow-0 text-sm text-base-content/70" th:text="${description}"></p>
+   </div>
+</html>

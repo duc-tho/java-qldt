@@ -1,0 +1,16 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <section th:fragment="panel"
+      th:replace="~{fragment/base/card :: section('card card-border mt-5 border-base-300 bg-base-100', ~{::#group-approval-content})}">
+      <div id="group-approval-content" class="card-body gap-4">
+         <h2 class="card-title text-lg font-semibold" th:text="#{topic-registrations.action.review}"></h2>
+         <th:block th:replace="~{fragment/feature/group/review-decision :: decision}"></th:block>
+         <div class="flex flex-wrap justify-end gap-2">
+            <th:block th:replace="~{fragment/base/button :: submitFor('reject-registration-form', #{topic-registrations.action.reject}, null, 'btn btn-sm btn-error btn-outline')}"></th:block>
+            <form th:action="@{/dot/{periodId}/nhom/{groupId}/duyet-de-tai(periodId=${group.registrationPeriod.id},groupId=${group.id})}" method="post">
+               <th:block th:replace="~{fragment/base/button :: submit(#{topic-registrations.action.approve}, null, 'btn btn-sm btn-primary', false)}"></th:block>
+            </form>
+         </div>
+      </div>
+   </section>
+</html>

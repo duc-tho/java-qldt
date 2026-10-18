@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="form-fields">
+      <div class="flex flex-col gap-3">
+         <div th:replace="~{fragment/base/input :: field('code', #{departments.field.code}, 'text', null, ${form.readonly}, ${form.validationRules.code}, true, null)}"></div>
+         <div th:replace="~{fragment/base/input :: field('name', #{departments.field.name}, 'text', null, ${form.readonly}, ${form.validationRules.name}, true, null)}"></div>
+      </div>
+   </th:block>
+</html>

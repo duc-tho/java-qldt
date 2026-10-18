@@ -1,0 +1,18 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="role(name, label, secretary)" class="fieldset text-sm gap-1">
+      <div th:replace="~{fragment/base/field-label :: label(${name}, ${label}, true, null)}"></div>
+      <select th:replace="~{fragment/base/select :: alpine(${name}, 'select w-full', true, ${secretary} ? 'secretary' : 'chairperson', ~{::#council-role-options})}">
+         <th:block id="council-role-options" th:fragment="council-role-options">
+         <option value="" th:text="#{councils.members.select-role}"></option>
+         <template th:unless="${secretary}" x-for="member in members" :key="member.id">
+            <option :value="member.id" x-text="member.fullName"></option>
+         </template>
+         <template th:if="${secretary}" x-for="member in members.filter(item => String(item.id) !== String(chairperson))" :key="member.id">
+            <option :value="member.id" x-text="member.fullName"></option>
+         </template>
+         </th:block>
+      </select>
+      <div th:replace="~{fragment/base/field-shell :: errors(${name}, false)}"></div>
+   </div>
+</html>

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/departments")
+@RequestMapping("/bo-mon")
 public class DepartmentController {
 
   private final DepartmentService service;
@@ -41,48 +41,54 @@ public class DepartmentController {
 
   @GetMapping
   public String list(@ModelAttribute TableQuery query, Model model) {
-    view.table(model, service.findAll(query, table), "/departments", query, table);
+    view.table(model, service.findAll(query, table), "/bo-mon", query, table);
     model.addAttribute("pageTitle", "departments.page.list.title");
     model.addAttribute("pageIcon", "bi:diagram-3");
-    return "fragment/page/department/list";
+    return "page/department/list";
   }
 
   @GetMapping("/new")
   public String createForm(Model model) {
-    form(model, new DepartmentForm(), "/departments", false, "departments.page.create.title");
-    return "fragment/page/department/create";
+    form(model, new DepartmentForm(), "/bo-mon", false, "departments.page.create.title");
+    return "page/department/create";
   }
 
   @PostMapping
   public String create(
       @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
     if (errors.hasErrors()) {
-      form(model, form, "/departments", false, "departments.page.create.title");
-      return "fragment/page/department/create";
+      form(model, form, "/bo-mon", false, "departments.page.create.title");
+      return "page/department/create";
+    }
+
+    if (service.existsByCode(form.getCode())) {
+      errors.rejectValue("code", "departments.validation.code.duplicate");
+      form(model, form, "/bo-mon", false, "departments.page.create.title");
+      return "page/department/create";
     }
 
     service.create(form.toEntity());
-    return "redirect:/departments";
+    return "redirect:/bo-mon";
   }
 
   @GetMapping("/{id}")
   public String detail(@PathVariable Long id, Model model) {
     Department department = service.findById(id);
-    if (department == null) return "redirect:/departments";
+    if (department == null) return "redirect:/bo-mon";
     DepartmentForm form = new DepartmentForm();
     form.fromEntity(department);
-    form(model, form, "/departments/" + id, true, "departments.page.detail.title");
-    return "fragment/page/department/detail";
+    form(model, form, "/bo-mon/" + id, true, "departments.page.detail.title");
+    return "page/department/detail";
   }
 
   @GetMapping("/{id}/edit")
   public String edit(@PathVariable Long id, Model model) {
     Department department = service.findById(id);
-    if (department == null) return "redirect:/departments";
+    if (department == null) return "redirect:/bo-mon";
     DepartmentForm form = new DepartmentForm();
     form.fromEntity(department);
-    form(model, form, "/departments/" + id, false, "departments.page.edit.title");
-    return "fragment/page/department/detail";
+    form(model, form, "/bo-mon/" + id, false, "departments.page.edit.title");
+    return "page/department/detail";
   }
 
   @PostMapping("/{id}")
@@ -91,16 +97,24 @@ public class DepartmentController {
       @Valid @ModelAttribute("data") DepartmentForm form,
       BindingResult errors,
       Model model) {
-    if (service.findById(id) == null) return "redirect:/departments";
+    if (service.findById(id) == null) return "redirect:/bo-mon";
     if (errors.hasErrors()) {
       form.setId(id);
-      form(model, form, "/departments/" + id, false, "departments.page.edit.title");
-      return "fragment/page/department/detail";
+      form(model, form, "/bo-mon/" + id, false, "departments.page.edit.title");
+      return "page/department/detail";
     }
+
+    if (service.existsByCodeAndIdNot(form.getCode(), id)) {
+      errors.rejectValue("code", "departments.validation.code.duplicate");
+      form.setId(id);
+      form(model, form, "/bo-mon/" + id, false, "departments.page.edit.title");
+      return "page/department/detail";
+    }
+
     Department department = form.toEntity();
     department.setId(id);
     service.update(department);
-    return "redirect:/departments/" + id;
+    return "redirect:/bo-mon/" + id;
   }
 
   @PostMapping("/{id}/delete")
@@ -112,7 +126,7 @@ public class DepartmentController {
     } catch (DataIntegrityViolationException exception) {
       attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
-    return "redirect:/departments";
+    return "redirect:/bo-mon";
   }
 
   private void form(
@@ -122,9 +136,9 @@ public class DepartmentController {
         data,
         action,
         "post",
-        "/departments",
+        "/bo-mon",
         readonly,
-        "fragment/page/department/fields",
+        "fragment/feature/department/fields",
         validation.render(DepartmentForm.class));
     model.addAttribute("pageTitle", title);
     model.addAttribute("pageIcon", "bi:diagram-3");

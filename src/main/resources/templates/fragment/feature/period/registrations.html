@@ -1,0 +1,48 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="registrations(groupSummaries, finalizedRegistrationIds)">
+      <div class="mt-4 min-h-0 grow overflow-x-auto rounded-box border-2 border-base-300">
+         <th:block th:replace="~{fragment/base/table :: table('table table-zebra w-full min-w-max [&_th]:min-w-32 [&_td]:min-w-32 table-md', ~{::#shared-table-head-1}, ~{::#shared-table-body-1})}">
+            <thead id="shared-table-head-1" th:fragment="shared-table-head-1" class="bg-base-200">
+               <tr>
+                  <th th:text="#{student-groups.field.name}"></th>
+                  <th th:text="#{student-groups.topic}"></th>
+                  <th th:text="#{announcements.column.status}"></th>
+               </tr>
+            </thead>
+            <th:block id="shared-table-body-1" th:fragment="shared-table-body-1">
+            <tbody>
+               <tr th:each="summary : ${groupSummaries}">
+                  <td>
+                     <a class="link link-primary font-medium" th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${summary.group.id})}" th:text="${summary.group.name}"></a>
+                     <div class="text-sm text-base-content/70" th:text="#{student-groups.summary.leader(${summary.leaderName})}"></div>
+                     <div class="text-sm text-base-content/70" th:text="#{student-groups.summary.members(${summary.memberCount})}"></div>
+                  </td>
+                  <td th:text="${summary.registration != null} ? ${summary.registration.topic.title} : #{student-groups.topic.empty}"></td>
+                  <td>
+                     <span class="badge badge-ghost badge-soft badge-sm"
+                        th:if="${summary.registration == null}"
+                        th:text="#{student-groups.registration.empty}"></span>
+                     <span class="badge badge-soft badge-sm"
+                        th:if="${summary.registration != null and (finalizedRegistrationIds == null or summary.registration.status.name() != 'APPROVED')}"
+                        th:classappend="${summary.registration.status.name() == 'APPROVED'} ? 'badge-success' : (${summary.registration.status.name() == 'REJECTED'} ? 'badge-error' : (${summary.registration.status.name() == 'PENDING'} ? 'badge-warning' : 'badge-ghost'))"
+                        th:text="#{topic-registrations.status.__${summary.registration.status.name()}__}"></span>
+                     <span class="badge badge-soft badge-sm"
+                        th:if="${summary.registration != null and finalizedRegistrationIds != null and summary.registration.status.name() == 'APPROVED'}"
+                        th:classappend="${finalizedRegistrationIds.contains(summary.registration.id)} ? 'badge-success' : 'badge-warning'"
+                        th:text="${finalizedRegistrationIds.contains(summary.registration.id)} ? #{student-groups.evaluation.completed} : #{student-groups.evaluation.waiting}"></span>
+                  </td>
+               </tr>
+               <tr th:if="${#lists.isEmpty(groupSummaries)}">
+                  <td
+                     colspan="3"
+                     class="text-center text-base-content/70"
+                     th:text="#{crud.table.empty}"
+                  ></td>
+               </tr>
+            </tbody>
+         
+            </th:block></th:block>
+      </div>
+   </th:block>
+</html>

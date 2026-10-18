@@ -4,13 +4,16 @@ import com.nhom11.qldt.feature.auth.model.entity.User;
 import com.nhom11.qldt.feature.auth.repository.UserRepository;
 import com.nhom11.qldt.feature.council.model.dto.CouncilForm;
 import com.nhom11.qldt.feature.council.model.dto.CouncilLecturerOption;
+import com.nhom11.qldt.feature.council.model.dto.CouncilSummary;
 import com.nhom11.qldt.feature.council.model.dto.EvaluationForm;
 import com.nhom11.qldt.feature.council.model.dto.FinalResultForm;
+import com.nhom11.qldt.feature.council.model.dto.RegistrationResultSummary;
 import com.nhom11.qldt.feature.council.model.entity.Council;
 import com.nhom11.qldt.feature.council.model.entity.CouncilMember;
 import com.nhom11.qldt.feature.council.model.entity.Evaluation;
 import com.nhom11.qldt.feature.council.model.entity.FinalResult;
 import com.nhom11.qldt.feature.council.model.entity.ResultPublication;
+import com.nhom11.qldt.feature.council.event.ResultsPublishedEvent;
 import com.nhom11.qldt.feature.council.model.enums.CouncilMemberRole;
 import com.nhom11.qldt.feature.council.model.enums.EvaluationStatus;
 import com.nhom11.qldt.feature.council.model.enums.FinalResultStatus;
@@ -20,13 +23,13 @@ import com.nhom11.qldt.feature.council.repository.CouncilRepository;
 import com.nhom11.qldt.feature.council.repository.EvaluationRepository;
 import com.nhom11.qldt.feature.council.repository.FinalResultRepository;
 import com.nhom11.qldt.feature.council.repository.ResultPublicationRepository;
-import com.nhom11.qldt.feature.reportsubmission.service.ReportSubmissionService;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
-import com.nhom11.qldt.feature.registrationperiod.repository.RegistrationPeriodRepository;
-import com.nhom11.qldt.feature.studentgroup.model.entity.TopicRegistration;
-import com.nhom11.qldt.feature.studentgroup.model.enums.TopicRegistrationStatus;
-import com.nhom11.qldt.feature.studentgroup.repository.TopicRegistrationRepository;
+import com.nhom11.qldt.feature.report.service.ReportSubmissionService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.model.enums.PeriodType;
+import com.nhom11.qldt.feature.period.repository.RegistrationPeriodRepository;
+import com.nhom11.qldt.feature.group.model.entity.TopicRegistration;
+import com.nhom11.qldt.feature.group.model.enums.TopicRegistrationStatus;
+import com.nhom11.qldt.feature.group.repository.TopicRegistrationRepository;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.repository.TopicRepository;
 import java.math.BigDecimal;
@@ -36,6 +39,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,6 +61,7 @@ public class CouncilService {
   private final TopicRegistrationRepository registrationRepository;
   private final UserRepository userRepository;
   private final ReportSubmissionService reportSubmissionService;
+  private final ApplicationEventPublisher eventPublisher;
 
   public CouncilService(
       CouncilRepository councilRepository,
@@ -67,7 +73,8 @@ public class CouncilService {
       TopicRepository topicRepository,
       TopicRegistrationRepository registrationRepository,
       UserRepository userRepository,
-      ReportSubmissionService reportSubmissionService) {
+      ReportSubmissionService reportSubmissionService,
+      ApplicationEventPublisher eventPublisher) {
     this.councilRepository = councilRepository;
     this.councilMemberRepository = councilMemberRepository;
     this.evaluationRepository = evaluationRepository;
@@ -78,11 +85,80 @@ public class CouncilService {
     this.registrationRepository = registrationRepository;
     this.userRepository = userRepository;
     this.reportSubmissionService = reportSubmissionService;
+    this.eventPublisher = eventPublisher;
   }
 
   public List<Council> councils(Long periodId) {
     requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
     return councilRepository.findAllByRegistrationPeriodId(periodId);
+  }
+
+  public long countCouncils(Long periodId) {
+    return councilRepository.countByRegistrationPeriodId(periodId);
+  }
+
+  public Map<Long, Long> councilCounts(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Map.of();
+
+    return counts(councilRepository.countByRegistrationPeriodIdIn(periodIds));
+  }
+
+  public Set<Long> publishedPeriodIds(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Set.of();
+
+    Map<Long, ResultPublicationAction> latestActions = new LinkedHashMap<>();
+    publicationRepository.findAllByRegistrationPeriodIdInOrderByIdDesc(periodIds).forEach(
+        publication -> latestActions.putIfAbsent(
+            publication.getRegistrationPeriod().getId(), publication.getAction()));
+    return latestActions.entrySet().stream()
+        .filter(entry -> entry.getValue() == ResultPublicationAction.PUBLISHED)
+        .map(Map.Entry::getKey)
+        .collect(Collectors.toSet());
+  }
+
+  public Set<Long> publishablePeriodIds(List<Long> periodIds) {
+    if (periodIds.isEmpty()) return Set.of();
+
+    Map<Long, Long> approvedCounts = counts(
+        registrationRepository.countByPeriodIdsAndStatus(
+            periodIds, TopicRegistrationStatus.APPROVED));
+    Map<Long, Long> finalizedCounts = counts(
+        finalResultRepository.countByPeriodIdsAndStatus(
+            periodIds, FinalResultStatus.FINALIZED));
+    return periodIds.stream()
+        .filter(periodId -> approvedCounts.getOrDefault(periodId, 0L) > 0)
+        .filter(periodId -> approvedCounts.get(periodId).equals(
+            finalizedCounts.getOrDefault(periodId, 0L)))
+        .collect(Collectors.toSet());
+  }
+
+  public List<CouncilSummary> councilSummaries(Long periodId, List<Council> councils) {
+    if (councils.isEmpty()) return List.of();
+
+    var councilIds = councils.stream().map(council -> council.getId()).toList();
+    Map<Long, List<CouncilMember>> membersByCouncil = councilMemberRepository.findAllByCouncilIdIn(councilIds)
+        .stream().collect(Collectors.groupingBy(member -> member.getCouncil().getId()));
+    Map<Long, Long> assignedCounts = topicRepository.countByCouncilInPeriod(periodId).stream()
+        .collect(Collectors.toMap(row -> (Long) row[0], row -> (Long) row[1]));
+    Map<Long, Long> finalizedCounts = counts(
+        finalResultRepository.countByCouncilIdsAndPeriodIdAndStatus(
+            councilIds, periodId, FinalResultStatus.FINALIZED));
+
+    return councils.stream().map(council -> {
+      var members = membersByCouncil.getOrDefault(council.getId(), List.of());
+      String chairpersonName = members.stream()
+          .filter(member -> member.getMemberRole() == CouncilMemberRole.CHAIRPERSON)
+          .map(member -> member.getLecturer().getFullName()).findFirst().orElse("");
+      return new CouncilSummary(council, chairpersonName, members.size(),
+          assignedCounts.getOrDefault(council.getId(), 0L),
+          finalizedCounts.getOrDefault(council.getId(), 0L));
+    }).toList();
+  }
+
+  public Set<Long> finalizedRegistrationIds(Long periodId) {
+    return Set.copyOf(
+        finalResultRepository.findRegistrationIdsByPeriodIdAndStatus(
+            periodId, FinalResultStatus.FINALIZED));
   }
 
   public Council findCouncil(Long periodId, Long councilId) {
@@ -139,6 +215,7 @@ public class CouncilService {
     council.setName(form.getName());
     councilRepository.save(council);
     councilMemberRepository.deleteAll(members(councilId));
+    councilMemberRepository.flush();
     saveMembers(council, form, lecturers);
   }
 
@@ -162,7 +239,7 @@ public class CouncilService {
     if (topic.getCouncil() != null && !topic.getCouncil().getId().equals(councilId)) {
       throw new IllegalArgumentException("councils.error.topic-already-assigned");
     }
-    Set<Long> adviserIds = topic.getAdvisers().stream().map(User::getId).collect(java.util.stream.Collectors.toSet());
+    Set<Long> adviserIds = topic.getAdvisers().stream().map(adviser -> adviser.getId()).collect(java.util.stream.Collectors.toSet());
     if (members(councilId).stream().anyMatch(member -> adviserIds.contains(member.getLecturer().getId()))) {
       throw new IllegalArgumentException("councils.error.adviser-member-conflict");
     }
@@ -328,7 +405,7 @@ public class CouncilService {
             .anyMatch(evaluatorId -> !memberIds.contains(evaluatorId))) {
       throw new IllegalArgumentException("final-results.error.evaluations-incomplete");
     }
-    BigDecimal score = evaluations.stream().map(Evaluation::getScore).reduce(BigDecimal.ZERO, BigDecimal::add)
+    BigDecimal score = evaluations.stream().map(evaluation -> evaluation.getScore()).reduce(BigDecimal.ZERO, (left, right) -> left.add(right))
         .divide(BigDecimal.valueOf(evaluations.size()), 2, RoundingMode.HALF_UP);
     FinalResult result = finalResultRepository.findByTopicRegistrationId(registrationId).orElseGet(FinalResult::new);
     result.setTopicRegistration(registration);
@@ -351,6 +428,7 @@ public class CouncilService {
       throw new IllegalArgumentException("result-publications.error.results-incomplete");
     }
     publicationRepository.save(publication(periodId, performer, ResultPublicationAction.PUBLISHED, null));
+    eventPublisher.publishEvent(new ResultsPublishedEvent(periodId));
   }
 
   @Transactional
@@ -366,8 +444,17 @@ public class CouncilService {
 
   public FinalResult publishedResult(Long groupId) {
     TopicRegistration registration = registrationRepository.findByStudentGroupId(groupId).orElse(null);
-    if (registration == null || !publicationRepository.findFirstByRegistrationPeriodIdOrderByPerformedAtDesc(registration.getTopic().getRegistrationPeriod().getId()).map(item -> item.getAction() == ResultPublicationAction.PUBLISHED).orElse(false)) return null;
+    if (registration == null || !publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(registration.getTopic().getRegistrationPeriod().getId()).map(item -> item.getAction() == ResultPublicationAction.PUBLISHED).orElse(false)) return null;
     return finalResultRepository.findByTopicRegistrationId(registration.getId()).orElse(null);
+  }
+
+  public List<FinalResult> publishedResults(Long periodId, List<Long> groupIds) {
+    if (groupIds.isEmpty() || !isPublished(periodId)) return List.of();
+    return finalResultRepository.findAllByPeriodAndGroupIds(periodId, groupIds);
+  }
+
+  public boolean resultsPublished(Long periodId) {
+    return isPublished(periodId);
   }
 
   public List<TopicRegistration> assignedRegistrations(Long councilId) {
@@ -393,14 +480,30 @@ public class CouncilService {
 
   public List<ResultPublication> publicationHistory(Long periodId) {
     periodRepository.findById(periodId).orElseThrow();
-    return publicationRepository.findAllByRegistrationPeriodIdOrderByPerformedAtDesc(periodId);
+    return publicationRepository.findAllByRegistrationPeriodIdOrderByIdDesc(periodId);
+  }
+
+  public List<RegistrationResultSummary> resultSummaries(Long periodId) {
+    List<TopicRegistration> registrations = registrationRepository
+        .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
+    if (registrations.isEmpty()) return List.of();
+
+    List<Long> groupIds = registrations.stream()
+        .map(registration -> registration.getStudentGroup().getId())
+        .toList();
+    Map<Long, FinalResult> resultsByRegistrationId =
+        finalResultRepository.findAllByPeriodAndGroupIds(periodId, groupIds).stream()
+            .collect(Collectors.toMap(result -> result.getTopicRegistration().getId(), result -> result));
+
+    return registrations.stream()
+        .map(registration -> new RegistrationResultSummary(
+            registration, resultsByRegistrationId.get(registration.getId())))
+        .toList();
   }
 
   public boolean canPublishResults(Long periodId) {
-    List<TopicRegistration> registrations =
-        registrationRepository.findAllByRegistrationPeriodId(periodId).stream()
-            .filter(registration -> registration.getStatus() == TopicRegistrationStatus.APPROVED)
-            .toList();
+    List<TopicRegistration> registrations = registrationRepository
+        .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
     return !registrations.isEmpty()
         && registrations.stream()
             .allMatch(
@@ -412,7 +515,7 @@ public class CouncilService {
   }
 
   public ResultPublication latestPublication(Long periodId) {
-    return publicationRepository.findFirstByRegistrationPeriodIdOrderByPerformedAtDesc(periodId).orElse(null);
+    return publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(periodId).orElse(null);
   }
 
   public TopicRegistration workspaceRegistration(Long registrationId, User member) {
@@ -477,6 +580,18 @@ public class CouncilService {
         .orElse(null);
   }
 
+  public Map<Long, EvaluationStatus> evaluationStatuses(
+      List<Long> registrationIds, Long evaluatorId) {
+    if (registrationIds.isEmpty()) return Map.of();
+
+    return evaluationRepository
+        .findAllByTopicRegistrationIdInAndEvaluatorId(registrationIds, evaluatorId)
+        .stream()
+        .collect(Collectors.toMap(
+            evaluation -> evaluation.getTopicRegistration().getId(),
+            Evaluation::getStatus));
+  }
+
   public CouncilMember membership(Long councilId, Long lecturerId) {
     return members(councilId).stream()
         .filter(member -> member.getLecturer().getId().equals(lecturerId))
@@ -516,7 +631,7 @@ public class CouncilService {
     return switch (topic.getRegistrationPeriod().getPeriodType()) {
       case MON_HOC, NCKH ->
           topic.getAdvisers().stream()
-              .map(User::getId)
+              .map(member -> member.getId())
               .collect(java.util.stream.Collectors.toSet());
       case TLCN -> topic.getReviewer() == null ? Set.of() : Set.of(topic.getReviewer().getId());
       case KLTN -> {
@@ -558,8 +673,8 @@ public class CouncilService {
 
     BigDecimal score =
         evaluations.stream()
-            .map(Evaluation::getScore)
-            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .map(evaluation -> evaluation.getScore())
+            .reduce(BigDecimal.ZERO, (left, right) -> left.add(right))
             .divide(BigDecimal.valueOf(evaluations.size()), 2, RoundingMode.HALF_UP);
     FinalResult result = new FinalResult();
     result.setTopicRegistration(registration);
@@ -614,7 +729,7 @@ public class CouncilService {
   }
 
   private void validateAssignedTopicAdvisers(Long councilId, List<User> lecturers) {
-    Set<Long> lecturerIds = lecturers.stream().map(User::getId).collect(java.util.stream.Collectors.toSet());
+    Set<Long> lecturerIds = lecturers.stream().map(lecturer -> lecturer.getId()).collect(java.util.stream.Collectors.toSet());
     boolean hasConflict =
         assignedRegistrations(councilId).stream()
             .flatMap(registration -> registration.getTopic().getAdvisers().stream())
@@ -636,7 +751,7 @@ public class CouncilService {
     }
   }
 
-  private boolean isCouncilManagementOpen(RegistrationPeriod period) {
+  public boolean isCouncilManagementOpen(RegistrationPeriod period) {
     LocalDateTime registrationEnd = period.getStudentRegistrationEnd();
     LocalDateTime councilDate = period.getCouncilDate();
     LocalDateTime now = LocalDateTime.now();
@@ -649,6 +764,11 @@ public class CouncilService {
   private boolean isPublished(Long periodId) {
     ResultPublication latest = latestPublication(periodId);
     return latest != null && latest.getAction() == ResultPublicationAction.PUBLISHED;
+  }
+
+  private Map<Long, Long> counts(List<Object[]> rows) {
+    return rows.stream().collect(Collectors.toMap(
+        row -> (Long) row[0], row -> (Long) row[1]));
   }
 
   private ResultPublication publication(Long periodId, User performer, ResultPublicationAction action, String reason) {

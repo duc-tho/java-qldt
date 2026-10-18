@@ -1,0 +1,36 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <dialog th:fragment="dialog(id, content, closeLabel, boxClasses)" th:id="${id}" class="modal">
+      <div th:class="${boxClasses}">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+         <th:block th:replace="~{fragment/base/button :: dialogDismiss(${closeLabel})}"></th:block>
+      </form>
+   </dialog>
+
+   <dialog th:fragment="dialogOpen(id, content, open, closeLabel)" th:id="${id}" class="modal" th:open="${open}">
+      <div class="modal-box">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+      <form method="dialog" class="modal-backdrop">
+         <th:block th:replace="~{fragment/base/button :: dialogDismiss(${closeLabel})}"></th:block>
+      </form>
+   </dialog>
+
+   <th:block th:fragment="panel(title, icon, iconClasses, content, actions)">
+      <div class="flex items-center gap-4 px-6 py-4">
+         <span class="iconify" th:classappend="${iconClasses}"
+            th:attr="data-icon=${icon}" data-width="20" aria-hidden="true"></span>
+         <h3 class="text-lg font-semibold" th:text="${title}"></h3>
+      </div>
+      <div class="border-t border-dashed border-base-300"></div>
+      <div class="px-6 py-5">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+      <div class="border-t border-dashed border-base-300"></div>
+      <div class="flex justify-end gap-3 px-6 py-4">
+         <th:block th:replace="${actions}"></th:block>
+      </div>
+   </th:block>
+</html>

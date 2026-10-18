@@ -18,9 +18,10 @@ import com.nhom11.qldt.feature.council.service.CouncilService;
 import com.nhom11.qldt.feature.department.service.DepartmentService;
 import com.nhom11.qldt.feature.department.view.DepartmentTableDefinition;
 import com.nhom11.qldt.core.table.TableQuery;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
-import com.nhom11.qldt.feature.studentgroup.service.StudentGroupService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.group.service.StudentGroupService;
+import com.nhom11.qldt.feature.group.model.entity.StudentGroup;
 import com.nhom11.qldt.feature.topic.model.entity.Topic;
 import com.nhom11.qldt.feature.topic.service.TopicService;
 import java.util.Optional;
@@ -103,7 +104,7 @@ class DeleteFailureFeedbackTest {
   void periodDeleteReferenceFailureShowsReason() throws Exception {
     doThrow(new DataIntegrityViolationException("foreign key")).when(periodService).delete(4L);
 
-    mockMvc.perform(post("/registration-periods/4/delete").with(csrf()))
+    mockMvc.perform(post("/dot/4/xoa").with(csrf()))
         .andExpect(status().is3xxRedirection())
         .andExpect(flash().attribute("deleteError", "crud.delete.error.in-use"));
   }
@@ -114,7 +115,7 @@ class DeleteFailureFeedbackTest {
     when(topicService.findByIdAndRegistrationPeriodId(5L, 4L)).thenReturn(new Topic());
     doThrow(new DataIntegrityViolationException("foreign key")).when(topicService).delete(5L);
 
-    mockMvc.perform(post("/registration-periods/4/topics/5/delete").with(csrf()))
+    mockMvc.perform(post("/dot/4/de-tai/5/xoa").with(csrf()))
         .andExpect(status().is3xxRedirection())
         .andExpect(flash().attribute("deleteError", "crud.delete.error.in-use"));
   }
@@ -127,7 +128,7 @@ class DeleteFailureFeedbackTest {
     doThrow(new IllegalArgumentException("topics.error.proposal-owner-required"))
         .when(topicService).deleteProposal(5L, 4L, proposer);
 
-    mockMvc.perform(post("/topic-proposals/4/topics/5/delete").with(csrf()))
+    mockMvc.perform(post("/dot/4/de-tai/5/xoa").with(csrf()))
         .andExpect(status().is3xxRedirection())
         .andExpect(flash().attribute("deleteError", "topics.error.proposal-owner-required"));
   }
@@ -137,7 +138,7 @@ class DeleteFailureFeedbackTest {
     doThrow(new DataIntegrityViolationException("foreign key"))
         .when(councilService).deleteCouncil(4L, 6L);
 
-    mockMvc.perform(post("/registration-periods/4/councils/6/delete").with(csrf()))
+    mockMvc.perform(post("/dot/4/hoi-dong/6/xoa").with(csrf()))
         .andExpect(status().is3xxRedirection())
         .andExpect(flash().attribute("deleteError", "crud.delete.error.in-use"));
   }
@@ -147,10 +148,11 @@ class DeleteFailureFeedbackTest {
   void memberDeleteReferenceFailureShowsReason() throws Exception {
     User student = new User();
     when(userService.findByEmail("user")).thenReturn(Optional.of(student));
+    when(studentGroupService.findGroup(7L, 4L)).thenReturn(new StudentGroup());
     doThrow(new DataIntegrityViolationException("foreign key"))
         .when(studentGroupService).removeMember(7L, student, 8L);
 
-    mockMvc.perform(post("/registration-periods/4/student-group/7/members/8/delete").with(csrf()))
+    mockMvc.perform(post("/dot/4/nhom/7/thanh-vien/8/xoa").with(csrf()))
         .andExpect(status().is3xxRedirection())
         .andExpect(flash().attribute("deleteError", "crud.delete.error.in-use"));
   }

@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="panel">
+      <section th:replace="~{fragment/base/card :: section('card card-border border-base-300', ~{::#group-result-card})}">
+         <th:block id="group-result-card" th:fragment="group-result-card">
+            <div class="card-body flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+               <div>
+                  <p class="text-sm text-base-content/70" th:text="#{student-results.published}"></p>
+                  <h2 class="card-title text-lg font-semibold" th:text="#{student-results.title}"></h2>
+                  <p class="mt-2" th:if="${publishedResult.summaryComment != null}"
+                     th:text="${publishedResult.summaryComment}"></p>
+               </div>
+               <div>
+                  <p class="text-sm text-base-content/70" th:text="#{student-results.final-score}"></p>
+                  <p class="text-3xl font-semibold text-success" th:text="${publishedResult.finalScore}"></p>
+               </div>
+            </div>
+         </th:block>
+      </section>
+   </th:block>
+</html>

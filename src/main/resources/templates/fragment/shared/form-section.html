@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <fieldset th:fragment="fieldGrid(title, content)" class="fieldset text-sm gap-1">
+      <legend class="fieldset-legend text-xl font-semibold" th:text="${title}"></legend>
+      <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+         <th:block th:replace="${content}"></th:block>
+      </div>
+   </fieldset>
+</html>

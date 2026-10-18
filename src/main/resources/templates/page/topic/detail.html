@@ -1,0 +1,39 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions">
+         <th:block th:if="${canEditTopic}">
+            <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai/{topicId}/sua(periodId=${topic.registrationPeriod.id},topicId=${topic.id})}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
+         </th:block>
+         <th:block th:if="${isStaff and form.readonly and canManageTopic}">
+            <th:block th:replace="~{fragment/crud/delete-action :: delete(${form.actionUrl + '/xoa'}, ${form.data.title}, #{crud.action.delete})}"></th:block>
+         </th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <div th:replace="~{fragment/feature/topic/viewer-detail :: viewer-detail(${topic}, ${isStaff or showRejectionReason == true}, ~{::#topic-review-actions})}">
+            <div id="topic-review-actions"
+               th:if="${isStaff and form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}"
+               class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+               <form th:action="${form.actionUrl + '/duyet'}" method="post">
+                  <th:block th:replace="~{fragment/base/button :: submit(#{topics.action.approve}, 'bi:check-circle', 'btn btn-primary btn-sm', false)}"></th:block>
+               </form>
+               <th:block th:replace="~{fragment/base/button :: modalOpen('reject_topic', #{topics.action.reject}, 'bi:x-circle', 'btn btn-error btn-outline btn-sm')}"></th:block>
+            </div>
+         </div>
+         <th:block th:if="${isStaff}">
+         <th:block th:replace="~{fragment/feature/topic/registered-groups :: groups}"></th:block>
+         <th:block th:replace="~{fragment/feature/topic/rejection-dialog :: boundDialog('reject_topic', ${form.actionUrl + '/tu-choi'})}"></th:block>
+         </th:block>
+         <th:block th:unless="${isStaff}">
+            <div class="mt-4 flex flex-wrap justify-end gap-2" th:if="${selectionGroupId != null}">
+               <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}(periodId=${topic.registrationPeriod.id},groupId=${selectionGroupId})}, #{navigation.action.back}, 'bi:arrow-left', 'btn btn-sm btn-outline', null)}"></th:block>
+               <form th:if="${canChooseTopic == true and selectedTopicId != topic.id}" method="post"
+                  th:action="@{/dot/{periodId}/nhom/{groupId}/de-tai(periodId=${topic.registrationPeriod.id},groupId=${selectionGroupId})}">
+                  <input type="hidden" name="topicId" th:value="${topic.id}">
+                  <th:block th:replace="~{fragment/base/button :: submit(#{student-groups.action.select-topic}, null, 'btn btn-sm btn-primary', false)}"></th:block>
+               </form>
+            </div>
+         </th:block>
+      </th:block>
+   </body>
+</html>

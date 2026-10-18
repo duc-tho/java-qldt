@@ -1,0 +1,74 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="iconLabel(label, icon)">
+      <span th:if="${icon != null}" class="iconify inline" th:attr="data-icon=${icon}" data-width="16" aria-hidden="true"></span>
+      <span th:if="${label != null}" th:text="${label}"></span>
+   </th:block>
+
+   <a th:fragment="link(url, label, icon, variant)"
+      class="btn btn-sm"
+      th:classappend="${variant == 'primary'} ? ' btn-primary' : (${variant == 'outline'} ? ' btn-outline' : ' btn-ghost')"
+      th:href="${url}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </a>
+
+   <a th:fragment="linkStyled(url, label, icon, classes, title)"
+      th:class="${classes}" th:href="${url}" th:title="${title}"
+      th:aria-label="${label == null ? title : null}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </a>
+
+   <a th:fragment="linkContent(url, classes, title, content)"
+      th:href="${url}" th:class="${classes}" th:title="${title}">
+      <th:block th:replace="${content}"></th:block>
+   </a>
+
+   <button th:fragment="submit(label, icon, classes, disabled)"
+      type="submit" th:class="${classes}" th:disabled="${disabled}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="submitTo(url, label, icon, classes)"
+      type="submit" formmethod="post" th:formaction="${url}" th:class="${classes}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="submitFor(formId, label, icon, classes)"
+      type="submit" th:form="${formId}" th:class="${classes}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="submitIcon(label, icon, classes)"
+      type="submit" th:class="${classes}" th:title="${label}" th:aria-label="${label}">
+      <span class="iconify" th:attr="data-icon=${icon}" aria-hidden="true"></span>
+   </button>
+
+   <button th:fragment="submitContent(classes, content)" type="submit" th:class="${classes}">
+      <th:block th:replace="${content}"></th:block>
+   </button>
+
+   <button th:fragment="disabled(label, icon, classes, title)"
+      type="button" th:class="${classes}" disabled aria-disabled="true" th:title="${title}">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="modalOpen(id, label, icon, classes)"
+      type="button" th:class="${classes}"
+      th:attr="onclick=|document.getElementById('${id}').showModal()|">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+
+   <button th:fragment="modalClose(id, label, classes)"
+      type="button" th:class="${classes}"
+      th:attr="onclick=|document.getElementById('${id}').close()|"
+      th:text="${label}"></button>
+
+   <button th:fragment="modalRefClose(label, icon, classes)"
+      type="button" th:class="${classes}" x-on:click="$refs.dialog.close()">
+      <span th:if="${icon != null}" class="iconify inline" th:attr="data-icon=${icon}" data-width="14"></span>
+      <span th:if="${label != null}" th:text="${label}"></span>
+   </button>
+
+   <button th:fragment="dialogDismiss(label)" type="submit" th:aria-label="${label}"></button>
+
+</html>

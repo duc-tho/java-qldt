@@ -1,0 +1,37 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="form-fields">
+      <div class="flex flex-col gap-3">
+         <div th:replace="~{fragment/base/input :: field('title', #{topics.field.title}, 'text', null, ${form.readonly}, ${form.validationRules.title}, true, null)}"></div>
+         <div th:replace="~{fragment/base/select :: field('departmentId', #{topics.field.department}, ${form.readonly}, ${form.validationRules.departmentId}, true, null, ${topic == null ? null : topic.department.name}, ~{::option})}">
+               <option
+                  value=""
+                  th:text="#{topics.field.department.placeholder}"
+               ></option>
+               <option
+                  th:each="department : ${departments}"
+                  th:value="${department.id}"
+                  th:text="${department.name}"
+               ></option>
+         </div>
+         <div th:replace="~{fragment/base/textarea :: field('description', #{topics.field.description}, 6, ${form.readonly}, ${form.validationRules.description}, true, null)}"></div>
+         <div class="flex flex-col gap-1">
+             <th:block th:if="${form.readonly}">
+                <div th:replace="~{fragment/base/field-label :: label('adviserIds', #{topics.field.advisers}, false, null)}"></div>
+             </th:block>
+             <div th:if="${form.readonly}" class="flex min-h-9 select-text flex-wrap gap-2 border-l-2 border-base-300 px-3 py-1.5" data-readonly-field="adviserIds">
+                <span class="badge badge-outline" th:each="lecturer : ${selectedLecturers}"
+                   th:text="|${lecturer.fullName} (${lecturer.userCode})|"></span>
+             </div>
+             <th:block th:unless="${form.readonly}">
+                <div th:replace="~{fragment/feature/topic/adviser-picker :: picker}"></div>
+             </th:block>
+            <span
+               class="text-error text-sm mt-1 block"
+               th:if="${#fields.hasErrors('adviserIds')}"
+               th:errors="*{adviserIds}"
+            ></span>
+         </div>
+      </div>
+   </th:block>
+</html>

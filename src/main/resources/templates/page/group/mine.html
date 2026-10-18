@@ -1,0 +1,21 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="page-content">
+         <div class="space-y-10">
+            <section aria-labelledby="groups-in-progress-heading">
+               <h2 id="groups-in-progress-heading" class="mb-4 text-xl font-semibold" th:text="#{work.groups.in-progress}"></h2>
+               <th:block th:replace="~{fragment/feature/group/mine-cards :: cards(${inProgressGroups}, #{work.groups.in-progress.empty})}"></th:block>
+            </section>
+            <section aria-labelledby="groups-waiting-heading">
+               <h2 id="groups-waiting-heading" class="mb-4 text-xl font-semibold" th:text="#{work.groups.waiting}"></h2>
+               <th:block th:replace="~{fragment/feature/group/mine-cards :: cards(${waitingGroups}, #{work.groups.waiting.empty})}"></th:block>
+            </section>
+            <section aria-labelledby="groups-published-heading">
+               <h2 id="groups-published-heading" class="mb-4 text-xl font-semibold" th:text="#{work.groups.published}"></h2>
+               <th:block th:replace="~{fragment/feature/group/mine-cards :: cards(${publishedGroups}, #{work.groups.published.empty})}"></th:block>
+            </section>
+         </div>
+      </th:block>
+   </body>
+</html>

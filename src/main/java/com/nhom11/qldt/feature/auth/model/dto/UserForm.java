@@ -50,7 +50,7 @@ public class UserForm implements CrudForm<User> {
     user.setEmail(email);
     user.setPhone(phone);
     user.setFullName(fullName);
-    user.setUserCode(userCode);
+    user.setUserCode(userCode == null || userCode.isBlank() ? null : userCode);
     return user;
   }
 

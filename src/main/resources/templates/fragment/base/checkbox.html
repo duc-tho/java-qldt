@@ -1,0 +1,12 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <label th:fragment="field(name, value, label, disabled)"
+      class="label cursor-pointer justify-start gap-2 text-sm font-medium text-base-content">
+      <input type="checkbox" class="checkbox"
+         th:field="*{__${name}__}" th:value="${value}" th:disabled="${disabled}">
+      <span th:text="${label}"></span>
+   </label>
+
+   <input th:fragment="named(name, value, checked, disabled)" type="checkbox" class="checkbox"
+      th:name="${name}" th:value="${value}" th:checked="${checked}" th:disabled="${disabled}">
+</html>

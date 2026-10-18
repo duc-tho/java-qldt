@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="row(initial, name, subtitle, avatarSize, classes, trailing)"
+      th:class="|flex min-w-0 items-center gap-3 ${classes}|">
+      <div th:replace="~{fragment/base/avatar :: initial(${initial}, ${avatarSize}, 'shrink-0')}"></div>
+      <div class="min-w-0 flex-1">
+         <p class="truncate font-medium" th:text="${name}"></p>
+         <p class="text-sm text-base-content/70" th:text="${subtitle}"></p>
+      </div>
+      <th:block th:if="${trailing != null}">
+         <th:block th:replace="${trailing}"></th:block>
+      </th:block>
+   </div>
+</html>

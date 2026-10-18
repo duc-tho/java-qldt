@@ -1,0 +1,32 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="overview">
+<div th:replace="~{fragment/base/card :: container('card card-border border-base-300', ~{::#evaluation-detail-card})}">
+               <th:block id="evaluation-detail-card" th:fragment="evaluation-detail-card">
+               <div class="card-body gap-3">
+                  <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-start">
+                     <div>
+                        <p
+                           class="text-sm text-base-content/70"
+                           th:text="${registration.topic.registrationPeriod.name}"
+                        ></p>
+                        <h2 class="card-title text-lg font-semibold" th:text="${registration.topic.title}"></h2>
+                        <a class="link link-primary" th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${registration.studentGroup.registrationPeriod.id},groupId=${registration.studentGroup.id})}" th:text="${registration.studentGroup.name}"></a>
+                     </div>
+                     <span
+                        class="badge badge-success badge-soft"
+                        th:if="${currentReport != null}"
+                        th:text="#{report-submissions.status.SUBMITTED}"
+                     ></span>
+                  </div>
+                  <th:block th:if="${currentReport == null}"><th:block th:replace="~{fragment/base/alert :: iconText('alert alert-warning alert-soft', 'alert', #{evaluations.error.report-required}, 'bi:file-earmark-x')}" ></th:block></th:block>
+                  <div class="flex flex-wrap gap-2" th:if="${currentReport != null}">
+                     <th:block th:each="file : ${reportFiles}">
+                        <th:block th:replace="~{fragment/feature/report/files :: button(${file}, ${registration.topic.registrationPeriod.id}, ${registration.studentGroup.id}, #{report-submissions.action.download(${file.originalName})}, 'bi:download')}"></th:block>
+                     </th:block>
+                  </div>
+               </div>
+               </th:block>
+            </div>
+   </th:block>
+</html>

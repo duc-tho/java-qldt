@@ -1,0 +1,46 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <input th:fragment="query(name, value, placeholder, type, classes)" th:name="${name}"
+      th:value="${value}" th:placeholder="${placeholder}" th:type="${type}" th:class="${classes}">
+
+   <input th:fragment="bound(name, type, classes, placeholder, required, maxLength)"
+      th:field="*{__${name}__}" th:type="${type}" th:class="${classes}" th:placeholder="${placeholder}"
+      th:required="${required}" th:maxlength="${maxLength}"
+      th:classappend="${#fields.hasErrors(name)} ? ' input-error'">
+
+   <input th:fragment="validatedBound(name, id, type, required, validationRule)"
+      th:id="${id}" th:type="${type}" class="input w-full" th:required="${required}"
+      th:field="*{__${name}__}" th:attr="validate-data=${validationRule}">
+
+   <input th:fragment="validatedMatch(name, id, target, validationRule, mismatchMessage)"
+      th:id="${id}" type="password" class="input w-full" required
+      th:field="*{__${name}__}" th:attr="validate-data=${validationRule},
+      data-validate-match=${target}, data-validate-match-message=${mismatchMessage}">
+
+   <input th:fragment="validatedNamed(id, type, name, placeholder, value, validationRule, required)"
+      th:id="${id}" th:type="${type}" th:name="${name}" class="input w-full"
+      th:required="${required}" th:classappend="${#fields.hasErrors(name)} ? ' input-error'"
+      th:placeholder="${placeholder}" th:value="${value}" th:attr="validate-data=${validationRule}">
+
+   <input th:fragment="datePicker(name, validationRule, required, effect, requiredWhenField, requiredWhenValues, requiredWhenMessage)" type="text" readonly
+      data-date-picker data-date-picker-mode="edit" placeholder="dd/MM/yyyy HH:mm"
+      th:field="*{__${name}__}" class="input w-full"
+      th:required="${required}" th:classappend="${#fields.hasErrors(name)} ? ' input-error'"
+      th:attr="validate-data=${validationRule}, x-effect=${effect},
+      data-validate-required-when-field=${requiredWhenField},
+      data-validate-required-when-values=${requiredWhenValues},
+      data-validate-required-when-message=${requiredWhenMessage}">
+
+   <div th:fragment="field(name, label, type, placeholder, readonly, validationRule, required, helpText)"
+      th:replace="~{fragment/base/field-shell :: field(${name}, ${label}, ${required}, ${helpText}, ${readonly}, ~{::field-content})}">
+      <th:block th:fragment="field-content">
+         <input th:unless="${readonly}" class="input w-full" th:field="*{__${name}__}" th:type="${type}"
+            th:placeholder="${placeholder}" th:required="${required}"
+            th:classappend="${#fields.hasErrors(name)} ? ' input-error'"
+            th:attr="validate-data=${validationRule}">
+         <th:block th:if="${readonly}" th:with="value=*{__${name}__}">
+            <th:block th:replace="~{fragment/base/readonly-value :: value(${name}, ${value})}"></th:block>
+         </th:block>
+      </th:block>
+   </div>
+</html>

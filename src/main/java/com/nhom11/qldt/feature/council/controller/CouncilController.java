@@ -6,9 +6,9 @@ import com.nhom11.qldt.feature.council.model.dto.CouncilForm;
 import com.nhom11.qldt.feature.council.model.dto.CouncilLecturerOption;
 import com.nhom11.qldt.feature.council.model.entity.Council;
 import com.nhom11.qldt.feature.council.service.CouncilService;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
-import com.nhom11.qldt.feature.registrationperiod.model.enums.PeriodType;
-import com.nhom11.qldt.feature.registrationperiod.service.RegistrationPeriodService;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.model.enums.PeriodType;
+import com.nhom11.qldt.feature.period.service.RegistrationPeriodService;
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -26,7 +26,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
-@RequestMapping("/registration-periods/{periodId}/councils")
+@RequestMapping("/dot/{periodId}/hoi-dong")
 public class CouncilController {
   private final CouncilService councilService;
   private final RegistrationPeriodService periodService;
@@ -41,7 +41,7 @@ public class CouncilController {
   @GetMapping
   public String list(@PathVariable Long periodId, Model model) {
     RegistrationPeriod period = periodService.findById(periodId);
-    if (!isCouncilPeriod(period)) return "redirect:/registration-periods";
+    if (!isCouncilPeriod(period)) return "redirect:/dot";
 
     model.addAttribute("period", period);
     List<Council> councils = councilService.councils(periodId);
@@ -51,38 +51,39 @@ public class CouncilController {
         councils.stream()
             .collect(
                 java.util.stream.Collectors.toMap(
-                    Council::getId, council -> councilService.members(council.getId()).size())));
+                    council -> council.getId(),
+                    council -> councilService.members(council.getId()).size())));
     model.addAttribute(
         "assignedCounts",
         councils.stream()
             .collect(
                 java.util.stream.Collectors.toMap(
-                    Council::getId,
+                    council -> council.getId(),
                     council -> councilService.assignedRegistrations(council.getId()).size())));
     model.addAttribute("managementOpen", councilService.isCouncilManagementOpen(periodId));
     model.addAttribute("pageTitle", "councils.page.list.title");
     model.addAttribute("pageIcon", "bi:people-fill");
-    return "fragment/page/council/list";
+    return "page/council/list";
   }
 
-  @GetMapping("/new")
+  @GetMapping("/tao")
   public String createForm(@PathVariable Long periodId, Model model) {
     if (!isCouncilPeriod(periodService.findById(periodId))) {
-      return "redirect:/registration-periods";
+      return "redirect:/dot";
     }
     if (!councilService.isCouncilManagementOpen(periodId)) {
-      return "redirect:/registration-periods/" + periodId + "/councils";
+      return "redirect:/dot/" + periodId + "/hoi-dong";
     }
     prepareForm(
         periodId,
         model,
         new CouncilForm(),
-        "/registration-periods/" + periodId + "/councils",
+        "/dot/" + periodId + "/hoi-dong",
         "councils.page.create.title");
-    return "fragment/page/council/create";
+    return "page/council/create";
   }
 
-  @GetMapping("/lecturers")
+  @GetMapping("/giang-vien")
   @ResponseBody
   public List<CouncilLecturerOption> lecturers(
       @PathVariable Long periodId, @RequestParam(required = false) String search) {
@@ -99,32 +100,32 @@ public class CouncilController {
       @Valid @ModelAttribute("data") CouncilForm form,
       BindingResult errors,
       Model model) {
-    String action = "/registration-periods/" + periodId + "/councils";
+    String action = "/dot/" + periodId + "/hoi-dong";
     if (!isCouncilPeriod(periodService.findById(periodId))) {
-      return "redirect:/registration-periods";
+      return "redirect:/dot";
     }
     if (errors.hasErrors()) {
       prepareForm(periodId, model, form, action, "councils.page.create.title");
-      return "fragment/page/council/create";
+      return "page/council/create";
     }
     try {
       councilService.createCouncil(periodId, user(principal), form);
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
       prepareForm(periodId, model, form, action, "councils.page.create.title");
-      return "fragment/page/council/create";
+      return "page/council/create";
     }
-    return "redirect:/registration-periods/" + periodId + "/councils";
+    return "redirect:/dot/" + periodId + "/hoi-dong";
   }
 
-  @GetMapping("/{councilId}/edit")
+  @GetMapping("/{councilId}/sua")
   public String edit(@PathVariable Long periodId, @PathVariable Long councilId, Model model) {
     Council council = councilService.findCouncil(periodId, councilId);
     if (council == null) {
-      return "redirect:/registration-periods/" + periodId + "/councils";
+      return "redirect:/dot/" + periodId + "/hoi-dong";
     }
     if (!councilService.isCouncilManagementOpen(periodId)) {
-      return "redirect:/registration-periods/" + periodId + "/councils/" + councilId;
+      return "redirect:/dot/" + periodId + "/hoi-dong/" + councilId;
     }
     CouncilForm form = new CouncilForm();
     form.setName(council.getName());
@@ -138,9 +139,9 @@ public class CouncilController {
         periodId,
         model,
         form,
-        "/registration-periods/" + periodId + "/councils/" + councilId,
+        "/dot/" + periodId + "/hoi-dong/" + councilId,
         "councils.page.edit.title");
-    return "fragment/page/council/create";
+    return "page/council/create";
   }
 
   @PostMapping("/{councilId}")
@@ -152,27 +153,27 @@ public class CouncilController {
       Model model) {
     Council council = councilService.findCouncil(periodId, councilId);
     if (council == null)
-      return "redirect:/registration-periods/" + periodId + "/councils";
-    String action = "/registration-periods/" + periodId + "/councils/" + councilId;
+      return "redirect:/dot/" + periodId + "/hoi-dong";
+    String action = "/dot/" + periodId + "/hoi-dong/" + councilId;
     if (errors.hasErrors()) {
       prepareForm(periodId, model, form, action, "councils.page.edit.title");
-      return "fragment/page/council/create";
+      return "page/council/create";
     }
     try {
       councilService.updateCouncil(periodId, councilId, form);
     } catch (IllegalArgumentException exception) {
       errors.reject(exception.getMessage());
       prepareForm(periodId, model, form, action, "councils.page.edit.title");
-      return "fragment/page/council/create";
+      return "page/council/create";
     }
-    return "redirect:/registration-periods/" + periodId + "/councils/" + councilId;
+    return "redirect:/dot/" + periodId + "/hoi-dong/" + councilId;
   }
 
   @GetMapping("/{councilId}")
   public String detail(@PathVariable Long periodId, @PathVariable Long councilId, Model model) {
     Council council = councilService.findCouncil(periodId, councilId);
     if (council == null)
-      return "redirect:/registration-periods/" + periodId + "/councils";
+      return "redirect:/dot/" + periodId + "/hoi-dong";
     model.addAttribute("council", council);
     model.addAttribute("members", councilService.members(councilId));
     model.addAttribute("eligibleRegistrations", councilService.eligibleUnassignedRegistrations(councilId));
@@ -180,10 +181,10 @@ public class CouncilController {
     model.addAttribute("managementOpen", councilService.isCouncilManagementOpen(periodId));
     model.addAttribute("pageTitle", "councils.page.detail.title");
     model.addAttribute("pageIcon", "bi:people-fill");
-    return "fragment/page/council/detail";
+    return "page/council/detail";
   }
 
-  @PostMapping("/{councilId}/topics/{topicId}")
+  @PostMapping("/{councilId}/de-tai/{topicId}")
   public String assignTopic(
       @PathVariable Long periodId,
       @PathVariable Long councilId,
@@ -194,10 +195,10 @@ public class CouncilController {
     } catch (IllegalArgumentException exception) {
       attributes.addFlashAttribute("error", exception.getMessage());
     }
-    return "redirect:/registration-periods/" + periodId + "/councils/" + councilId;
+    return "redirect:/dot/" + periodId + "/hoi-dong/" + councilId;
   }
 
-  @PostMapping("/{councilId}/topics/{topicId}/unassign")
+  @PostMapping("/{councilId}/de-tai/{topicId}/bo-phan-cong")
   public String unassignTopic(
       @PathVariable Long periodId,
       @PathVariable Long councilId,
@@ -208,10 +209,10 @@ public class CouncilController {
     } catch (IllegalArgumentException exception) {
       attributes.addFlashAttribute("error", exception.getMessage());
     }
-    return "redirect:/registration-periods/" + periodId + "/councils/" + councilId;
+    return "redirect:/dot/" + periodId + "/hoi-dong/" + councilId;
   }
 
-  @PostMapping("/{councilId}/delete")
+  @PostMapping("/{councilId}/xoa")
   public String delete(@PathVariable Long periodId, @PathVariable Long councilId, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
     try {
       councilService.deleteCouncil(periodId, councilId);
@@ -220,7 +221,7 @@ public class CouncilController {
     } catch (DataIntegrityViolationException exception) {
       attributes.addFlashAttribute("deleteError", "crud.delete.error.in-use");
     }
-    return "redirect:/registration-periods/" + periodId + "/councils";
+    return "redirect:/dot/" + periodId + "/hoi-dong";
   }
 
   private void prepareForm(

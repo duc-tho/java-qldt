@@ -1,0 +1,60 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="form-fields">
+      <div
+         class="flex flex-col gap-6"
+         x-data="{ periodType: '' }"
+         th:attr="data-period-type=${data.periodType}"
+         x-init="periodType = $el.dataset.periodType || ''"
+      >
+         <fieldset class="fieldset text-sm gap-1">
+            <legend class="fieldset-legend text-xl font-semibold">
+               <span th:text="#{registration-periods.section.general}"></span>
+               <span class="tooltip tooltip-right ml-1" tabindex="0" th:attr="data-tip=#{registration-periods.help.stages}" th:aria-label="#{registration-periods.help.stages}">
+                  <span class="iconify text-primary" data-icon="bi:exclamation-circle"></span>
+               </span>
+            </legend>
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+               <div th:replace="~{fragment/base/input :: field('name', #{registration-periods.field.name}, 'text', #{registration-periods.placeholder.name}, ${form.readonly}, ${form.validationRules.name}, true, null)}"></div>
+               <div class="flex flex-col gap-1">
+                  <div th:replace="~{fragment/base/field-label :: label('periodType', #{registration-periods.field.type}, ${!form.readonly}, null)}"></div>
+                  <th:block th:unless="${form.readonly}">
+                  <select th:replace="~{fragment/base/select :: boundAlpine('periodType', 'select w-full', true, 'periodType', ${form.validationRules.periodType}, ~{::#period-type-options})}">
+                     <th:block id="period-type-options" th:fragment="period-type-options">
+                     <option value="" th:text="#{registration-periods.placeholder.type}"></option>
+                     <option
+                        th:each="type : ${periodTypes}"
+                        th:value="${type}"
+                        th:text="#{period-types.__${type.name()}__}"
+                     ></option>
+                     </th:block>
+                  </select>
+                  </th:block>
+                  <th:block th:if="${form.readonly}">
+                     <th:block th:replace="~{fragment/base/readonly-value :: value('periodType', ${data.periodType == null ? '' : #messages.msg('period-types.' + data.periodType.name())})}"></th:block>
+                  </th:block>
+                  <div th:unless="${form.readonly}" id="periodType-error">
+                     <span
+                        class="text-error text-sm mt-1 block"
+                        th:if="${#fields.hasErrors('periodType')}"
+                        th:errors="*{periodType}"
+                     ></span>
+                  </div>
+               </div>
+            </div>
+         </fieldset>
+         <fieldset th:replace="~{fragment/shared/form-section :: fieldGrid(#{registration-periods.section.registration-and-publication}, ~{::registration-date-fields})}">
+            <th:block th:fragment="registration-date-fields"
+               th:each="field : ${ {'lecturerRegistrationStart', 'lecturerRegistrationEnd', 'studentRegistrationStart', 'studentRegistrationEnd'} }">
+               <div th:replace="~{fragment/feature/period/date-field :: field(${field}, ${form.readonly}, ${form.validationRules.get(field)})}"></div>
+            </th:block>
+         </fieldset>
+         <fieldset th:replace="~{fragment/shared/form-section :: fieldGrid(#{registration-periods.section.evaluation}, ~{::evaluation-date-fields})}">
+            <th:block th:fragment="evaluation-date-fields"
+               th:each="field : ${ {'reportDeadline', 'reviewerDeadline', 'councilDate'} }">
+               <div th:replace="~{fragment/feature/period/date-field :: field(${field}, ${form.readonly}, ${form.validationRules.get(field)})}"></div>
+            </th:block>
+         </fieldset>
+      </div>
+   </th:block>
+</html>

@@ -41,8 +41,28 @@ public class UserService extends BaseCrudService<User, Long> {
     return userRepository.findByEmail(email);
   }
 
+  public boolean existsByEmail(String email) {
+    return userRepository.existsByEmail(email);
+  }
+
+  public boolean existsByEmailAndIdNot(String email, Long id) {
+    return userRepository.existsByEmailAndIdNot(email, id);
+  }
+
+  public boolean existsByUserCode(String userCode) {
+    return userRepository.existsByUserCode(userCode);
+  }
+
+  public boolean existsByUserCodeAndIdNot(String userCode, Long id) {
+    return userRepository.existsByUserCodeAndIdNot(userCode, id);
+  }
+
   public List<User> findAllLecturers() {
     return userRepository.findAllLecturers();
+  }
+
+  public List<User> findAllLecturersByIds(Set<Long> ids) {
+    return ids.isEmpty() ? List.of() : userRepository.findAllLecturersByIdIn(ids);
   }
 
   public List<User> searchLecturers(String search) {
@@ -81,7 +101,6 @@ public class UserService extends BaseCrudService<User, Long> {
   @Transactional
   public User updateAccount(Long id, AccountForm form) {
     User user = userRepository.findById(id).orElseThrow();
-    user.setEmail(form.getEmail());
     user.setPhone(form.getPhone());
     user.setFullName(form.getFullName());
 
@@ -106,7 +125,7 @@ public class UserService extends BaseCrudService<User, Long> {
       throw new IllegalArgumentException("users.validation.roles.invalid");
     }
 
-    Set<String> roleNames = roles.stream().map(Role::getName).collect(Collectors.toSet());
+    Set<String> roleNames = roles.stream().map(role -> role.getName()).collect(Collectors.toSet());
     boolean validPair =
         roles.size() == 2
             && roleNames.contains("ADMIN")

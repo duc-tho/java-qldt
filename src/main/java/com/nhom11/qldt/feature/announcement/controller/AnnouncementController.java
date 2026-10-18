@@ -10,7 +10,11 @@ import com.nhom11.qldt.feature.announcement.service.AnnouncementService;
 import com.nhom11.qldt.feature.announcement.view.AnnouncementTableDefinition;
 import com.nhom11.qldt.feature.auth.repository.RoleRepository;
 import jakarta.validation.Valid;
+import java.util.Set;
+import java.util.stream.Collectors;
 import org.springframework.data.domain.Page;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -19,9 +23,10 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.server.ResponseStatusException;
 
 @Controller
-@RequestMapping("/announcements")
+@RequestMapping("/thong-bao")
 public class AnnouncementController {
   private final AnnouncementService service;
   private final AnnouncementTableDefinition table;
@@ -43,22 +48,29 @@ public class AnnouncementController {
   }
 
   @GetMapping
-  public String list(@ModelAttribute TableQuery query, Model model) {
-    Page<Announcement> data = service.findAll(query, table);
-
-    view.table(model, data, "/announcements", query, table);
-
+  public String list(@ModelAttribute TableQuery query, Authentication authentication, Model model) {
+    boolean staff = isStaff(authentication);
     model.addAttribute("pageTitle", "announcements.page.list.title");
     model.addAttribute("pageIcon", "bi:megaphone");
+    model.addAttribute("isStaff", staff);
 
-    return "fragment/page/announcement/list";
+    if (!staff) {
+      model.addAttribute("announcements", service.findPublishedForRoles(roleNames(authentication)));
+      return "page/announcement/list";
+    }
+
+    Page<Announcement> data = service.findAll(query, table);
+
+    view.table(model, data, "/thong-bao", query, table);
+
+    return "page/announcement/list";
   }
 
   @GetMapping("/new")
   public String createForm(Model model) {
-    form(model, new AnnouncementForm(), "/announcements", false, "announcements.page.create.title");
+    form(model, new AnnouncementForm(), "/thong-bao", false, "announcements.page.create.title");
 
-    return "fragment/page/announcement/create";
+    return "page/announcement/create";
   }
 
   @PostMapping
@@ -67,30 +79,43 @@ public class AnnouncementController {
     validateAudience(form, errors);
 
     if (errors.hasErrors()) {
-      form(model, form, "/announcements", false, "announcements.page.create.title");
+      form(model, form, "/thong-bao", false, "announcements.page.create.title");
 
-      return "fragment/page/announcement/create";
+      return "page/announcement/create";
     }
 
     service.create(form.toEntity(), form.getRoleIds());
 
-    return "redirect:/announcements";
+    return "redirect:/thong-bao";
   }
 
   @GetMapping("/{id}")
-  public String detail(@PathVariable Long id, Model model) {
-    Announcement item = service.findById(id);
+  public String detail(@PathVariable Long id, Authentication authentication, Model model) {
+    boolean staff = isStaff(authentication);
+    Announcement item = staff
+        ? service.findById(id)
+        : service.findPublishedByIdForRoles(id, roleNames(authentication));
 
-    if (item == null) return "redirect:/announcements";
+    if (item == null) {
+      if (!staff) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+      return "redirect:/thong-bao";
+    }
+
+    if (!staff) {
+      model.addAttribute("announcement", item);
+      model.addAttribute("pageTitle", "announcements.page.detail.title");
+      model.addAttribute("pageIcon", "bi:megaphone");
+      return "page/announcement/read-detail";
+    }
 
     AnnouncementForm form = new AnnouncementForm();
     form.fromEntity(item);
 
-    form(model, form, "/announcements/" + id, true, "announcements.page.detail.title");
+    form(model, form, "/thong-bao/" + id, true, "announcements.page.detail.title");
 
     model.addAttribute("canEdit", item.getStatus() == AnnouncementStatus.PUBLISHED);
 
-    return "fragment/page/announcement/detail";
+    return "page/announcement/detail";
   }
 
   @GetMapping("/{id}/edit")
@@ -98,13 +123,13 @@ public class AnnouncementController {
     Announcement item = service.findById(id);
 
     if (item == null || item.getStatus() == AnnouncementStatus.WITHDRAWN)
-      return "redirect:/announcements";
+      return "redirect:/thong-bao";
 
     AnnouncementForm form = new AnnouncementForm();
     form.fromEntity(item);
-    form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
+    form(model, form, "/thong-bao/" + id, false, "announcements.page.edit.title");
 
-    return "fragment/page/announcement/detail";
+    return "page/announcement/detail";
   }
 
   @PostMapping("/{id}")
@@ -115,25 +140,25 @@ public class AnnouncementController {
       Model model) {
     Announcement existing = service.findById(id);
     if (existing == null || existing.getStatus() == AnnouncementStatus.WITHDRAWN) {
-      return "redirect:/announcements";
+      return "redirect:/thong-bao";
     }
 
     validateAudience(form, errors);
 
     if (errors.hasErrors()) {
-      form(model, form, "/announcements/" + id, false, "announcements.page.edit.title");
-      return "fragment/page/announcement/detail";
+      form(model, form, "/thong-bao/" + id, false, "announcements.page.edit.title");
+      return "page/announcement/detail";
     }
     Announcement item = form.toEntity();
     item.setId(id);
     service.update(item, form.getRoleIds());
-    return "redirect:/announcements/" + id;
+    return "redirect:/thong-bao/" + id;
   }
 
   @PostMapping("/{id}/withdraw")
   public String withdraw(@PathVariable Long id) {
     service.withdraw(id);
-    return "redirect:/announcements";
+    return "redirect:/thong-bao";
   }
 
   private void validateAudience(AnnouncementForm form, BindingResult errors) {
@@ -149,13 +174,27 @@ public class AnnouncementController {
         data,
         action,
         "post",
-        "/announcements",
+        "/thong-bao",
         readonly,
-        "fragment/page/announcement/fields",
+        "fragment/feature/announcement/fields",
         validation.render(AnnouncementForm.class));
 
     model.addAttribute("roles", roles.findAll());
     model.addAttribute("pageTitle", pageTitle);
     model.addAttribute("pageIcon", "bi:megaphone");
+  }
+
+  private boolean isStaff(Authentication authentication) {
+    return authentication.getAuthorities().stream().anyMatch(authority ->
+        authority.getAuthority().equals("ROLE_ADMIN")
+            || authority.getAuthority().equals("ROLE_HEAD_OF_FACULTY"));
+  }
+
+  private Set<String> roleNames(Authentication authentication) {
+    return authentication.getAuthorities().stream()
+        .map(authority -> authority.getAuthority())
+        .filter(authority -> authority.startsWith("ROLE_"))
+        .map(authority -> authority.substring("ROLE_".length()))
+        .collect(Collectors.toSet());
   }
 }

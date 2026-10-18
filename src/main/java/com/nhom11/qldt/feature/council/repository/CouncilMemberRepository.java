@@ -10,5 +10,8 @@ public interface CouncilMemberRepository extends BaseRepository<CouncilMember, L
   @Query("select member from CouncilMember member join fetch member.lecturer where member.council.id = :councilId")
   List<CouncilMember> findAllByCouncilId(@Param("councilId") Long councilId);
 
+  @Query("select member from CouncilMember member join fetch member.lecturer where member.council.id in :councilIds")
+  List<CouncilMember> findAllByCouncilIdIn(@Param("councilIds") List<Long> councilIds);
+
   boolean existsByCouncilIdAndLecturerId(Long councilId, Long lecturerId);
 }

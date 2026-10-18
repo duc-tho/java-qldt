@@ -27,14 +27,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/users")
+@RequestMapping("/nguoi-dung")
 public class UserController {
 
-  private static final String BASE_URL = "/users";
-  private static final String TEMPLATE_USER_FIELDS = "fragment/page/user/fields";
-  private static final String VIEW_USER_LIST = "fragment/page/user/list";
-  private static final String VIEW_USER_DETAIL = "fragment/page/user/detail";
-  private static final String VIEW_USER_CREATE = "fragment/page/user/create";
+  private static final String BASE_URL = "/nguoi-dung";
+  private static final String TEMPLATE_USER_FIELDS = "fragment/feature/user/fields";
+  private static final String VIEW_USER_LIST = "page/user/list";
+  private static final String VIEW_USER_DETAIL = "page/user/detail";
+  private static final String VIEW_USER_CREATE = "page/user/create";
   private static final String FORM_METHOD_POST = "post";
   private static final int FORCE_DELETE_PERMANENTLY = 1;
 
@@ -112,6 +112,8 @@ public class UserController {
           messageSource.getMessage(
               "users.validation.password.required", null, LocaleContextHolder.getLocale()));
     }
+
+    validateUniqueFields(form, null, bindingResult);
 
     if (!bindingResult.hasErrors()) {
       try {
@@ -214,6 +216,9 @@ public class UserController {
       return "redirect:" + BASE_URL;
     }
 
+    form.setId(id);
+    validateUniqueFields(form, id, bindingResult);
+
     if (!bindingResult.hasErrors()) {
       User updates = form.toEntity();
       updates.setId(id);
@@ -275,5 +280,31 @@ public class UserController {
   @ModelAttribute
   public void selectionData(Model model) {
     model.addAttribute("roles", roleRepository.findAll());
+  }
+
+  private void validateUniqueFields(UserForm form, Long excludedId, BindingResult bindingResult) {
+    if (!bindingResult.hasFieldErrors("email")) {
+      boolean emailExists =
+          excludedId == null
+              ? userService.existsByEmail(form.getEmail())
+              : userService.existsByEmailAndIdNot(form.getEmail(), excludedId);
+      if (emailExists) {
+        bindingResult.rejectValue("email", "users.validation.email.duplicate");
+      }
+    }
+
+    if (form.getUserCode() == null
+        || form.getUserCode().isBlank()
+        || bindingResult.hasFieldErrors("userCode")) {
+      return;
+    }
+
+    boolean userCodeExists =
+        excludedId == null
+            ? userService.existsByUserCode(form.getUserCode())
+            : userService.existsByUserCodeAndIdNot(form.getUserCode(), excludedId);
+    if (userCodeExists) {
+      bindingResult.rejectValue("userCode", "users.validation.user_code.duplicate");
+    }
   }
 }

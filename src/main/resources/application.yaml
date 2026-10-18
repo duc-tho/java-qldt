@@ -1,16 +1,31 @@
 spring:
   profiles:
-    active: ${PROFILES_ACTIVE:dev-win}
+    active: ${PROFILES_ACTIVE:dev}
   application:
     name: qldt
   messages:
     basename: i18n/messages
     encoding: UTF-8
+  mail:
+    host: ${MAIL_HOST:smtp.gmail.com}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    from-address: ${MAIL_FROM_ADDRESS:info@qldt.local}
+    from-name: ${MAIL_FROM_NAME:Hệ thống QLĐT thông báo}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
   servlet:
     multipart:
       max-file-size: 50MB
       max-request-size: 500MB
 
 qldt:
+  dashboard:
+    announcement-limit: 8
   report-storage:
     root: ${REPORT_STORAGE_ROOT:./local-report-storage}

@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <th:block th:fragment="delete(url, name, label)">
+      <th:block th:replace="~{fragment/crud/delete-action :: deleteStyled(${url}, ${name}, ${label}, 'btn btn-error btn-outline btn-sm', 'bi:trash')}"></th:block>
+   </th:block>
+
+   <button th:fragment="deleteStyled(url, name, label, classes, icon)"
+      type="button" th:class="${classes}"
+      x-data
+      th:attr="data-delete-url=${url}, data-delete-name=${name}"
+      x-on:click="$dispatch('crud-delete-request', { url: $el.dataset.deleteUrl, name: $el.dataset.deleteName })">
+      <th:block th:insert="~{fragment/base/button :: iconLabel(${label}, ${icon})}"></th:block>
+   </button>
+</html>

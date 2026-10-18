@@ -1,289 +1,42 @@
-<ul th:fragment="sidebar-menu" class="menu w-full grow">
-   <li
-      sec:authorize="hasRole('ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title is-drawer-close:hidden"
-   >
-      <span th:text="#{navigation.group.overview}"></span>
+<ul th:fragment="sidebar-menu" class="menu w-full grow" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+   <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.overview}, 'menu-title pointer-events-none h-9')}"></li>
+   <li>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/', #{navigation.item.home}, 'bi:house', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${currentPath == '/'}, #{navigation.item.home})}"></th:block>
    </li>
-   <li
-      sec:authorize="hasRole('ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.home}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:house"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.home}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
-   >
-      <span th:text="#{navigation.group.topic-management}"></span>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <details
-         th:open="${#strings.startsWith(currentPath, '/registration-periods')}"
-      >
-         <summary
-            class="flex btn btn-ghost text-left justify-start items-center"
-         >
-            <span
-               class="iconify block shrink-0"
-               data-icon="bi:folder2-open"
-               data-width="18"
-            ></span>
-            <span
-               class="is-drawer-close:hidden"
-               th:text="#{navigation.group.topic-management}"
-            ></span>
-         </summary>
-         <ul>
-            <li>
-               <a
-                  href="/registration-periods"
-                  th:classappend="${currentPath == '/registration-periods'} ? ' menu-active'"
-                  ><span
-                     th:text="#{navigation.item.registration-periods}"
-                  ></span
-               ></a>
-            </li>
-            <li>
-               <a
-                  href="/registration-periods/topics"
-                  th:classappend="${#strings.contains(currentPath, '/topics')} ? ' menu-active'"
-                  ><span th:text="#{navigation.item.topics}"></span
-               ></a>
-            </li>
-            <li>
-               <a
-                  href="/registration-periods/groups"
-                  th:classappend="${#strings.contains(currentPath, '/groups')} ? ' menu-active'"
-                  ><span th:text="#{navigation.item.groups}"></span
-               ></a>
-            </li>
-         </ul>
-      </details>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
-   >
-      <span th:text="#{navigation.group.lecturer}"></span>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/registration-periods"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         th:classappend="${#strings.startsWith(currentPath, '/registration-periods')} ? ' menu-active'"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:calendar-range"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.registration-periods}"
-         ></span>
-      </a>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/topic-registrations"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:journal-check"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.topic-registrations}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/council-workspace"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         th:classappend="${#strings.startsWith(currentPath, '/council-workspace')} ? ' menu-active'"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:clipboard2-check"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.council-workspace}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('LECTURER')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/topic-proposals"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:journal-plus"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.topic-proposals}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasRole('STUDENT')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
-   >
-      <span th:text="#{navigation.group.student}"></span>
-   </li>
-   <li
-      sec:authorize="hasRole('STUDENT')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/student-groups"
-         class="flex btn btn-ghost text-left justify-start items-center"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:people"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.student-groups}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/departments"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.departments}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:diagram-3"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.departments}"
-         ></span
-      ></a>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-      class="menu-title mt-4 is-drawer-close:hidden"
-   >
-      <span th:text="#{navigation.group.information}"></span>
-   </li>
-   <li
-      sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/announcements"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.announcements}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:megaphone"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.announcements}"
-         ></span
-      ></a>
-   </li>
-   <li class="menu-title mt-4 is-drawer-close:hidden">
-      <span th:text="#{navigation.group.system}"></span>
+   <li sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')">
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/bo-mon', #{navigation.item.departments}, 'bi:diagram-3', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/bo-mon')}, #{navigation.item.departments})}"></th:block>
    </li>
    <li>
-      <a
-         href="/account"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.account}"
-      >
-         <span
-            class="iconify block shrink-0"
-            data-icon="bi:person-circle"
-            data-width="18"
-         ></span>
-         <span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.account}"
-         ></span>
-      </a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/dot', #{navigation.item.registration-periods}, 'bi:calendar-range', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/dot')}, #{navigation.item.registration-periods})}"></th:block>
    </li>
+
+   <th:block sec:authorize="hasRole('HEAD_OF_FACULTY')">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.topic-management}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/phe-duyet-de-tai', #{work.topic-approval.title}, 'bi:journal-check', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/phe-duyet-de-tai' or #strings.contains(currentPath, '/de-tai')}, null)}"></th:block></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/hoi-dong', #{work.council.title}, 'bi:people-fill', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/hoi-dong' or #strings.contains(currentPath, '/hoi-dong')}, null)}"></th:block></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/cong-bo-diem', #{work.publication.title}, 'bi:award', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/cong-bo-diem' or #strings.contains(currentPath, '/ket-qua')}, null)}"></th:block></li>
+   </th:block>
+
+   <th:block sec:authorize="hasRole('LECTURER')">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.lecturer}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/phe-duyet-dang-ky', #{work.registration.title}, 'bi:journal-check', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/phe-duyet-dang-ky' or #strings.contains(currentPath, '/nhom')}, null)}"></th:block></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/de-xuat-de-tai', #{navigation.item.topic-proposals}, 'bi:journal-plus', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/de-xuat-de-tai' or #strings.contains(currentPath, '/de-tai')}, null)}"></th:block></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/cham-diem', #{work.evaluation.title}, 'bi:clipboard2-check', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/cham-diem' or #strings.contains(currentPath, '/danh-gia')}, null)}"></th:block></li>
+   </th:block>
+
+   <th:block sec:authorize="hasRole('STUDENT')">
+      <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.student}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+      <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/nhom-cua-toi', #{navigation.item.student-groups}, 'bi:people', 'flex btn btn-sm btn-ghost text-left justify-start items-center', ${currentPath == '/nhom-cua-toi' or #strings.contains(currentPath, '/nhom')}, null)}"></th:block></li>
+   </th:block>
+
+   <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.information}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
    <li>
-      <a
-         href="/settings"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.settings}"
-      >
-         <span
-            class="iconify block shrink-0"
-            data-icon="bi:gear"
-            data-width="18"
-         ></span>
-         <span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.settings}"
-         ></span>
-      </a>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/thong-bao', #{navigation.item.announcements}, 'bi:megaphone', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/thong-bao')}, #{navigation.item.announcements})}"></th:block>
    </li>
-   <li
-      sec:authorize="hasRole('ADMIN')"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
-   >
-      <a
-         href="/users"
-         class="flex btn btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right"
-         th:attr="data-tip=#{navigation.item.users}"
-         ><span
-            class="iconify block shrink-0"
-            data-icon="bi:people"
-            data-width="18"
-         ></span
-         ><span
-            class="is-drawer-close:hidden"
-            th:text="#{navigation.item.users}"
-         ></span
-      ></a>
+   <li th:replace="~{fragment/base/menu-title :: title(#{navigation.group.system}, 'menu-title pointer-events-none mt-4 h-9')}"></li>
+   <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/tai-khoan', #{navigation.item.account}, 'bi:person-circle', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/tai-khoan')}, #{navigation.item.account})}"></th:block></li>
+   <li><th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/cai-dat', #{navigation.item.settings}, 'bi:gear', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/cai-dat')}, #{navigation.item.settings})}"></th:block></li>
+   <li sec:authorize="hasRole('ADMIN')">
+      <th:block th:replace="~{fragment/ui/navigation-actions :: sidebarLink('/nguoi-dung', #{navigation.item.users}, 'bi:people', 'flex btn btn-sm btn-ghost text-left justify-start items-center is-drawer-close:tooltip is-drawer-close:tooltip-right', ${#strings.startsWith(currentPath, '/nguoi-dung')}, #{navigation.item.users})}"></th:block>
    </li>
 </ul>

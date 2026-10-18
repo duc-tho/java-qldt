@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
-@RequestMapping("/registration-periods/{periodId}/result-publication")
+@RequestMapping("/dot/{periodId}/ket-qua")
 public class ResultPublicationController {
   private final CouncilService councilService;
   private final UserService userService;
@@ -25,7 +25,7 @@ public class ResultPublicationController {
     this.userService = userService;
   }
 
-  @PostMapping
+  @PostMapping("/cong-bo")
   public String publish(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -38,7 +38,7 @@ public class ResultPublicationController {
     return redirect(periodId);
   }
 
-  @PostMapping("/revoke")
+  @PostMapping("/thu-hoi")
   public String revoke(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -68,6 +68,6 @@ public class ResultPublicationController {
   }
 
   private String redirect(Long periodId) {
-    return "redirect:/registration-periods/" + periodId;
+    return "redirect:/dot/" + periodId + "/ket-qua";
   }
 }

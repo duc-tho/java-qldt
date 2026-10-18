@@ -7,10 +7,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class SettingsController {
 
-  @GetMapping("/settings")
+  @GetMapping("/cai-dat")
   public String settings(Model model) {
     model.addAttribute("pageTitle", "settings.page.title");
     model.addAttribute("pageIcon", "bi:gear");
-    return "settings";
+    return "page/settings/index";
   }
 }

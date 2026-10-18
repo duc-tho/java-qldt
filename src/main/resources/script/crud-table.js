@@ -34,6 +34,21 @@ function registerCrudTable() {
 
       form.submit();
     },
+
+    async postAction(url, reason) {
+      const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
+      const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
+      const headers = csrfToken && csrfHeader ? { [csrfHeader]: csrfToken } : {};
+      const body = reason === undefined ? undefined : new URLSearchParams({ reason });
+      const response = await fetch(url, { method: "POST", headers, body });
+      if (response.redirected) {
+        window.location.assign(response.url);
+        return;
+      }
+      document.open();
+      document.write(await response.text());
+      document.close();
+    },
   }));
 }
 

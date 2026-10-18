@@ -1,0 +1,14 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <a th:fragment="card(file, periodId, groupId)"
+      th:replace="~{fragment/base/button :: linkContent(@{/dot/{periodId}/nhom/{groupId}/bao-cao/tep/{fileId}(periodId=${periodId},groupId=${groupId},fileId=${file.id})}, 'flex min-w-0 items-center gap-3 rounded-field border border-base-300 bg-base-200/40 p-3 text-sm hover:bg-base-200', null, ~{::#report-file-card-content})}">
+      <th:block id="report-file-card-content" th:fragment="report-file-card-content">
+         <span class="iconify shrink-0 text-primary" data-icon="bi:file-earmark-arrow-down"></span>
+         <span class="min-w-0 flex-1 truncate" th:text="${file.originalName}"></span>
+         <span class="iconify shrink-0 text-base-content/70" data-icon="bi:download"></span>
+      </th:block>
+   </a>
+
+   <th:block th:fragment="button(file, periodId, groupId, label, icon)"
+      th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/nhom/{groupId}/bao-cao/tep/{fileId}(periodId=${periodId},groupId=${groupId},fileId=${file.id})}, ${label}, ${icon}, 'btn btn-outline btn-sm', null)}"></th:block>
+</html>

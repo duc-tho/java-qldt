@@ -1,0 +1,45 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
+   <body>
+      <th:block layout:fragment="actions" th:if="${isStaff}">
+         <th:block th:replace="~{fragment/feature/result/publication :: actions(${period})}"></th:block>
+      </th:block>
+      <th:block layout:fragment="page-content">
+         <th:block th:if="${isStaff}">
+            <div th:replace="~{fragment/feature/result/publication :: result-publication(${period})}"></div>
+         </th:block>
+
+         <section th:unless="${isStaff}" class="space-y-5">
+            <th:block th:if="${#lists.isEmpty(results)}">
+               <th:block th:replace="~{fragment/base/alert :: iconText('alert alert-info alert-soft', 'alert', #{result-publications.empty}, 'bi:info-circle')}"></th:block>
+            </th:block>
+            <div class="overflow-x-auto rounded-box border border-base-300" th:unless="${#lists.isEmpty(results)}">
+               <th:block th:replace="~{fragment/base/table :: table('table table-md', ~{::#result-table-head}, ~{::#result-table-body})}">
+                  <thead id="result-table-head" th:fragment="result-table-head" class="bg-base-200">
+                     <tr>
+                        <th th:text="#{councils.workspace.topic}"></th>
+                        <th th:text="#{councils.workspace.group}"></th>
+                        <th th:text="#{result-publications.column.score}"></th>
+                        <th th:text="#{result-publications.column.summary}"></th>
+                     </tr>
+                  </thead>
+                  <th:block id="result-table-body" th:fragment="result-table-body">
+                     <tbody>
+                        <tr th:each="result : ${results}">
+                           <td class="font-medium" th:text="${result.topicRegistration.topic.title}"></td>
+                           <td>
+                              <a class="link link-primary"
+                                 th:href="@{/dot/{periodId}/nhom/{groupId}(periodId=${period.id},groupId=${result.topicRegistration.studentGroup.id})}"
+                                 th:text="${result.topicRegistration.studentGroup.name}"></a>
+                           </td>
+                           <td th:text="${result.finalScore}"></td>
+                           <td th:text="${result.summaryComment}"></td>
+                        </tr>
+                     </tbody>
+                  </th:block>
+               </th:block>
+            </div>
+         </section>
+      </th:block>
+   </body>
+</html>

@@ -1,0 +1,9 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <div th:fragment="field(id, label, required, control, classes, errorClasses)"
+      th:class="${classes == null ? 'flex flex-col gap-1' : classes}">
+      <div th:replace="~{fragment/base/field-label :: label(${id}, ${label}, ${required}, null)}"></div>
+      <th:block th:replace="${control}"></th:block>
+      <div th:id="|${id}-error|" th:class="${errorClasses}"></div>
+   </div>
+</html>

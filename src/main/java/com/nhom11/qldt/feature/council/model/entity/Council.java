@@ -2,7 +2,7 @@ package com.nhom11.qldt.feature.council.model.entity;
 
 import com.nhom11.qldt.core.entity.SoftDeleteEntity;
 import com.nhom11.qldt.feature.auth.model.entity.User;
-import com.nhom11.qldt.feature.registrationperiod.model.entity.RegistrationPeriod;
+import com.nhom11.qldt.feature.period.model.entity.RegistrationPeriod;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;

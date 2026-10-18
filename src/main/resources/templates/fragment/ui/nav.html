@@ -1,35 +1,39 @@
-<div class="navbar bg-base-200">
-   <div class="navbar-start">
-      <label
-         for="my-drawer-4"
-         th:aria-label="#{navigation.action.open-sidebar}"
-         class="btn btn-square btn-ghost drawer-button"
-         ><span
-            class="iconify inline"
-            data-icon="bi:list"
-            data-width="20"
-         ></span
-      ></label>
+<div class="navbar relative z-30 bg-base-200">
+   <div class="navbar-start gap-1">
+      <th:block th:replace="~{fragment/ui/navigation-actions :: drawerToggle('my-drawer-4', #{navigation.action.close-sidebar}, 'sidebar-toggle-open btn btn-sm btn-square btn-ghost drawer-button', 'bi:arrow-bar-left')}"></th:block>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: drawerToggle('my-drawer-4', #{navigation.action.open-sidebar}, 'sidebar-toggle-closed btn btn-sm btn-square btn-ghost drawer-button', 'bi:arrow-bar-right')}"></th:block>
+      <th:block th:replace="~{fragment/ui/navigation-actions :: navLink('/', #{navigation.item.home}, 'bi:house', 'btn btn-sm btn-ghost gap-2 px-3', true)}"></th:block>
    </div>
-   <div class="navbar-center">
-      <a href="/" class="btn btn-ghost text-xl">QLĐT</a>
-   </div>
-   <div class="navbar-end">
+   <div class="navbar-end gap-1">
+      <th:block sec:authorize="hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+         <th:block th:replace="~{fragment/ui/navigation-actions :: navLink('/thong-bao', #{navigation.action.notifications}, 'bi:bell', 'btn btn-sm btn-square btn-ghost', false)}"></th:block>
+      </th:block>
+      <span
+         class="flex size-10 items-center justify-center text-base-content/70"
+         role="img"
+         sec:authorize="!hasAnyRole('HEAD_OF_FACULTY', 'ADMIN')"
+         xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+         th:aria-label="#{navigation.action.notifications}"
+      >
+         <span class="iconify" data-icon="bi:bell" data-width="20" aria-hidden="true"></span>
+      </span>
       <details class="dropdown dropdown-end" th:if="${currentUser != null}">
-         <summary
-            class="btn btn-ghost btn-circle"
-            th:aria-label="#{navigation.item.account}"
-         >
-            <div class="avatar avatar-placeholder">
-               <div class="flex w-9 items-center justify-center rounded-full bg-primary text-primary-content">
+         <summary th:replace="~{fragment/ui/navigation-actions :: menuSummary(#{navigation.item.account}, 'btn btn-sm btn-ghost h-auto min-h-10 gap-2 px-2 py-1', ~{::#account-menu-summary})}">
+            <th:block id="account-menu-summary" th:fragment="account-menu-summary">
+            <span class="hidden min-w-0 max-w-40 text-right sm:block">
+               <span class="block truncate text-sm font-semibold" th:text="${currentUser.fullName}"></span>
+               <span class="block truncate text-sm text-base-content/70">
                   <span
-                     th:text="${#strings.substring(currentUser.fullName, 0, 1)}"
+                     th:each="role, iter : ${currentUser.roles}"
+                     th:text="|#{roles.__${role.name}__}${iter.last ? '' : ' / '}|"
                   ></span>
-               </div>
-            </div>
+               </span>
+            </span>
+            <div th:replace="~{fragment/base/avatar :: initial(${#strings.substring(currentUser.fullName, 0, 1)}, 'size-9', '')}"></div>
+            </th:block>
          </summary>
          <ul
-            class="dropdown-content menu z-10 mt-3 w-64 rounded-box bg-base-100 p-2 shadow-lg"
+            class="dropdown-content menu z-50 mt-3 w-64 rounded-box bg-base-100 p-2 shadow-lg"
          >
             <li class="menu-title">
                <span th:text="${currentUser.fullName}"></span>
@@ -44,7 +48,7 @@
                ></span>
             </li>
             <li>
-               <a href="/account"
+               <a href="/tai-khoan"
                   ><span class="iconify" data-icon="bi:person-gear"></span
                   ><span th:text="#{navigation.item.account}"></span
                ></a>
@@ -55,10 +59,12 @@
                      type="hidden"
                      th:name="${_csrf.parameterName}"
                      th:value="${_csrf.token}"
-                  /><button type="submit" class="flex w-full items-center gap-2 text-left">
+                  /><th:block th:replace="~{fragment/base/button :: submitContent('flex w-full items-center gap-2 text-left', ~{::nav-logout-content})}">
+                     <th:block th:fragment="nav-logout-content">
                      <span class="iconify" data-icon="bi:box-arrow-right"></span
                      ><span th:text="#{navigation.action.logout}"></span>
-                  </button>
+                     </th:block>
+                  </th:block>
                </form>
             </li>
          </ul>

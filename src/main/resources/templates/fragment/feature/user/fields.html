@@ -1,0 +1,50 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+   <th:block th:fragment="form-fields">
+      <div class="flex flex-col gap-3">
+         <div th:replace="~{fragment/base/input :: field('fullName', #{users.field.full_name}, 'text', null, ${form.readonly}, ${form.validationRules.fullName}, true, null)}"></div>
+         <div th:replace="~{fragment/base/input :: field('userCode', #{users.field.user_code}, 'text', null, ${form.readonly}, null, false, null)}"></div>
+
+         <div class="flex flex-col gap-1 rounded-lg border border-base-300 p-3"
+            th:unless="${form.readonly}"
+            th:classappend="${#fields.hasErrors('roleIds')} ? ' border-error'"
+            x-data="userRoleSelection">
+            <div th:replace="~{fragment/base/field-label :: label('roleIds', #{users.field.roles}, true, null)}"></div>
+            <div class="flex flex-wrap items-center gap-4">
+               <label class="label justify-start gap-2 text-sm font-medium text-base-content"
+                  th:each="role : ${roles}" th:attr="data-role-name=${role.name}"
+                  x-on:change="select($event.target)">
+                  <input th:replace="~{fragment/base/checkbox :: named('roleIds', ${role.id}, ${data.roleIds != null and data.roleIds.contains(role.id)}, false)}">
+                  <span th:text="#{roles.__${role.name}__}"></span>
+               </label>
+            </div>
+         </div>
+         <div class="flex flex-col gap-1" th:if="${form.readonly}">
+            <div th:replace="~{fragment/base/field-label :: label('roleIds', #{users.field.roles}, false, null)}"></div>
+            <div id="roleIds" data-readonly-field="roleIds"
+               class="flex min-h-9 select-text flex-wrap items-center gap-2 border-l-2 border-base-300 px-3 py-1.5 font-medium text-base-content">
+               <span th:if="${data.roleIds == null or data.roleIds.isEmpty()}">—</span>
+               <th:block th:each="role : ${roles}" th:if="${data.roleIds != null and data.roleIds.contains(role.id)}">
+                  <th:block th:replace="~{fragment/base/badge :: text(#{roles.__${role.name}__}, 'badge badge-outline')}"></th:block>
+               </th:block>
+            </div>
+         </div>
+         <span class="text-error text-sm" th:if="${#fields.hasErrors('roleIds')}"
+            th:errors="*{roleIds}"></span>
+
+         <div th:replace="~{fragment/base/input :: field('email', #{users.field.email}, 'email', null, ${form.readonly}, ${form.validationRules.email}, true, null)}"></div>
+         <div th:replace="~{fragment/base/input :: field('username', #{users.field.username}, 'text', null, ${form.readonly}, ${form.validationRules.username}, true, null)}"></div>
+
+         <div class="flex flex-col gap-1" th:unless="${form.readonly}">
+            <div th:replace="~{fragment/base/field-label :: label('password', #{users.field.password}, ${data.id == null}, null)}"></div>
+            <th:block th:replace="~{fragment/base/input :: validatedNamed('password', 'password', 'password', ${data.id != null ? #messages.msg('users.field.password.placeholder') : ''}, null, ${form.validationRules.password}, ${data.id == null})}"></th:block>
+            <div id="password-error">
+               <span class="text-error mt-1 block text-sm"
+                  th:if="${#fields.hasErrors('password')}" th:errors="*{password}"></span>
+            </div>
+         </div>
+
+         <div th:replace="~{fragment/base/input :: field('phone', #{users.field.phone}, 'text', null, ${form.readonly}, ${form.validationRules.phone}, false, null)}"></div>
+      </div>
+   </th:block>
+</html>

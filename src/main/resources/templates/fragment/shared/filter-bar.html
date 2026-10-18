@@ -1,0 +1,7 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+   <form th:fragment="get(action, classes, controls)" method="get"
+      th:action="${action}" th:class="${classes}">
+      <th:block th:replace="${controls}"></th:block>
+   </form>
+</html>
