@@ -2,18 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org" layout:decorate="~{layout/page.html}">
    <body>
       <th:block layout:fragment="actions">
-         <th:block th:if="${isStaff}">
-         <form
-            th:if="${form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}"
-            th:action="${form.actionUrl + '/duyet'}"
-            method="post"
-         >
-            <th:block th:replace="~{fragment/base/button :: submit(#{topics.action.approve}, 'bi:check-circle', 'btn btn-success btn-sm', false)}"></th:block>
-         </form>
-         <th:block th:if="${form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}">
-            <th:block th:replace="~{fragment/base/button :: modalOpen('reject_topic', #{topics.action.reject}, 'bi:x-circle', 'btn btn-error btn-outline btn-sm')}"></th:block>
-         </th:block>
-         </th:block>
          <th:block th:if="${canEditTopic}">
             <th:block th:replace="~{fragment/base/button :: linkStyled(@{/dot/{periodId}/de-tai/{topicId}/sua(periodId=${topic.registrationPeriod.id},topicId=${topic.id})}, #{crud.action.edit}, 'bi:pencil-square', 'btn btn-primary btn-sm', null)}"></th:block>
          </th:block>
@@ -22,21 +10,19 @@
          </th:block>
       </th:block>
       <th:block layout:fragment="page-content">
-         <div th:replace="~{fragment/feature/topic/viewer-detail :: viewer-detail(${topic}, ${isStaff or showRejectionReason == true})}"></div>
+         <div th:replace="~{fragment/feature/topic/viewer-detail :: viewer-detail(${topic}, ${isStaff or showRejectionReason == true}, ~{::#topic-review-actions})}">
+            <div id="topic-review-actions"
+               th:if="${isStaff and form.readonly and canManageTopic and topic.status.name() == 'PROPOSED'}"
+               class="flex shrink-0 items-center gap-2 self-end sm:self-auto">
+               <form th:action="${form.actionUrl + '/duyet'}" method="post">
+                  <th:block th:replace="~{fragment/base/button :: submit(#{topics.action.approve}, 'bi:check-circle', 'btn btn-primary btn-sm', false)}"></th:block>
+               </form>
+               <th:block th:replace="~{fragment/base/button :: modalOpen('reject_topic', #{topics.action.reject}, 'bi:x-circle', 'btn btn-error btn-outline btn-sm')}"></th:block>
+            </div>
+         </div>
          <th:block th:if="${isStaff}">
          <th:block th:replace="~{fragment/feature/topic/registered-groups :: groups}"></th:block>
-         <dialog th:replace="~{fragment/base/dialog :: dialog('reject_topic', ~{::#reject-topic-content}, #{crud.delete.close})}">
-            <section id="reject-topic-content">
-               <form th:action="${form.actionUrl + '/tu-choi'}" th:object="${rejectForm}" method="post">
-                  <h3 class="text-lg font-semibold" th:text="#{topics.action.reject}"></h3>
-                  <div th:replace="~{fragment/feature/topic/rejection-reason :: field(true)}"></div>
-                  <div class="modal-action">
-                     <th:block th:replace="~{fragment/base/button :: submit(#{topics.action.reject}, null, 'btn btn-sm btn-error', false)}"></th:block>
-                     <th:block th:replace="~{fragment/base/button :: modalClose('reject_topic', #{crud.form.cancel}, 'btn btn-sm')}"></th:block>
-                  </div>
-               </form>
-            </section>
-         </dialog>
+         <th:block th:replace="~{fragment/feature/topic/rejection-dialog :: boundDialog('reject_topic', ${form.actionUrl + '/tu-choi'})}"></th:block>
          </th:block>
          <th:block th:unless="${isStaff}">
             <div class="mt-4 flex flex-wrap justify-end gap-2" th:if="${selectionGroupId != null}">

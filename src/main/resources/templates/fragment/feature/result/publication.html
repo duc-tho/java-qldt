@@ -97,7 +97,7 @@
       </div>
 
       <dialog th:fragment="revokeDialog(period)"
-         th:replace="~{fragment/base/dialog :: dialog('revoke_publication', ~{::#revoke-publication-content}, #{crud.delete.close})}">
+         th:replace="~{fragment/base/dialog :: dialog('revoke_publication', ~{::#revoke-publication-content}, #{crud.delete.close}, 'modal-box')}">
             <section id="revoke-publication-content">
                <form method="post" th:action="@{/dot/{id}/ket-qua/thu-hoi(id=${period.id})}" th:object="${revocationForm}">
                   <h3 class="text-lg font-semibold" th:text="#{result-publications.action.revoke}"></h3>
