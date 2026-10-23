@@ -10,14 +10,19 @@ import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/** Truy cập và truy vấn dữ liệu của chức năng nhóm sinh viên và đăng ký đề tài. */
 public interface StudentGroupRepository extends BaseRepository<StudentGroup, Long> {
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countByRegistrationPeriodId(Long registrationPeriodId);
 
+  /** Kiểm tra sự tồn tại của bản ghi thỏa điều kiện nghiệp vụ được cung cấp. */
   boolean existsByRegistrationPeriodIdAndNameIgnoreCase(Long registrationPeriodId, String name);
 
   @EntityGraph(attributePaths = {"registrationPeriod"})
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<StudentGroup> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<StudentGroup> findAllByRegistrationPeriodIdOrderByName(Long registrationPeriodId);
 
   @Query(
@@ -32,6 +37,7 @@ public interface StudentGroupRepository extends BaseRepository<StudentGroup, Lon
           or member.lecturer.id = :lecturerId)
       order by studentGroup.name
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<StudentGroup> findAllRelatedToLecturer(
       @Param("periodId") Long periodId, @Param("lecturerId") Long lecturerId);
 
@@ -46,10 +52,12 @@ public interface StudentGroupRepository extends BaseRepository<StudentGroup, Lon
         and registration.status = com.nhom11.qldt.feature.group.model.enums.TopicRegistrationStatus.PENDING
       order by studentGroup.name
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<StudentGroup> findAllPendingForAdviser(
       @Param("periodId") Long periodId, @Param("lecturerId") Long lecturerId);
 
   @Lock(LockModeType.PESSIMISTIC_WRITE)
   @Query("select studentGroup from StudentGroup studentGroup where studentGroup.id = :id")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<StudentGroup> findByIdForUpdate(@Param("id") Long id);
 }

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class ResultPageController {
   private final CouncilService councilService;
   private final RegistrationPeriodService periodService;
@@ -34,6 +35,7 @@ public class ResultPageController {
   }
 
   @GetMapping("/dot/{periodId}/ket-qua")
+  /** Hiển thị thông tin chi tiết của hội đồng và kết quả đánh giá được yêu cầu. */
   public String detail(@PathVariable Long periodId, Authentication authentication, Model model) {
     RegistrationPeriod period = periodService.findById(periodId);
     if (period == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);

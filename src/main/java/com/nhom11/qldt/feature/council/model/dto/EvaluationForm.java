@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận điểm từ 0 đến 10 và nhận xét của giảng viên đánh giá. */
 public class EvaluationForm {
   @DecimalMin(value = "0.00", message = "{evaluations.validation.score.range}")
   @DecimalMax(value = "10.00", message = "{evaluations.validation.score.range}")

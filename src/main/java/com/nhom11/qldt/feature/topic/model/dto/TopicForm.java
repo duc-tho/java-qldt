@@ -13,6 +13,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận thông tin đề tài, bộ môn và danh sách giảng viên hướng dẫn từ form. */
 public class TopicForm implements CrudForm<Topic> {
 
   private Long id;
@@ -32,6 +33,7 @@ public class TopicForm implements CrudForm<Topic> {
   private Set<Long> adviserIds = new LinkedHashSet<>();
 
   @Override
+  /** Chuyển dữ liệu biểu mẫu thành thực thể để tầng dịch vụ xử lý. */
   public Topic toEntity() {
     Topic topic = new Topic();
     topic.setTitle(title);
@@ -40,6 +42,7 @@ public class TopicForm implements CrudForm<Topic> {
   }
 
   @Override
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(Topic entity) {
     id = entity.getId();
     title = entity.getTitle();

@@ -12,6 +12,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận thông tin tài khoản và danh sách quyền từ form quản lý người dùng. */
 public class UserForm implements CrudForm<User> {
 
   private Long id;
@@ -40,6 +41,7 @@ public class UserForm implements CrudForm<User> {
   private Set<Long> roleIds;
 
   @Override
+  /** Chuyển dữ liệu biểu mẫu thành thực thể để tầng dịch vụ xử lý. */
   public User toEntity() {
     User user = new User();
     user.setId(id);
@@ -55,6 +57,7 @@ public class UserForm implements CrudForm<User> {
   }
 
   @Override
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(User entity) {
     this.id = entity.getId();
     this.username = entity.getUsername();

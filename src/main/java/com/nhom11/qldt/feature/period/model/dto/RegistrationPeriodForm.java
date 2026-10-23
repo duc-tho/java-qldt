@@ -12,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 @Getter
 @Setter
+/** Nhận loại đợt và các mốc thời gian từ form tạo hoặc chỉnh sửa đợt đăng ký. */
 public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
   private Long id;
 
@@ -47,6 +48,7 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
   @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm")
   private LocalDateTime councilDate;
 
+  /** Chuyển dữ liệu biểu mẫu thành thực thể để tầng dịch vụ xử lý. */
   public RegistrationPeriod toEntity() {
 
     RegistrationPeriod item = new RegistrationPeriod();
@@ -63,6 +65,7 @@ public class RegistrationPeriodForm implements CrudForm<RegistrationPeriod> {
     return item;
   }
 
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(RegistrationPeriod item) {
     id = item.getId();
     name = item.getName();

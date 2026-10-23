@@ -21,6 +21,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 @Service
+/** Kiểm tra mốc thời gian, xác định giai đoạn và lọc các đợt người dùng được xem. */
 public class RegistrationPeriodService extends BaseCrudService<RegistrationPeriod, Long> {
   private final RegistrationPeriodRepository repository;
   private final ResultPublicationRepository publicationRepository;
@@ -32,16 +33,19 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
   }
 
   @Override
+  /** Trả về repository để lớp base đọc và ghi dữ liệu đợt đăng ký. */
   public BaseRepository<RegistrationPeriod, Long> getRepository() {
     return repository;
   }
 
   @Override
+  /** Kiểm tra thứ tự các mốc thời gian trước khi tạo đợt đăng ký. */
   protected void beforeCreate(RegistrationPeriod period) {
     validate(period);
   }
 
   @Override
+  /** Kiểm tra lại thứ tự các mốc thời gian trước khi cập nhật đợt đăng ký. */
   protected void beforeUpdate(RegistrationPeriod period) {
     validate(period);
   }
@@ -52,9 +56,11 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     }
   }
 
+  /** Kiểm tra thứ tự các mốc thời gian và trả về toàn bộ lỗi của đợt đăng ký. */
   public List<RegistrationPeriodValidationError> validationErrors(RegistrationPeriod period) {
     List<RegistrationPeriodValidationError> errors = new ArrayList<>();
 
+    // Các giai đoạn phải nối tiếp nhau theo đúng thứ tự thời gian.
     if (!period.getLecturerRegistrationStart().isBefore(period.getLecturerRegistrationEnd())
         || !period.getLecturerRegistrationEnd().isBefore(period.getStudentRegistrationStart())
         || !period.getStudentRegistrationStart().isBefore(period.getStudentRegistrationEnd())
@@ -62,6 +68,7 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
       errors.add(RegistrationPeriodValidationError.TIMELINE);
     }
 
+    // Chỉ TLCN và KLTN cần hạn phản biện, đồng thời hạn này không được trước hạn báo cáo.
     boolean reviewerRequired =
         period.getPeriodType() == PeriodType.TLCN || period.getPeriodType() == PeriodType.KLTN;
 
@@ -72,6 +79,7 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
       errors.add(RegistrationPeriodValidationError.REVIEWER_DEADLINE);
     }
 
+    // KLTN bắt buộc có ngày hội đồng nằm sau hạn báo cáo và không sau hạn phản biện.
     boolean councilRequired = period.getPeriodType() == PeriodType.KLTN;
     if (councilRequired != (period.getCouncilDate() != null)
         || councilRequired
@@ -85,22 +93,27 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     return errors;
   }
 
+  /** Lấy các đợt đang mở để sinh viên tạo nhóm và đăng ký đề tài. */
   public List<RegistrationPeriod> findOpenForStudents() {
     return repository.findOpenForStudents(LocalDateTime.now());
   }
 
+  /** Đếm số đợt KLTN đang trong thời gian được phép quản lý hội đồng. */
   public long countOpenCouncilPeriods() {
     return repository.countOpenCouncilPeriods(LocalDateTime.now());
   }
 
+  /** Lấy các đợt có công việc liên quan đến giảng viên để hiển thị trên trang nghiệp vụ. */
   public List<RegistrationPeriod> findVisibleForLecturers() {
     return repository.findVisibleForLecturers(LocalDateTime.now());
   }
 
+  /** Lấy các đợt mà giảng viên tham gia với vai trò hướng dẫn, phản biện hoặc hội đồng. */
   public List<RegistrationPeriod> findVisibleForLecturer(Long lecturerId) {
     return repository.findVisibleForLecturer(LocalDateTime.now(), lecturerId);
   }
 
+  /** Lấy một trang đợt liên quan đến giảng viên, có hỗ trợ tìm kiếm và lọc theo tên. */
   public Page<RegistrationPeriod> findVisibleForLecturer(
       Long lecturerId,
       TableQuery query,
@@ -113,10 +126,12 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
         viewerPageable(query, definition));
   }
 
+  /** Lấy các đợt sinh viên đang được tham gia hoặc đã từng có nhóm. */
   public List<RegistrationPeriod> findVisibleForStudent(Long studentId) {
     return repository.findVisibleForStudent(LocalDateTime.now(), studentId);
   }
 
+  /** Lấy một trang đợt liên quan đến sinh viên, có hỗ trợ tìm kiếm và lọc theo tên. */
   public Page<RegistrationPeriod> findVisibleForStudent(
       Long studentId,
       TableQuery query,
@@ -129,10 +144,12 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
         viewerPageable(query, definition));
   }
 
+  /** Lấy toàn bộ đợt đăng ký chưa bị xóa mềm. */
   public List<RegistrationPeriod> findAll() {
     return repository.findAll();
   }
 
+  /** Xác định giai đoạn hiện tại của đợt dựa trên các mốc thời gian. */
   public RegistrationPeriodStage stage(RegistrationPeriod period, LocalDateTime now) {
     if (now.isBefore(period.getLecturerRegistrationStart())) {
       return RegistrationPeriodStage.UPCOMING;
@@ -146,6 +163,8 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     if (now.isBefore(period.getReportDeadline())) {
       return RegistrationPeriodStage.TOPIC_EXECUTION;
     }
+
+    // Sau hạn báo cáo, hành động công bố gần nhất quyết định đợt đã đóng hay còn đánh giá.
     return publicationRepository
         .findFirstByRegistrationPeriodIdOrderByIdDesc(period.getId())
         .filter(publication -> publication.getAction() == ResultPublicationAction.PUBLISHED)
@@ -163,6 +182,7 @@ public class RegistrationPeriodService extends BaseCrudService<RegistrationPerio
     Pageable pageable = query.pageable(definition);
     if (pageable.getSort().isSorted()) return pageable;
 
+    // Khi người xem không chọn cách sắp xếp, ưu tiên các đợt kết thúc đăng ký gần nhất.
     return PageRequest.of(
         pageable.getPageNumber(),
         pageable.getPageSize(),

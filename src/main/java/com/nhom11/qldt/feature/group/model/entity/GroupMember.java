@@ -14,6 +14,7 @@ import lombok.Setter;
 @Table(name = "group_members")
 @Getter
 @Setter
+/** Biểu diễn quan hệ thành viên giữa sinh viên và nhóm. */
 public class GroupMember extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "student_group_id", nullable = false)

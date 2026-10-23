@@ -15,6 +15,7 @@ import lombok.Setter;
 @Table(name = "report_files")
 @Getter
 @Setter
+/** Biểu diễn tệp vật lý thuộc một lần nộp báo cáo. */
 public class ReportFile extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "report_submission_id", nullable = false)

@@ -8,6 +8,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 @Service
+/** Đọc tài khoản từ database để Spring Security xác thực email, mật khẩu và quyền. */
 public class DatabaseUserDetailsService implements UserDetailsService {
   private final UserService userService;
 
@@ -16,6 +17,7 @@ public class DatabaseUserDetailsService implements UserDetailsService {
   }
 
   @Override
+  /** Nạp tài khoản và quyền hạn theo email để Spring Security xác thực. */
   public UserDetails loadUserByUsername(String email) {
     User user =
         userService

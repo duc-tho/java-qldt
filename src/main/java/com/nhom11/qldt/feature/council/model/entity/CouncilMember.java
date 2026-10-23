@@ -16,6 +16,7 @@ import lombok.Setter;
 @Table(name = "council_members")
 @Getter
 @Setter
+/** Biểu diễn một giảng viên tham gia hội đồng với vai trò được phân công. */
 public class CouncilMember extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "council_id", nullable = false)

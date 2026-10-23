@@ -11,12 +11,14 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/** Truy cập và truy vấn dữ liệu của chức năng thông báo. */
 public interface AnnouncementRepository extends BaseRepository<Announcement, Long> {
   @EntityGraph(attributePaths = "roles")
   @Query(
       "select distinct announcement from Announcement announcement join announcement.roles role "
           + "where announcement.status = com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus.PUBLISHED "
           + "and role.name in :roleNames order by announcement.createdAt desc")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<Announcement> findPublishedForRoles(@Param("roleNames") Set<String> roleNames);
 
   @Query(
@@ -24,6 +26,7 @@ public interface AnnouncementRepository extends BaseRepository<Announcement, Lon
           + "from Announcement announcement join announcement.roles role "
           + "where announcement.status = com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus.PUBLISHED "
           + "and role.name in :roleNames order by announcement.createdAt desc")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<AnnouncementSummary> findRecentPublishedForRoles(
       @Param("roleNames") Set<String> roleNames, Pageable pageable);
 
@@ -33,6 +36,7 @@ public interface AnnouncementRepository extends BaseRepository<Announcement, Lon
           + "where announcement.id = :id "
           + "and announcement.status = com.nhom11.qldt.feature.announcement.model.enums.AnnouncementStatus.PUBLISHED "
           + "and role.name in :roleNames")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<Announcement> findPublishedByIdForRoles(
       @Param("id") Long id, @Param("roleNames") Set<String> roleNames);
 }

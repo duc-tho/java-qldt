@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đề tài. */
 public class TopicProposalController {
   private final TopicService topicService;
   private final UserService userService;
@@ -52,6 +53,7 @@ public class TopicProposalController {
   }
 
   @GetMapping("/de-xuat-de-tai")
+  /** Hiển thị danh sách đề tài mà người dùng được phép truy cập. */
   public String list(@AuthenticationPrincipal UserDetails principal, Model model) {
     User lecturer = currentUser(principal);
     List<RegistrationPeriod> periods = periodService.findVisibleForLecturer(lecturer.getId());
@@ -76,6 +78,7 @@ public class TopicProposalController {
     return "page/topic/proposals";
   }
 
+  /** Hiển thị biểu mẫu chỉnh sửa đề tài. */
   public String editForm(@PathVariable Long periodId, @PathVariable Long topicId, @AuthenticationPrincipal UserDetails principal, Model model) {
     if (principal == null) return "redirect:/dot/" + periodId + "/de-tai";
     User proposer = currentUser(principal);
@@ -89,6 +92,7 @@ public class TopicProposalController {
     return "page/topic/create";
   }
 
+  /** Kiểm tra biểu mẫu, cập nhật đề tài và trả về kết quả điều hướng. */
   public String update(@PathVariable Long periodId, @PathVariable Long topicId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute("data") TopicForm form, BindingResult errors, Model model) {
     if (principal == null) return "redirect:/dot/" + periodId + "/de-tai";
     User proposer = currentUser(principal);
@@ -110,6 +114,7 @@ public class TopicProposalController {
     return "redirect:/dot/" + periodId + "/de-tai/" + topicId;
   }
 
+  /** Xóa đề tài được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(
       @PathVariable Long periodId,
       @PathVariable Long topicId,

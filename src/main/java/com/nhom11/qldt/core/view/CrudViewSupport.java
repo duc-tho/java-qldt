@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 
 @Component
+/** Hỗ trợ controller chuẩn bị model dùng chung cho bảng và biểu mẫu CRUD. */
 public class CrudViewSupport {
 
   private final TableModelFactory tableModelFactory;
@@ -17,6 +18,7 @@ public class CrudViewSupport {
     this.tableModelFactory = tableModelFactory;
   }
 
+  /** Gắn model bảng vào view và trả về fragment bảng CRUD cần render. */
   public <T> String table(
       Model model,
       Page<T> data,
@@ -29,6 +31,7 @@ public class CrudViewSupport {
     return "fragment/crud/table :: crud-table";
   }
 
+  /** Chuẩn bị biểu mẫu với chiều rộng mặc định của giao diện. */
   public <T> void form(
       Model model,
       T data,
@@ -51,6 +54,7 @@ public class CrudViewSupport {
         validationRules);
   }
 
+  /** Chuẩn bị đầy đủ dữ liệu và cấu hình hiển thị cho biểu mẫu CRUD. */
   public <T> void form(
       Model model,
       T data,

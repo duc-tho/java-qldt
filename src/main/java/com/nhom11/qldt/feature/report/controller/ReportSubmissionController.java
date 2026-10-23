@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/dot/{periodId}/nhom/{groupId}/bao-cao")
+/** Điều phối các yêu cầu HTTP của chức năng nộp báo cáo. */
 public class ReportSubmissionController {
   private final ReportSubmissionService reportSubmissionService;
   private final UserService userService;
@@ -41,6 +42,7 @@ public class ReportSubmissionController {
   }
 
   @PostMapping
+  /** Tiếp nhận và xử lý yêu cầu nộp báo cáo. */
   public String submit(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -61,6 +63,7 @@ public class ReportSubmissionController {
   }
 
   @GetMapping("/tep/{fileId}")
+  /** Kiểm tra quyền truy cập rồi trả về tệp báo cáo để tải xuống. */
   public ResponseEntity<Resource> download(
       @PathVariable Long periodId,
       @PathVariable Long groupId,

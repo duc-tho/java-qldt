@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận tên và mã bộ môn từ form, đồng thời khai báo các điều kiện validation. */
 public class DepartmentForm implements CrudForm<Department> {
 
   private Long id;
@@ -22,6 +23,7 @@ public class DepartmentForm implements CrudForm<Department> {
   private String name;
 
   @Override
+  /** Chuyển dữ liệu biểu mẫu thành thực thể để tầng dịch vụ xử lý. */
   public Department toEntity() {
     Department department = new Department();
     department.setCode(code);
@@ -30,6 +32,7 @@ public class DepartmentForm implements CrudForm<Department> {
   }
 
   @Override
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(Department entity) {
     id = entity.getId();
     code = entity.getCode();

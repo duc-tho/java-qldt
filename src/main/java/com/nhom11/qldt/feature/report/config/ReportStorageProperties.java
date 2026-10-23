@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Getter
 @Setter
+/** Ánh xạ các thuộc tính của chức năng nộp báo cáo từ cấu hình ứng dụng. */
 public class ReportStorageProperties {
   @NotBlank private String root;
 }

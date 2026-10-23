@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận lý do thu hồi kết quả đã công bố. */
 public class PublicationRevocationForm {
   @NotBlank(message = "{result-publications.validation.reason.required}")
   @Size(max = 500, message = "{result-publications.validation.reason.max}")

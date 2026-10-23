@@ -30,6 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
+/** Xử lý nộp lại báo cáo, lưu file, kiểm tra quyền tải xuống và quản lý lịch sử nộp. */
 public class ReportSubmissionService {
   private static final int MAX_FILES = 10;
   private static final int MAX_ORIGINAL_NAME_LENGTH = 255;
@@ -62,9 +63,12 @@ public class ReportSubmissionService {
   }
 
   @Transactional
+  /** Nộp bộ file báo cáo mới và chuyển lần nộp hiện tại trước đó sang trạng thái đã thay thế. */
   public ReportSubmission submit(
       Long periodId, Long groupId, Long registrationId, User actor, List<MultipartFile> files) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
+
+    // Xác thực ngữ cảnh URL, quyền trưởng nhóm, thời gian nộp và toàn bộ tệp trước khi ghi dữ liệu.
     requireContext(registration, periodId, groupId);
     requireLeader(registration, actor);
     requireSubmissionWindow(registration);
@@ -72,11 +76,14 @@ public class ReportSubmissionService {
 
     LocalDateTime submittedAt = LocalDateTime.now();
     ReportSubmission current = current(registrationId);
+
+    // Mỗi đăng ký chỉ có một bản nộp hiện hành; bản cũ được giữ lại trong lịch sử.
     if (current != null) {
       current.setStatus(ReportSubmissionStatus.REPLACED);
       submissionRepository.save(current);
     }
 
+    // Tạo bản ghi lần nộp trước để các tệp có thể tham chiếu đúng khóa ngoại.
     ReportSubmission submission = new ReportSubmission();
     submission.setTopicRegistration(registration);
     submission.setSubmittedBy(actor);
@@ -85,6 +92,7 @@ public class ReportSubmissionService {
     submission.setStatus(ReportSubmissionStatus.SUBMITTED);
     submission = submissionRepository.save(submission);
 
+    // Ghi từng tệp xuống đĩa và lưu metadata tương ứng trong cơ sở dữ liệu.
     List<Path> storedPaths = new ArrayList<>();
     try {
       for (MultipartFile file : files) {
@@ -104,13 +112,16 @@ public class ReportSubmissionService {
       }
       groupActivityService.record(
           registration.getStudentGroup(), actor, null, GroupActivityType.REPORT_SUBMITTED, null);
+
       return submission;
     } catch (IOException exception) {
+      // Transaction sẽ hoàn tác dữ liệu; các tệp đã ghi cần được dọn thủ công.
       storedPaths.forEach(this::deleteQuietly);
       throw new IllegalStateException("report-submissions.error.storage", exception);
     }
   }
 
+  /** Lấy lần nộp báo cáo hiện tại, không tính các lần đã bị thay thế. */
   public ReportSubmission current(Long registrationId) {
     return submissionRepository
         .findFirstByTopicRegistrationIdAndStatusNotOrderBySubmittedAtDesc(
@@ -118,29 +129,39 @@ public class ReportSubmissionService {
         .orElse(null);
   }
 
+  /** Kiểm tra đăng ký đề tài đã có ít nhất một lần nộp báo cáo còn hiệu lực. */
   public boolean hasCurrentSubmission(Long registrationId) {
     return current(registrationId) != null;
   }
 
+  /** Lấy toàn bộ lịch sử nộp báo cáo, sắp xếp lần nộp mới nhất lên trước. */
   public List<ReportSubmission> history(Long registrationId) {
     return submissionRepository.findAllByTopicRegistrationIdOrderBySubmittedAtDesc(registrationId);
   }
 
+  /** Lấy danh sách file thuộc một lần nộp báo cáo. */
   public List<ReportFile> files(Long submissionId) {
     return fileRepository.findAllByReportSubmissionId(submissionId);
   }
 
+  /** Tìm thông tin file báo cáo theo ID; báo lỗi nếu record không tồn tại. */
   public ReportFile findFile(Long fileId) {
     return fileRepository.findById(fileId).orElseThrow();
   }
 
+  /** Kiểm tra quyền của người dùng rồi nạp tệp báo cáo từ vùng lưu trữ để tải xuống. */
   public Resource download(Long periodId, Long groupId, Long fileId, User actor) {
     ReportFile file = findFile(fileId);
     TopicRegistration registration = file.getReportSubmission().getTopicRegistration();
+
     requireContext(registration, periodId, groupId);
+
+    // Quyền tải được mở cho quản trị, thành viên nhóm và giảng viên tham gia đánh giá.
     if (!canAccess(registration, actor)) {
       throw new IllegalArgumentException("report-submissions.error.download-forbidden");
     }
+
+    // Chuẩn hóa đường dẫn và bắt buộc tệp nằm trong thư mục lưu trữ cấu hình.
     Path path = root().resolve(file.getStoragePath()).normalize();
     if (!path.startsWith(root()) || !Files.isRegularFile(path)) {
       throw new IllegalArgumentException("report-submissions.error.file-not-found");
@@ -148,6 +169,7 @@ public class ReportSubmissionService {
     return new FileSystemResource(path);
   }
 
+  /** Kiểm tra người dùng là trưởng nhóm và thời gian nộp báo cáo đang mở. */
   public boolean canUpload(TopicRegistration registration, User actor) {
     return registration != null
         && registration.getStatus() == TopicRegistrationStatus.APPROVED
@@ -158,10 +180,12 @@ public class ReportSubmissionService {
             .orElse(false);
   }
 
+  /** Kiểm tra thời hạn nộp báo cáo đã kết thúc hay chưa. */
   public boolean isUploadClosed(TopicRegistration registration) {
     return registration != null && !isBeforeOrAtDeadline(registration);
   }
 
+  /** Kiểm tra thời gian nộp báo cáo chưa bắt đầu vì đợt đăng ký sinh viên vẫn đang mở. */
   public boolean isUploadNotStarted(TopicRegistration registration) {
     if (registration == null) {
       return false;
@@ -201,14 +225,19 @@ public class ReportSubmissionService {
   }
 
   private boolean canAccess(TopicRegistration registration, User actor) {
+    // Quản trị viên và trưởng khoa được phép truy cập mọi báo cáo.
     if (hasRole(actor, "ADMIN") || hasRole(actor, "HEAD_OF_FACULTY")) {
       return true;
     }
+
+    // Sinh viên chỉ được truy cập báo cáo của chính nhóm mình.
     if (groupMemberRepository
         .findByStudentGroupIdAndStudentId(registration.getStudentGroup().getId(), actor.getId())
         .isPresent()) {
       return true;
     }
+
+    // Giảng viên hướng dẫn, phản biện hoặc thành viên hội đồng đều tham gia đánh giá báo cáo.
     if (registration.getTopic().getAdvisers().stream()
         .anyMatch(adviser -> adviser.getId().equals(actor.getId()))) {
       return true;
@@ -223,9 +252,12 @@ public class ReportSubmissionService {
   }
 
   private void validateFiles(List<MultipartFile> files) {
+    // Kiểm tra số lượng trước khi duyệt chi tiết để báo lỗi thống nhất cho cả danh sách.
     if (files == null || files.isEmpty() || files.size() > MAX_FILES) {
       throw new IllegalArgumentException("report-submissions.validation.files.count");
     }
+
+    // Mỗi tệp phải có tên hợp lệ, đúng định dạng hỗ trợ và không vượt giới hạn theo loại.
     for (MultipartFile file : files) {
       ReportFileType type = fileType(file);
       String originalName = file.getOriginalFilename();

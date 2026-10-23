@@ -45,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/** Xử lý hội đồng, phân công phản biện, chấm điểm, chốt và công bố kết quả. */
 public class CouncilService {
   private static final int MIN_MEMBERS = 3;
   private static final int MAX_MEMBERS = 5;
@@ -88,21 +89,25 @@ public class CouncilService {
     this.eventPublisher = eventPublisher;
   }
 
+  /** Lấy danh sách hội đồng của một đợt KLTN. */
   public List<Council> councils(Long periodId) {
     requireCouncilPeriod(periodRepository.findById(periodId).orElseThrow());
     return councilRepository.findAllByRegistrationPeriodId(periodId);
   }
 
+  /** Đếm tổng số hội đồng đã tạo trong một đợt. */
   public long countCouncils(Long periodId) {
     return councilRepository.countByRegistrationPeriodId(periodId);
   }
 
+  /** Thống kê số hội đồng theo từng đợt đăng ký được cung cấp. */
   public Map<Long, Long> councilCounts(List<Long> periodIds) {
     if (periodIds.isEmpty()) return Map.of();
 
     return counts(councilRepository.countByRegistrationPeriodIdIn(periodIds));
   }
 
+  /** Lấy ID các đợt có hành động gần nhất là công bố kết quả. */
   public Set<Long> publishedPeriodIds(List<Long> periodIds) {
     if (periodIds.isEmpty()) return Set.of();
 
@@ -116,6 +121,7 @@ public class CouncilService {
         .collect(Collectors.toSet());
   }
 
+  /** Xác định các đợt đã đủ điều kiện để công bố kết quả. */
   public Set<Long> publishablePeriodIds(List<Long> periodIds) {
     if (periodIds.isEmpty()) return Set.of();
 
@@ -132,6 +138,7 @@ public class CouncilService {
         .collect(Collectors.toSet());
   }
 
+  /** Tổng hợp hội đồng cùng thành viên và số đề tài để hiển thị danh sách. */
   public List<CouncilSummary> councilSummaries(Long periodId, List<Council> councils) {
     if (councils.isEmpty()) return List.of();
 
@@ -155,20 +162,24 @@ public class CouncilService {
     }).toList();
   }
 
+  /** Lấy ID các đăng ký đã được chốt điểm cuối cùng trong một đợt. */
   public Set<Long> finalizedRegistrationIds(Long periodId) {
     return Set.copyOf(
         finalResultRepository.findRegistrationIdsByPeriodIdAndStatus(
             periodId, FinalResultStatus.FINALIZED));
   }
 
+  /** Tìm hội đồng theo ID và bảo đảm hội đồng thuộc đúng đợt đăng ký. */
   public Council findCouncil(Long periodId, Long councilId) {
     return councilRepository.findByIdAndRegistrationPeriodId(councilId, periodId).orElse(null);
   }
 
+  /** Lấy danh sách giảng viên cùng vai trò của họ trong hội đồng. */
   public List<CouncilMember> members(Long councilId) {
     return councilMemberRepository.findAllByCouncilId(councilId);
   }
 
+  /** Kiểm tra đợt còn trong thời gian được phép tạo và phân công hội đồng. */
   public boolean isCouncilManagementOpen(Long periodId) {
     RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
     requireCouncilPeriod(period);
@@ -176,6 +187,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Xóa hội đồng khi thời gian quản lý còn mở và chưa có đề tài được phân công. */
   public void deleteCouncil(Long periodId, Long councilId) {
     Council council = requireCouncil(periodId, councilId);
     requireCouncilPeriod(council.getRegistrationPeriod());
@@ -188,6 +200,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Tạo hội đồng KLTN và lưu danh sách thành viên theo vai trò được chọn. */
   public Council createCouncil(Long periodId, User creator, CouncilForm form) {
     RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
     requireCouncilPeriod(period);
@@ -203,6 +216,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Cập nhật thông tin và danh sách thành viên của hội đồng chưa khóa. */
   public void updateCouncil(Long periodId, Long councilId, CouncilForm form) {
     Council council = requireCouncil(periodId, councilId);
     requireCouncilPeriod(council.getRegistrationPeriod());
@@ -220,6 +234,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Phân công một đề tài KLTN chưa có hội đồng vào hội đồng được chọn. */
   public void assignTopic(Long periodId, Long councilId, Long topicId) {
     Council council = requireCouncil(periodId, councilId);
     Topic topic = topicRepository.findById(topicId).orElseThrow();
@@ -248,6 +263,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Gỡ đề tài khỏi hội đồng khi chưa phát sinh đánh giá hoặc kết quả cuối cùng. */
   public void unassignTopic(Long periodId, Long councilId, Long topicId) {
     Council council = requireCouncil(periodId, councilId);
     requireCouncilPeriod(council.getRegistrationPeriod());
@@ -277,12 +293,14 @@ public class CouncilService {
     topicRepository.save(topic);
   }
 
+  /** Kiểm tra đợt còn trong thời gian được phép phân công giảng viên phản biện. */
   public boolean isReviewerAssignmentOpen(Long periodId) {
     RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
     requireReviewerPeriod(period);
     return isReviewerAssignmentOpen(period);
   }
 
+  /** Lấy các đề tài trong đợt cần hiển thị trên màn hình phân công phản biện. */
   public List<Topic> reviewerAssignmentTopics(Long periodId) {
     RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
     requireReviewerPeriod(period);
@@ -297,6 +315,7 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Gán giảng viên phản biện cho đề tài sau khi kiểm tra xung đột vai trò. */
   public void assignReviewer(Long periodId, Long topicId, Long reviewerId) {
     RegistrationPeriod period = periodRepository.findById(periodId).orElseThrow();
     requireReviewerPeriod(period);
@@ -341,24 +360,34 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Lưu bản nháp hoặc nộp phiếu đánh giá của giảng viên cho một đăng ký đề tài. */
   public void saveEvaluation(Long registrationId, User evaluator, EvaluationForm form, boolean submit) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
+
+    // Chỉ người được phân công mới được chấm đăng ký đã duyệt, có báo cáo và còn hạn.
     if (registration.getStatus() != TopicRegistrationStatus.APPROVED) {
       throw new IllegalArgumentException("evaluations.error.registration-required");
     }
+
     if (!requiredEvaluatorIds(registration).contains(evaluator.getId())) {
       throw new IllegalArgumentException("evaluations.error.not-assigned");
     }
+
     if (!reportSubmissionService.hasCurrentSubmission(registrationId)) {
       throw new IllegalArgumentException("evaluations.error.report-required");
     }
+
     if (!isEvaluationOpen(registration)) {
       throw new IllegalArgumentException("evaluations.error.deadline-passed");
     }
+
+    // Tái sử dụng bản nháp; phiếu đã nộp bị khóa để bảo toàn kết quả đánh giá.
     Evaluation evaluation = evaluationRepository.findByTopicRegistrationIdAndEvaluatorId(registrationId, evaluator.getId()).orElseGet(Evaluation::new);
     if (evaluation.getId() != null && evaluation.getStatus() == EvaluationStatus.SUBMITTED) {
       throw new IllegalArgumentException("evaluations.error.submitted-locked");
     }
+
+    // Điểm chỉ bắt buộc và được kiểm tra miền giá trị khi nộp chính thức.
     if (submit) {
       if (form.getScore() == null || form.getScore().compareTo(MIN_SCORE) < 0 || form.getScore().compareTo(MAX_SCORE) > 0) {
         throw new IllegalArgumentException("evaluations.validation.score.range");
@@ -368,12 +397,15 @@ public class CouncilService {
     } else {
       evaluation.setStatus(EvaluationStatus.DRAFT);
     }
+
+    // Các trường nội dung được lưu cho cả bản nháp lẫn bản nộp chính thức.
     evaluation.setTopicRegistration(registration);
     evaluation.setEvaluator(evaluator);
     evaluation.setScore(form.getScore());
     evaluation.setComment(form.getComment());
     evaluationRepository.save(evaluation);
 
+    // Các loại đợt không dùng hội đồng được tự động chốt khi đủ phiếu bắt buộc.
     if (submit
         && registration.getTopic().getRegistrationPeriod().getPeriodType() != PeriodType.KLTN) {
       finalizeAutomaticResult(registration);
@@ -381,12 +413,16 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Chốt kết quả cuối cùng sau khi toàn bộ thành viên hội đồng đã nộp phiếu. */
   public void finalizeResult(Long registrationId, User chairperson, FinalResultForm form) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
+
+    // Chỉ KLTN còn trong thời gian đánh giá mới được chốt thủ công.
     requireCouncilPeriod(registration.getTopic().getRegistrationPeriod());
     if (!isEvaluationOpen(registration)) {
       throw new IllegalArgumentException("final-results.error.deadline-passed");
     }
+    // Người chốt bắt buộc là chủ tịch của đúng hội đồng được gán cho đề tài.
     Council council = registration.getTopic().getCouncil();
     if (council == null || members(council.getId()).stream().noneMatch(member -> member.getLecturer().getId().equals(chairperson.getId()) && member.getMemberRole() == CouncilMemberRole.CHAIRPERSON)) {
       throw new IllegalArgumentException("final-results.error.chairperson-required");
@@ -394,6 +430,8 @@ public class CouncilService {
     if (finalResultRepository.findByTopicRegistrationId(registrationId).isPresent()) {
       throw new IllegalArgumentException("final-results.error.already-finalized");
     }
+
+    // Tập phiếu đã nộp phải khớp chính xác với tập thành viên hội đồng.
     List<Evaluation> evaluations = evaluationRepository.findAllByTopicRegistrationIdAndStatus(registrationId, EvaluationStatus.SUBMITTED);
     Set<Long> memberIds =
         members(council.getId()).stream()
@@ -405,8 +443,12 @@ public class CouncilService {
             .anyMatch(evaluatorId -> !memberIds.contains(evaluatorId))) {
       throw new IllegalArgumentException("final-results.error.evaluations-incomplete");
     }
+
+    // Điểm cuối cùng là trung bình cộng, làm tròn hai chữ số thập phân.
     BigDecimal score = evaluations.stream().map(evaluation -> evaluation.getScore()).reduce(BigDecimal.ZERO, (left, right) -> left.add(right))
         .divide(BigDecimal.valueOf(evaluations.size()), 2, RoundingMode.HALF_UP);
+
+    // Ghi kết quả cùng người và thời điểm chốt để phục vụ truy vết.
     FinalResult result = finalResultRepository.findByTopicRegistrationId(registrationId).orElseGet(FinalResult::new);
     result.setTopicRegistration(registration);
     result.setFinalScore(score);
@@ -418,7 +460,9 @@ public class CouncilService {
   }
 
   @Transactional
+  /** Công bố kết quả của đợt và ghi lại người thực hiện trong lịch sử công bố. */
   public void publishResults(Long periodId, User performer) {
+    // Chỉ người có quyền công bố và đợt đã hoàn tất mọi kết quả mới được tiếp tục.
     periodRepository.findById(periodId).orElseThrow();
     requirePublisher(performer);
     if (isPublished(periodId)) {
@@ -427,36 +471,47 @@ public class CouncilService {
     if (!canPublishResults(periodId)) {
       throw new IllegalArgumentException("result-publications.error.results-incomplete");
     }
+
+    // Lưu lịch sử trước rồi phát sự kiện để các listener gửi thông báo sau commit.
     publicationRepository.save(publication(periodId, performer, ResultPublicationAction.PUBLISHED, null));
     eventPublisher.publishEvent(new ResultsPublishedEvent(periodId));
   }
 
   @Transactional
+  /** Thu hồi kết quả đã công bố và lưu lý do cùng người thực hiện vào lịch sử. */
   public void revokePublication(Long periodId, User performer, String reason) {
+    // Thu hồi chỉ hợp lệ khi kết quả hiện đang được công bố và người thao tác có quyền.
     periodRepository.findById(periodId).orElseThrow();
     requirePublisher(performer);
     if (!isPublished(periodId)) {
       throw new IllegalArgumentException("result-publications.error.not-published");
     }
+
     if (reason == null || reason.isBlank()) throw new IllegalArgumentException("result-publications.validation.reason.required");
+
+    // Không xóa lịch sử công bố; thêm một bản ghi thu hồi mới để giữ audit trail.
     publicationRepository.save(publication(periodId, performer, ResultPublicationAction.REVOKED, reason.trim()));
   }
 
+  /** Lấy kết quả đã công bố của nhóm; trả về {@code null} nếu chưa có kết quả công khai. */
   public FinalResult publishedResult(Long groupId) {
     TopicRegistration registration = registrationRepository.findByStudentGroupId(groupId).orElse(null);
     if (registration == null || !publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(registration.getTopic().getRegistrationPeriod().getId()).map(item -> item.getAction() == ResultPublicationAction.PUBLISHED).orElse(false)) return null;
     return finalResultRepository.findByTopicRegistrationId(registration.getId()).orElse(null);
   }
 
+  /** Lấy kết quả đã công bố của các nhóm được chọn trong cùng một đợt. */
   public List<FinalResult> publishedResults(Long periodId, List<Long> groupIds) {
     if (groupIds.isEmpty() || !isPublished(periodId)) return List.of();
     return finalResultRepository.findAllByPeriodAndGroupIds(periodId, groupIds);
   }
 
+  /** Kiểm tra hành động công bố gần nhất cho biết kết quả của đợt đang được công khai. */
   public boolean resultsPublished(Long periodId) {
     return isPublished(periodId);
   }
 
+  /** Lấy các đăng ký đề tài đã được phân công cho một hội đồng. */
   public List<TopicRegistration> assignedRegistrations(Long councilId) {
     Council council = councilRepository.findById(councilId).orElseThrow();
     requireCouncilPeriod(council.getRegistrationPeriod());
@@ -466,6 +521,7 @@ public class CouncilService {
         .toList();
   }
 
+  /** Lấy các đăng ký KLTN đủ điều kiện nhưng chưa được phân công vào hội đồng nào. */
   public List<TopicRegistration> eligibleUnassignedRegistrations(Long councilId) {
     Council council = councilRepository.findById(councilId).orElseThrow();
     requireCouncilPeriod(council.getRegistrationPeriod());
@@ -478,16 +534,19 @@ public class CouncilService {
         .toList();
   }
 
+  /** Lấy lịch sử công bố và thu hồi kết quả của một đợt, mới nhất xếp trước. */
   public List<ResultPublication> publicationHistory(Long periodId) {
     periodRepository.findById(periodId).orElseThrow();
     return publicationRepository.findAllByRegistrationPeriodIdOrderByIdDesc(periodId);
   }
 
+  /** Tổng hợp trạng thái và điểm cuối cùng của từng đăng ký trong đợt. */
   public List<RegistrationResultSummary> resultSummaries(Long periodId) {
     List<TopicRegistration> registrations = registrationRepository
         .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
     if (registrations.isEmpty()) return List.of();
 
+    // Nạp kết quả theo lô rồi lập chỉ mục theo đăng ký để tránh truy vấn từng nhóm.
     List<Long> groupIds = registrations.stream()
         .map(registration -> registration.getStudentGroup().getId())
         .toList();
@@ -495,12 +554,14 @@ public class CouncilService {
         finalResultRepository.findAllByPeriodAndGroupIds(periodId, groupIds).stream()
             .collect(Collectors.toMap(result -> result.getTopicRegistration().getId(), result -> result));
 
+    // Giữ cả đăng ký chưa có kết quả để giao diện thể hiện trạng thái còn thiếu.
     return registrations.stream()
         .map(registration -> new RegistrationResultSummary(
             registration, resultsByRegistrationId.get(registration.getId())))
         .toList();
   }
 
+  /** Kiểm tra tất cả đăng ký hợp lệ trong đợt đã có kết quả cuối cùng để được công bố. */
   public boolean canPublishResults(Long periodId) {
     List<TopicRegistration> registrations = registrationRepository
         .findAllByRegistrationPeriodIdAndStatus(periodId, TopicRegistrationStatus.APPROVED);
@@ -514,10 +575,12 @@ public class CouncilService {
                         .orElse(false));
   }
 
+  /** Lấy lần công bố hoặc thu hồi kết quả gần nhất của một đợt. */
   public ResultPublication latestPublication(Long periodId) {
     return publicationRepository.findFirstByRegistrationPeriodIdOrderByIdDesc(periodId).orElse(null);
   }
 
+  /** Tìm đăng ký trong không gian làm việc và kiểm tra người dùng có vai trò đánh giá liên quan. */
   public TopicRegistration workspaceRegistration(Long registrationId, User member) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
     if (!requiredEvaluatorIds(registration).contains(member.getId())) {
@@ -526,14 +589,17 @@ public class CouncilService {
     return registration;
   }
 
+  /** Lấy toàn bộ phiếu đánh giá đã lưu của một đăng ký đề tài. */
   public List<Evaluation> evaluations(Long registrationId) {
     return evaluationRepository.findAllByTopicRegistrationId(registrationId);
   }
 
+  /** Lấy kết quả cuối cùng của đăng ký; trả về {@code null} nếu chưa chốt điểm. */
   public FinalResult finalResult(Long registrationId) {
     return finalResultRepository.findByTopicRegistrationId(registrationId).orElse(null);
   }
 
+  /** Kiểm tra giảng viên được phân công đánh giá và chưa nộp phiếu trước đó. */
   public boolean canEvaluate(Long registrationId, User evaluator) {
     TopicRegistration registration = workspaceRegistration(registrationId, evaluator);
     Evaluation existing = evaluation(registrationId, evaluator.getId());
@@ -542,10 +608,13 @@ public class CouncilService {
         && isEvaluationOpen(registration);
   }
 
+  /** Kiểm tra tất cả thành viên bắt buộc của hội đồng đã nộp phiếu đánh giá. */
   public boolean allMemberEvaluationsSubmitted(Long registrationId) {
     TopicRegistration registration = registrationRepository.findById(registrationId).orElseThrow();
     Council council = registration.getTopic().getCouncil();
     if (council == null) return false;
+
+    // So sánh theo tập mã để bảo đảm không thiếu hoặc thừa phiếu từ ngoài hội đồng.
     Set<Long> memberIds =
         members(council.getId()).stream()
             .map(member -> member.getLecturer().getId())
@@ -559,14 +628,19 @@ public class CouncilService {
     return !memberIds.isEmpty() && submittedEvaluatorIds.equals(memberIds);
   }
 
+  /** Kiểm tra người dùng là chủ tịch hội đồng và đã đủ phiếu để chốt kết quả KLTN. */
   public boolean canFinalizeResult(Long registrationId, User user) {
     TopicRegistration registration = workspaceRegistration(registrationId, user);
+
+    // Chỉ KLTN có hội đồng, chưa chốt và còn thời gian đánh giá mới đi tiếp.
     if (registration.getTopic().getRegistrationPeriod().getPeriodType() != PeriodType.KLTN
         || registration.getTopic().getCouncil() == null
         || finalResult(registrationId) != null
         || !isEvaluationOpen(registration)) {
       return false;
     }
+
+    // Quyền chốt thuộc chủ tịch và chỉ mở khi toàn bộ thành viên đã nộp phiếu.
     CouncilMember membership =
         membership(registration.getTopic().getCouncil().getId(), user.getId());
     return membership != null
@@ -574,12 +648,14 @@ public class CouncilService {
         && allMemberEvaluationsSubmitted(registrationId);
   }
 
+  /** Lấy phiếu đánh giá của một giảng viên cho một đăng ký đề tài. */
   public Evaluation evaluation(Long registrationId, Long evaluatorId) {
     return evaluationRepository
         .findByTopicRegistrationIdAndEvaluatorId(registrationId, evaluatorId)
         .orElse(null);
   }
 
+  /** Gom trạng thái phiếu đánh giá theo từng đăng ký để hiển thị danh sách công việc. */
   public Map<Long, EvaluationStatus> evaluationStatuses(
       List<Long> registrationIds, Long evaluatorId) {
     if (registrationIds.isEmpty()) return Map.of();
@@ -592,6 +668,7 @@ public class CouncilService {
             Evaluation::getStatus));
   }
 
+  /** Tìm vai trò của một giảng viên trong hội đồng. */
   public CouncilMember membership(Long councilId, Long lecturerId) {
     return members(councilId).stream()
         .filter(member -> member.getLecturer().getId().equals(lecturerId))
@@ -599,8 +676,12 @@ public class CouncilService {
         .orElse(null);
   }
 
+  /** Lấy các đăng ký mà giảng viên tham gia với vai trò hướng dẫn, phản biện hoặc hội đồng. */
   public List<TopicRegistration> workspaceRegistrations(User member) {
+    // Dùng map để hợp nhất đăng ký khi một giảng viên đồng thời giữ nhiều vai trò đánh giá.
     Map<Long, TopicRegistration> registrations = new LinkedHashMap<>();
+
+    // Giảng viên hướng dẫn chỉ trực tiếp đánh giá các đợt môn học và nghiên cứu khoa học.
     registrationRepository
         .findAllByAdviserIdAndStatus(member.getId(), TopicRegistrationStatus.APPROVED)
         .stream()
@@ -610,15 +691,19 @@ public class CouncilService {
               return type == PeriodType.MON_HOC || type == PeriodType.NCKH;
             })
         .forEach(registration -> registrations.put(registration.getId(), registration));
+
+    // Phản biện và thành viên hội đồng được thêm từ các phân công tương ứng.
     registrationRepository
         .findAllByReviewerIdAndStatus(member.getId(), TopicRegistrationStatus.APPROVED)
         .forEach(registration -> registrations.put(registration.getId(), registration));
+
     registrationRepository
         .findAllByCouncilMemberId(member.getId(), TopicRegistrationStatus.APPROVED)
         .forEach(registration -> registrations.put(registration.getId(), registration));
     return List.copyOf(registrations.values());
   }
 
+  /** Chuyển danh sách ID giảng viên thành dữ liệu gọn dùng cho ô lựa chọn. */
   public List<CouncilLecturerOption> lecturerOptions(List<Long> ids) {
     if (ids == null || ids.isEmpty()) return List.of();
     return userRepository.findAllLecturersByIdIn(Set.copyOf(ids)).stream()
@@ -628,6 +713,8 @@ public class CouncilService {
 
   private Set<Long> requiredEvaluatorIds(TopicRegistration registration) {
     Topic topic = registration.getTopic();
+
+    // Nhóm người bắt buộc chấm thay đổi theo loại đợt: hướng dẫn, phản biện hoặc hội đồng.
     return switch (topic.getRegistrationPeriod().getPeriodType()) {
       case MON_HOC, NCKH ->
           topic.getAdvisers().stream()
@@ -655,10 +742,12 @@ public class CouncilService {
   }
 
   private void finalizeAutomaticResult(TopicRegistration registration) {
+    // Không tính lại khi kết quả đã được tạo trước đó.
     if (finalResultRepository.findByTopicRegistrationId(registration.getId()).isPresent()) {
       return;
     }
 
+    // Chỉ chốt khi tập người đã nộp phiếu khớp chính xác tập người bắt buộc chấm.
     Set<Long> requiredEvaluatorIds = requiredEvaluatorIds(registration);
     List<Evaluation> evaluations =
         evaluationRepository.findAllByTopicRegistrationIdAndStatus(
@@ -671,6 +760,7 @@ public class CouncilService {
       return;
     }
 
+    // Kết quả tự động dùng trung bình cộng và không ghi người chốt thủ công.
     BigDecimal score =
         evaluations.stream()
             .map(evaluation -> evaluation.getScore())
@@ -701,6 +791,7 @@ public class CouncilService {
   }
 
   private List<User> validatedLecturers(CouncilForm form) {
+    // Kiểm tra cấu trúc danh sách và bảo đảm chủ tịch, thư ký là hai thành viên khác nhau.
     List<Long> ids = form.getMemberIds();
     if (ids == null
         || form.getChairpersonId() == null
@@ -713,12 +804,15 @@ public class CouncilService {
         || form.getChairpersonId().equals(form.getSecretaryId())) {
       throw new IllegalArgumentException("councils.error.invalid-members");
     }
+
+    // Đối chiếu cơ sở dữ liệu để loại mã không tồn tại hoặc không thuộc giảng viên.
     List<User> lecturers = userRepository.findAllLecturersByIdIn(Set.copyOf(ids));
     if (lecturers.size() != ids.size()) throw new IllegalArgumentException("councils.error.invalid-members");
     return lecturers;
   }
 
   private void saveMembers(Council council, CouncilForm form, List<User> lecturers) {
+    // Vai trò chủ tịch và thư ký được ưu tiên; các giảng viên còn lại là thành viên.
     for (User lecturer : lecturers) {
       CouncilMember member = new CouncilMember();
       member.setCouncil(council);
@@ -729,6 +823,7 @@ public class CouncilService {
   }
 
   private void validateAssignedTopicAdvisers(Long councilId, List<User> lecturers) {
+    // Người hướng dẫn đề tài không được tham gia hội đồng chấm chính đề tài đó.
     Set<Long> lecturerIds = lecturers.stream().map(lecturer -> lecturer.getId()).collect(java.util.stream.Collectors.toSet());
     boolean hasConflict =
         assignedRegistrations(councilId).stream()
@@ -751,6 +846,7 @@ public class CouncilService {
     }
   }
 
+  /** Kiểm tra thời điểm hiện tại nằm sau hạn đăng ký và không vượt quá ngày tổ chức hội đồng. */
   public boolean isCouncilManagementOpen(RegistrationPeriod period) {
     LocalDateTime registrationEnd = period.getStudentRegistrationEnd();
     LocalDateTime councilDate = period.getCouncilDate();

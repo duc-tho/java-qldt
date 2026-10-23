@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng nhóm sinh viên và đăng ký đề tài. */
 public class StudentRegistrationPeriodController {
   private final StudentGroupService groupService;
   private final UserService userService;
@@ -32,6 +33,7 @@ public class StudentRegistrationPeriodController {
   }
 
   @GetMapping("/nhom-cua-toi")
+  /** Hiển thị danh sách nhóm sinh viên và đăng ký đề tài mà người dùng được phép truy cập. */
   public String list(@AuthenticationPrincipal UserDetails principal, Model model) {
     User student = userService.findByEmail(principal.getUsername()).orElseThrow();
     List<GroupSummary> groups = groupService.groupSummariesForStudent(student);

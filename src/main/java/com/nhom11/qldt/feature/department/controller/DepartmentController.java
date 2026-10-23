@@ -21,6 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/bo-mon")
+/** Xử lý các trang và request tạo, xem, sửa, xóa bộ môn. */
 public class DepartmentController {
 
   private final DepartmentService service;
@@ -40,6 +41,7 @@ public class DepartmentController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách bộ môn có tìm kiếm, sắp xếp và phân trang. */
   public String list(@ModelAttribute TableQuery query, Model model) {
     view.table(model, service.findAll(query, table), "/bo-mon", query, table);
     model.addAttribute("pageTitle", "departments.page.list.title");
@@ -48,12 +50,14 @@ public class DepartmentController {
   }
 
   @GetMapping("/new")
+  /** Hiển thị form tạo bộ môn mới. */
   public String createForm(Model model) {
     form(model, new DepartmentForm(), "/bo-mon", false, "departments.page.create.title");
     return "page/department/create";
   }
 
   @PostMapping
+  /** Kiểm tra dữ liệu form; nếu hợp lệ thì tạo bộ môn và quay về danh sách. */
   public String create(
       @Valid @ModelAttribute("data") DepartmentForm form, BindingResult errors, Model model) {
     if (errors.hasErrors()) {
@@ -72,6 +76,7 @@ public class DepartmentController {
   }
 
   @GetMapping("/{id}")
+  /** Hiển thị chi tiết bộ môn theo ID ở chế độ chỉ đọc. */
   public String detail(@PathVariable Long id, Model model) {
     Department department = service.findById(id);
     if (department == null) return "redirect:/bo-mon";
@@ -82,6 +87,7 @@ public class DepartmentController {
   }
 
   @GetMapping("/{id}/edit")
+  /** Hiển thị form chỉnh sửa bộ môn theo ID. */
   public String edit(@PathVariable Long id, Model model) {
     Department department = service.findById(id);
     if (department == null) return "redirect:/bo-mon";
@@ -92,6 +98,7 @@ public class DepartmentController {
   }
 
   @PostMapping("/{id}")
+  /** Kiểm tra dữ liệu form; nếu hợp lệ thì cập nhật bộ môn theo ID. */
   public String update(
       @PathVariable Long id,
       @Valid @ModelAttribute("data") DepartmentForm form,
@@ -118,6 +125,7 @@ public class DepartmentController {
   }
 
   @PostMapping("/{id}/delete")
+  /** Xóa bộ môn theo ID; hiển thị lỗi nếu bộ môn vẫn đang được đề tài sử dụng. */
   public String delete(@PathVariable Long id, RedirectAttributes attributes) {
     try {
       service.delete(id);

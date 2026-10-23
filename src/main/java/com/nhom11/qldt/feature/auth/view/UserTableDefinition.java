@@ -8,9 +8,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Khai báo cột, thao tác và quyền hiển thị của bảng tài khoản và người dùng. */
 public class UserTableDefinition extends BaseTableDefinition<User> {
 
   @Override
+  /** Khai báo các cột và khả năng tìm kiếm, lọc, sắp xếp của bảng. */
   public List<ColumnDef> columns() {
     return List.of(
         new ColumnDef(
@@ -48,6 +50,7 @@ public class UserTableDefinition extends BaseTableDefinition<User> {
   }
 
   @Override
+  /** Khai báo các thao tác hiển thị cho từng bản ghi trong bảng. */
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Link(

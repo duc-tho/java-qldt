@@ -27,6 +27,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/dot/{periodId}/hoi-dong")
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class CouncilController {
   private final CouncilService councilService;
   private final RegistrationPeriodService periodService;
@@ -39,6 +40,7 @@ public class CouncilController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách hội đồng và kết quả đánh giá mà người dùng được phép truy cập. */
   public String list(@PathVariable Long periodId, Model model) {
     RegistrationPeriod period = periodService.findById(periodId);
     if (!isCouncilPeriod(period)) return "redirect:/dot";
@@ -67,6 +69,7 @@ public class CouncilController {
   }
 
   @GetMapping("/tao")
+  /** Hiển thị biểu mẫu tạo mới hội đồng và kết quả đánh giá. */
   public String createForm(@PathVariable Long periodId, Model model) {
     if (!isCouncilPeriod(periodService.findById(periodId))) {
       return "redirect:/dot";
@@ -85,6 +88,7 @@ public class CouncilController {
 
   @GetMapping("/giang-vien")
   @ResponseBody
+  /** Tìm danh sách giảng viên phù hợp để sử dụng trong ô lựa chọn. */
   public List<CouncilLecturerOption> lecturers(
       @PathVariable Long periodId, @RequestParam(required = false) String search) {
     if (!isCouncilPeriod(periodService.findById(periodId))) return List.of();
@@ -94,6 +98,7 @@ public class CouncilController {
   }
 
   @PostMapping
+  /** Kiểm tra biểu mẫu, tạo hội đồng và kết quả đánh giá và trả về kết quả điều hướng. */
   public String create(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -119,6 +124,7 @@ public class CouncilController {
   }
 
   @GetMapping("/{councilId}/sua")
+  /** Hiển thị biểu mẫu chỉnh sửa hội đồng và kết quả đánh giá. */
   public String edit(@PathVariable Long periodId, @PathVariable Long councilId, Model model) {
     Council council = councilService.findCouncil(periodId, councilId);
     if (council == null) {
@@ -145,6 +151,7 @@ public class CouncilController {
   }
 
   @PostMapping("/{councilId}")
+  /** Kiểm tra biểu mẫu, cập nhật hội đồng và kết quả đánh giá và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long periodId,
       @PathVariable Long councilId,
@@ -170,6 +177,7 @@ public class CouncilController {
   }
 
   @GetMapping("/{councilId}")
+  /** Hiển thị thông tin chi tiết của hội đồng và kết quả đánh giá được yêu cầu. */
   public String detail(@PathVariable Long periodId, @PathVariable Long councilId, Model model) {
     Council council = councilService.findCouncil(periodId, councilId);
     if (council == null)
@@ -185,6 +193,7 @@ public class CouncilController {
   }
 
   @PostMapping("/{councilId}/de-tai/{topicId}")
+  /** Gán đề tài được chọn cho hội đồng. */
   public String assignTopic(
       @PathVariable Long periodId,
       @PathVariable Long councilId,
@@ -199,6 +208,7 @@ public class CouncilController {
   }
 
   @PostMapping("/{councilId}/de-tai/{topicId}/bo-phan-cong")
+  /** Gỡ đề tài khỏi hội đồng hiện tại. */
   public String unassignTopic(
       @PathVariable Long periodId,
       @PathVariable Long councilId,
@@ -213,6 +223,7 @@ public class CouncilController {
   }
 
   @PostMapping("/{councilId}/xoa")
+  /** Xóa hội đồng và kết quả đánh giá được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(@PathVariable Long periodId, @PathVariable Long councilId, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
     try {
       councilService.deleteCouncil(periodId, councilId);

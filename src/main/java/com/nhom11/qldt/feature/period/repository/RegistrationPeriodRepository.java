@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/** Truy cập và truy vấn dữ liệu của chức năng đợt đăng ký. */
 public interface RegistrationPeriodRepository extends BaseRepository<RegistrationPeriod, Long> {
   @Query(
       """
@@ -17,6 +18,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
         and period.studentRegistrationEnd < :now
         and period.councilDate > :now
       """)
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countOpenCouncilPeriods(@Param("now") LocalDateTime now);
 
   @Query(
@@ -26,6 +28,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
         and period.studentRegistrationEnd >= :now
       order by period.studentRegistrationEnd asc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<RegistrationPeriod> findOpenForStudents(@Param("now") LocalDateTime now);
 
   @Query(
@@ -35,6 +38,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
         and period.studentRegistrationEnd >= :now
       order by period.studentRegistrationEnd asc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<RegistrationPeriod> findVisibleForLecturers(@Param("now") LocalDateTime now);
 
   @Query(
@@ -50,6 +54,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
             where member.council.registrationPeriod = period and member.lecturer.id = :lecturerId))
       order by period.lecturerRegistrationEnd desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<RegistrationPeriod> findVisibleForLecturer(
       @Param("now") LocalDateTime now, @Param("lecturerId") Long lecturerId);
 
@@ -82,6 +87,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
             and (:search is null or lower(period.name) like lower(concat('%', :search, '%')))
             and (:nameFilter is null or lower(period.name) like lower(concat('%', :nameFilter, '%')))
           """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Page<RegistrationPeriod> findVisibleForLecturer(
       @Param("now") LocalDateTime now,
       @Param("lecturerId") Long lecturerId,
@@ -97,6 +103,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
           where member.registrationPeriod = period and member.student.id = :studentId)
       order by period.studentRegistrationEnd desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<RegistrationPeriod> findVisibleForStudent(
       @Param("now") LocalDateTime now, @Param("studentId") Long studentId);
 
@@ -119,6 +126,7 @@ public interface RegistrationPeriodRepository extends BaseRepository<Registratio
             and (:search is null or lower(period.name) like lower(concat('%', :search, '%')))
             and (:nameFilter is null or lower(period.name) like lower(concat('%', :nameFilter, '%')))
           """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Page<RegistrationPeriod> findVisibleForStudent(
       @Param("now") LocalDateTime now,
       @Param("studentId") Long studentId,

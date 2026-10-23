@@ -16,6 +16,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/** Biểu diễn vai trò phân quyền có thể gán cho người dùng. */
 public final class Role extends SoftDeleteEntity {
   @Column(nullable = false, unique = true, length = 50)
   String name;

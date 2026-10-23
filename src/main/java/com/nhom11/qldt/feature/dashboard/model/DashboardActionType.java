@@ -1,5 +1,6 @@
 package com.nhom11.qldt.feature.dashboard.model;
 
+/** Các loại tác vụ nhanh có thể xuất hiện trên bảng điều khiển. */
 public enum DashboardActionType {
   USERS("dashboard.action.users.title", "dashboard.action.users.description", "/nguoi-dung", "bi:people"),
   DEPARTMENTS("dashboard.action.departments.title", "dashboard.action.departments.description", "/bo-mon", "bi:diagram-3"),

@@ -41,6 +41,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/dot/{periodId}/nhom")
+/** Điều phối các yêu cầu HTTP của chức năng nhóm sinh viên và đăng ký đề tài. */
 public class StudentGroupController {
   private final StudentGroupService studentGroupService;
   private final RegistrationPeriodService registrationPeriodService;
@@ -71,6 +72,7 @@ public class StudentGroupController {
   }
 
   @GetMapping("/tao")
+  /** Hiển thị biểu mẫu tạo mới nhóm sinh viên và đăng ký đề tài. */
   public String createForm(
       @PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal, Model model) {
     RegistrationPeriod period = findPeriod(periodId);
@@ -85,6 +87,7 @@ public class StudentGroupController {
   }
 
   @PostMapping
+  /** Kiểm tra biểu mẫu, tạo nhóm sinh viên và đăng ký đề tài và trả về kết quả điều hướng. */
   public String create(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -114,6 +117,7 @@ public class StudentGroupController {
   }
 
   @GetMapping("/{groupId}")
+  /** Hiển thị thông tin chi tiết của nhóm sinh viên và đăng ký đề tài được yêu cầu. */
   public String detail(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -128,6 +132,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/thanh-vien")
+  /** Thêm sinh viên vào nhóm do trưởng nhóm hiện tại quản lý. */
   public String addMember(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -154,6 +159,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/thanh-vien/{memberId}/xoa")
+  /** Xóa một thành viên khỏi nhóm theo yêu cầu của trưởng nhóm. */
   public String removeMember(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -172,6 +178,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/truong-nhom")
+  /** Chuyển quyền trưởng nhóm cho thành viên được chọn. */
   public String transferLeadership(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -188,6 +195,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/gui-duyet")
+  /** Gửi đăng ký đề tài hiện tại cho giảng viên hướng dẫn xét duyệt. */
   public String requestApproval(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -204,6 +212,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/de-tai")
+  /** Chọn đề tài cho nhóm và tạo đăng ký chờ xét duyệt. */
   public String selectTopic(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -220,6 +229,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/duyet-de-tai")
+  /** Phê duyệt đăng ký đề tài thuộc phạm vi hướng dẫn của giảng viên hiện tại. */
   public String approveTopic(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -237,6 +247,7 @@ public class StudentGroupController {
   }
 
   @PostMapping("/{groupId}/tu-choi-de-tai")
+  /** Từ chối đăng ký đề tài và lưu lý do để nhóm theo dõi. */
   public String rejectTopic(
       @PathVariable Long periodId,
       @PathVariable Long groupId,
@@ -261,12 +272,15 @@ public class StudentGroupController {
   }
 
   private void populateDetail(Model model, StudentGroup group, User viewer) {
+    // Nạp thông tin nhóm, trưởng nhóm và lịch sử hoạt động dùng ở phần đầu trang.
     List<GroupMember> members = studentGroupService.members(group.getId());
     model.addAttribute("group", group);
     model.addAttribute("members", members);
     model.addAttribute("leader", members.stream().filter(member -> member.isLeader()).findFirst().orElse(null));
     List<GroupActivity> activities = groupActivityService.history(group.getId());
     model.addAttribute("activities", activities);
+
+    // Mốc đổi trạng thái được suy ra khác nhau theo từng giai đoạn của đăng ký.
     TopicRegistration registration = studentGroupService.registration(group.getId());
     model.addAttribute("registration", registration);
     if (registration != null) {
@@ -282,6 +296,8 @@ public class StudentGroupController {
         case APPROVED, REJECTED -> registration.getReviewedAt();
       });
     }
+
+    // Gom trạng thái nộp báo cáo để giao diện quyết định thông báo và nút thao tác.
     var currentReport = registration == null ? null : reportSubmissionService.current(registration.getId());
     boolean reportUploadClosed = reportSubmissionService.isUploadClosed(registration);
     boolean reportUploadNotStarted = reportSubmissionService.isUploadNotStarted(registration);
@@ -294,6 +310,8 @@ public class StudentGroupController {
     model.addAttribute("statusGuidanceKey", statusGuidanceKey(
         registration, registrationOpen, members.size(), reportUploadClosed,
         reportUploadNotStarted, currentReport != null));
+
+    // Các cờ quyền hạn được tính tại server để template chỉ chịu trách nhiệm hiển thị.
     model.addAttribute("publishedResult", councilService.publishedResult(group.getId()));
     model.addAttribute(
         "isDraftRegistration",
@@ -308,12 +326,16 @@ public class StudentGroupController {
         && registrationOpen
         && registration.getTopic().getAdvisers().stream()
             .anyMatch(adviser -> adviser.getId().equals(viewer.getId())));
+
+    // Giữ dữ liệu form đã bị validation lỗi; chỉ tạo form rỗng khi chưa có trong model.
     if (!model.containsAttribute("rejectForm")) {
       model.addAttribute("rejectForm", new RejectTopicRegistrationForm());
     }
+
     if (!model.containsAttribute("addMemberForm")) {
       model.addAttribute("addMemberForm", new AddGroupMemberForm());
     }
+
     model.addAttribute("pageTitle", "student-groups.page.detail.title");
     model.addAttribute("pageHeading", group.getName());
     model.addAttribute("pageIcon", "bi:people");
@@ -326,6 +348,7 @@ public class StudentGroupController {
       return registrationOpen ? "student-groups.status.guide.NONE" : "student-groups.status.guide.NONE_CLOSED";
     }
 
+    // Ưu tiên nguyên nhân chặn thao tác cụ thể nhất để hướng dẫn đúng bước tiếp theo.
     return switch (registration.getStatus()) {
       case DRAFT -> !registrationOpen ? "student-groups.status.guide.DRAFT_CLOSED"
           : memberCount < 3 ? "student-groups.status.guide.DRAFT_MEMBERS"

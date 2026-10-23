@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Khai báo cột, thao tác và quyền hiển thị của bảng đợt đăng ký. */
 public class RegistrationPeriodTableDefinition extends BaseTableDefinition<RegistrationPeriod> {
 
   private final MessageSource messageSource;
@@ -25,6 +26,7 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
   }
 
   @Override
+  /** Khai báo các cột và khả năng tìm kiếm, lọc, sắp xếp của bảng. */
   public List<ColumnDef> columns() {
     return List.of(
         new ColumnDef(
@@ -58,6 +60,7 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
   }
 
   @Override
+  /** Khai báo các thao tác hiển thị cho từng bản ghi trong bảng. */
   public List<ActionDef> actions(String baseUrl) {
     if (!canManageRegistrationPeriods()) {
       return List.of(
@@ -83,11 +86,13 @@ public class RegistrationPeriodTableDefinition extends BaseTableDefinition<Regis
   }
 
   @Override
+  /** Tạo URL dẫn đến màn hình tạo mới. */
   public String createUrl(String baseUrl) {
     return baseUrl + "/tao";
   }
 
   @Override
+  /** Kiểm tra người dùng hiện tại có quyền tạo mới hay không. */
   public boolean canCreate() {
     return canManageRegistrationPeriods();
   }

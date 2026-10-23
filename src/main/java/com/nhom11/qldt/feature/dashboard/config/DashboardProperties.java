@@ -12,6 +12,7 @@ import org.springframework.validation.annotation.Validated;
 @Validated
 @Getter
 @Setter
+/** Ánh xạ các thuộc tính của chức năng bảng điều khiển từ cấu hình ứng dụng. */
 public class DashboardProperties {
   @Min(1)
   private int announcementLimit;

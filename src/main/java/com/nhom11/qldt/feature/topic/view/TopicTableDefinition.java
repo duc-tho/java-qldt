@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Khai báo cột, thao tác và quyền hiển thị của bảng đề tài. */
 public class TopicTableDefinition extends BaseTableDefinition<Topic> {
   private final MessageSource messageSource;
   private final TopicService topicService;
@@ -23,6 +24,7 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
   }
 
   @Override
+  /** Khai báo các cột và khả năng tìm kiếm, lọc, sắp xếp của bảng. */
   public List<ColumnDef> columns() {
     return List.of(
         new ColumnDef(
@@ -62,6 +64,7 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
   }
 
   @Override
+  /** Khai báo các thao tác hiển thị cho từng bản ghi trong bảng. */
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Post(
@@ -107,11 +110,13 @@ public class TopicTableDefinition extends BaseTableDefinition<Topic> {
   }
 
   @Override
+  /** Tạo URL dẫn đến màn hình tạo mới. */
   public String createUrl(String baseUrl) {
     return baseUrl + "/tao";
   }
 
   @Override
+  /** Tạo URL thực hiện xóa hàng loạt. */
   public String bulkDeleteUrl(String baseUrl) {
     return baseUrl + "/xoa";
   }

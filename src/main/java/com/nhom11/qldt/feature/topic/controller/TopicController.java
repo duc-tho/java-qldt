@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đề tài. */
 public class TopicController {
   private final TopicService topicService;
   private final TopicTableDefinition tableDefinition;
@@ -60,6 +61,7 @@ public class TopicController {
     this.studentGroupService = studentGroupService;
   }
 
+  /** Hiển thị danh sách đề tài mà người dùng được phép truy cập. */
   public String list(@PathVariable Long periodId, @ModelAttribute TableQuery query,
       @RequestParam(required = false) Long departmentId,
       @RequestParam(required = false) TopicStatus status,
@@ -92,6 +94,7 @@ public class TopicController {
   }
 
   @ResponseBody
+  /** Tìm danh sách giảng viên phù hợp để sử dụng trong ô lựa chọn. */
   public java.util.List<CouncilLecturerOption> lecturers(
       @PathVariable Long periodId, @RequestParam(required = false) String search) {
     if (findPeriod(periodId) == null || search == null || search.trim().length() < 2) {
@@ -102,6 +105,7 @@ public class TopicController {
         .toList();
   }
 
+  /** Hiển thị biểu mẫu tạo mới đề tài. */
   public String createForm(@PathVariable Long periodId, Model model) {
     RegistrationPeriod period = findPeriod(periodId);
     if (period == null) {
@@ -113,6 +117,7 @@ public class TopicController {
     return "page/topic/create";
   }
 
+  /** Kiểm tra biểu mẫu, tạo đề tài và trả về kết quả điều hướng. */
   public String create(
       @PathVariable Long periodId,
       @Valid @ModelAttribute("data") TopicForm form,
@@ -142,6 +147,7 @@ public class TopicController {
     return "redirect:" + baseUrl(periodId);
   }
 
+  /** Hiển thị thông tin chi tiết của đề tài được yêu cầu. */
   public String detail(@PathVariable Long periodId, @PathVariable Long id, Model model) {
     Topic topic = findTopic(periodId, id);
     if (topic == null) {
@@ -151,6 +157,7 @@ public class TopicController {
     return detailView(model, topic, periodId);
   }
 
+  /** Hiển thị biểu mẫu chỉnh sửa đề tài. */
   public String edit(@PathVariable Long periodId, @PathVariable Long id, Model model) {
     Topic topic = findTopic(periodId, id);
     if (topic == null) {
@@ -169,6 +176,7 @@ public class TopicController {
     return "page/topic/create";
   }
 
+  /** Kiểm tra biểu mẫu, cập nhật đề tài và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long periodId,
       @PathVariable Long id,
@@ -207,6 +215,7 @@ public class TopicController {
     return "redirect:" + topicUrl(periodId, id);
   }
 
+  /** Xóa đề tài được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(
       @PathVariable Long periodId, @PathVariable Long id, RedirectAttributes redirectAttributes) {
     if (findTopic(periodId, id) != null) {
@@ -221,6 +230,7 @@ public class TopicController {
     return "redirect:" + baseUrl(periodId);
   }
 
+  /** Xóa các bản ghi đề tài đã chọn và thông báo kết quả. */
   public String deleteSelected(
       @PathVariable Long periodId,
       @RequestParam(name = "ids", required = false) java.util.List<Long> ids,
@@ -301,6 +311,7 @@ public class TopicController {
     model.addAttribute("breadcrumbParentLabel", period.getName());
   }
 
+  /** Hiển thị biểu mẫu đề xuất đề tài cho giảng viên. */
   public String proposeForm(
       @PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal, Model model) {
     RegistrationPeriod period = findPeriod(periodId);
@@ -313,6 +324,7 @@ public class TopicController {
     return "page/topic/create";
   }
 
+  /** Tiếp nhận biểu mẫu và tạo đề xuất đề tài. */
   public String propose(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -350,6 +362,7 @@ public class TopicController {
     model.addAttribute("requiredAdviserId", proposer.getId());
   }
 
+  /** Phê duyệt đề xuất đề tài và quay lại trang chi tiết của đề tài. */
   public String approve(
       @PathVariable Long periodId, @PathVariable Long id, RedirectAttributes redirectAttributes) {
     try {
@@ -360,6 +373,7 @@ public class TopicController {
     return "redirect:" + topicUrl(periodId, id);
   }
 
+  /** Từ chối yêu cầu nghiệp vụ và lưu lý do. */
   public String reject(
       @PathVariable Long periodId,
       @PathVariable Long id,

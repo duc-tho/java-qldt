@@ -2,6 +2,7 @@ package com.nhom11.qldt.core.table;
 
 import java.util.function.Function;
 
+/** Mô tả một cột bảng, cách lấy giá trị và các khả năng truy vấn được cho phép. */
 public class ColumnDef {
   public final String field;
   public final String label;
@@ -25,6 +26,7 @@ public class ColumnDef {
     this.sortable = sortable;
   }
 
+  /** Trích xuất giá trị hiển thị của cột từ một bản ghi. */
   public String getValue(Object item) {
     return valueExtractor.apply(item);
   }

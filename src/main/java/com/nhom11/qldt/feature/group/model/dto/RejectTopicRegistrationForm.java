@@ -6,6 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận lý do giảng viên hướng dẫn từ chối đăng ký đề tài của nhóm. */
 public class RejectTopicRegistrationForm {
   @NotBlank(message = "{topic-registrations.validation.reason.required}")
   private String reason;

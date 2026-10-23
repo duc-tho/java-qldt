@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/** Truy cập và truy vấn dữ liệu của chức năng nhóm sinh viên và đăng ký đề tài. */
 public interface TopicRegistrationRepository extends BaseRepository<TopicRegistration, Long> {
   @Query(
       """
@@ -17,6 +18,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where adviser.id = :lecturerId
         and registration.status = com.nhom11.qldt.feature.group.model.enums.TopicRegistrationStatus.PENDING
       """)
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countPendingByAdviserId(@Param("lecturerId") Long lecturerId);
 
   @Query(
@@ -39,18 +41,22 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
             and evaluation.evaluator.id = :lecturerId
             and evaluation.status = com.nhom11.qldt.feature.council.model.enums.EvaluationStatus.SUBMITTED)
       """)
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countPendingEvaluations(@Param("lecturerId") Long lecturerId);
 
   @Query(
       "select registration.studentGroup.registrationPeriod.id, count(registration) from TopicRegistration registration where registration.studentGroup.registrationPeriod.id in :periodIds and registration.status = :status group by registration.studentGroup.registrationPeriod.id")
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   List<Object[]> countByPeriodIdsAndStatus(
       @Param("periodIds") List<Long> periodIds,
       @Param("status") TopicRegistrationStatus status);
 
   @EntityGraph(attributePaths = {"topic", "topic.department"})
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByStudentGroupIdIn(List<Long> groupIds);
 
   @EntityGraph(attributePaths = {"studentGroup", "studentGroup.registrationPeriod"})
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByTopicId(Long topicId);
 
   @Query(
@@ -59,6 +65,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       join registration.topic.advisers adviser
       where registration.id = :registrationId and adviser.id = :lecturerId
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<Long> findGroupIdByIdAndAdviserId(
       @Param("registrationId") Long registrationId, @Param("lecturerId") Long lecturerId);
 
@@ -70,6 +77,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
         "topic.advisers",
         "reviewedBy"
       })
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<TopicRegistration> findByStudentGroupId(Long studentGroupId);
 
   @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
@@ -81,6 +89,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where adviser.id = :lecturerId and registration.status = :status
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByAdviserIdAndStatus(
       @Param("lecturerId") Long lecturerId, @Param("status") TopicRegistrationStatus status);
 
@@ -96,6 +105,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where adviser.id = :lecturerId and registration.status <> :excludedStatus
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByAdviserIdExcludingStatus(
       @Param("lecturerId") Long lecturerId,
       @Param("excludedStatus") TopicRegistrationStatus excludedStatus);
@@ -111,6 +121,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where adviser.id = :lecturerId
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByAdviserId(@Param("lecturerId") Long lecturerId);
 
   @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
@@ -122,6 +133,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where topic.reviewer.id = :lecturerId and registration.status = :status
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByReviewerIdAndStatus(
       @Param("lecturerId") Long lecturerId, @Param("status") TopicRegistrationStatus status);
 
@@ -135,6 +147,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       where studentGroup.registrationPeriod.id = :periodId
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByRegistrationPeriodId(@Param("periodId") Long periodId);
 
   @EntityGraph(attributePaths = {"studentGroup.registrationPeriod", "topic.registrationPeriod"})
@@ -147,6 +160,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
         and registration.status = :status
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByRegistrationPeriodIdAndStatus(
       @Param("periodId") Long periodId, @Param("status") TopicRegistrationStatus status);
 
@@ -159,6 +173,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
       join topic.advisers adviser
       where registration.id = :registrationId and adviser.id = :lecturerId
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<TopicRegistration> findByIdAndAdviserId(
       @Param("registrationId") Long registrationId, @Param("lecturerId") Long lecturerId);
 
@@ -173,6 +188,7 @@ public interface TopicRegistrationRepository extends BaseRepository<TopicRegistr
         and registration.status = :status
       order by registration.updatedAt desc
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicRegistration> findAllByCouncilMemberId(
       @Param("lecturerId") Long lecturerId, @Param("status") TopicRegistrationStatus status);
 }

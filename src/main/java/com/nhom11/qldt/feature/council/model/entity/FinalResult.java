@@ -21,6 +21,7 @@ import lombok.Setter;
 @Table(name = "final_results")
 @Getter
 @Setter
+/** Lưu kết quả cuối cùng đã được hội đồng thống nhất cho đăng ký đề tài. */
 public class FinalResult extends SoftDeleteEntity {
   @OneToOne(optional = false)
   @JoinColumn(name = "topic_registration_id", nullable = false, unique = true)

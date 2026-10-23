@@ -20,6 +20,7 @@ import org.springframework.transaction.event.TransactionPhase;
 import org.springframework.transaction.event.TransactionalEventListener;
 
 @Component
+/** Lắng nghe sự kiện nghiệp vụ và gửi email liên quan đến hội đồng, đánh giá và công bố kết quả. */
 public class ResultPublicationEmailListener {
   private static final Logger LOGGER = LoggerFactory.getLogger(ResultPublicationEmailListener.class);
 
@@ -37,6 +38,7 @@ public class ResultPublicationEmailListener {
   }
 
   @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
+  /** Gửi thông báo kết quả đến sinh viên sau khi sự kiện công bố được phát ra. */
   public void notifyStudents(ResultsPublishedEvent event) {
     List<TopicRegistration> registrations = registrationRepository
         .findAllByRegistrationPeriodIdAndStatus(

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 
+/** Hiện thực mặc định cho các thao tác repository mở rộng của ứng dụng. */
 public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRepository<T, ID>
     implements BaseRepository<T, ID> {
 
@@ -30,6 +31,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
   }
 
   @Override
+  /** Ủy quyền việc phân trang, tìm kiếm, lọc và sắp xếp cho bộ dựng Criteria API. */
   public Page<T> findAll(
       Pageable pageable,
       String search,
@@ -39,6 +41,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
   }
 
   @Override
+  /** Cập nhật {@code deleted_at} bằng thời điểm hiện tại rồi lưu record lại database. */
   public void softDelete(T entity) {
     if (!(entity instanceof SoftDeleteEntity)) {
       throw new IllegalArgumentException("Entity does not support soft delete");
@@ -51,6 +54,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
   }
 
   @Override
+  /** Cập nhật {@code deleted_at} cho từng record rồi lưu toàn bộ trong một lần. */
   public void softDeleteAll(Iterable<T> entities) {
     for (T entity : entities) {
       if (!(entity instanceof SoftDeleteEntity)) {
@@ -63,6 +67,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
   }
 
   @Override
+  /** Chạy câu lệnh DELETE native để bỏ qua bộ lọc tự động {@code deleted_at IS NULL}. */
   public boolean deleteByIdIncludingDeleted(ID id) {
     return entityManager
             .createNativeQuery("DELETE FROM " + resolveTableName() + " WHERE id = :id")
@@ -71,6 +76,7 @@ public class BaseRepositoryImpl<T, ID extends Serializable> extends SimpleJpaRep
         > 0;
   }
 
+  /** Xác định tên bảng vật lý từ annotation JPA, hoặc dùng tên lớp khi không khai báo. */
   private String resolveTableName() {
     Table table = domainClass.getAnnotation(Table.class);
     if (table != null && !table.name().isBlank()) {

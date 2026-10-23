@@ -6,6 +6,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận mã sinh viên cần thêm vào nhóm. */
 public class AddGroupMemberForm {
   @NotBlank(message = "{student-groups.validation.student-code.required}")
   private String studentCode;

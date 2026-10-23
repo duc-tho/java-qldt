@@ -8,6 +8,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận email và mật khẩu từ form đăng nhập, đồng thời khai báo điều kiện validation. */
 public class LoginForm {
   public static final String SESSION_EMAIL_ATTRIBUTE = LoginForm.class.getName() + ".email";
 

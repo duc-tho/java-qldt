@@ -38,6 +38,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đề tài. */
 public class TopicPageController {
   private final TopicController staffPages;
   private final TopicProposalController proposalPages;
@@ -71,6 +72,7 @@ public class TopicPageController {
   }
 
   @GetMapping("/dot/{periodId}/de-tai")
+  /** Hiển thị danh sách đề tài mà người dùng được phép truy cập. */
   public String list(
       @PathVariable Long periodId,
       @ModelAttribute TableQuery query,
@@ -130,6 +132,7 @@ public class TopicPageController {
   }
 
   @GetMapping("/dot/{periodId}/de-tai/{topicId}")
+  /** Hiển thị thông tin chi tiết của đề tài được yêu cầu. */
   public String detail(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -189,6 +192,7 @@ public class TopicPageController {
   }
 
   @GetMapping("/dot/{periodId}/de-tai/tao")
+  /** Hiển thị biểu mẫu tạo mới đề tài. */
   public String createForm(
       @PathVariable Long periodId,
       Authentication authentication,
@@ -202,6 +206,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai")
+  /** Kiểm tra biểu mẫu, tạo đề tài và trả về kết quả điều hướng. */
   public String create(
       @PathVariable Long periodId,
       Authentication authentication,
@@ -218,12 +223,14 @@ public class TopicPageController {
 
   @GetMapping("/dot/{periodId}/de-tai/giang-vien")
   @ResponseBody
+  /** Tìm danh sách giảng viên phù hợp để sử dụng trong ô lựa chọn. */
   public List<CouncilLecturerOption> lecturers(
       @PathVariable Long periodId, @RequestParam(required = false) String search) {
     return staffPages.lecturers(periodId, search);
   }
 
   @GetMapping("/dot/{periodId}/de-tai/{topicId}/sua")
+  /** Hiển thị biểu mẫu chỉnh sửa đề tài. */
   public String edit(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -238,6 +245,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai/{topicId}")
+  /** Kiểm tra biểu mẫu, cập nhật đề tài và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -254,6 +262,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai/{topicId}/xoa")
+  /** Xóa đề tài được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -268,6 +277,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai/xoa")
+  /** Xóa các bản ghi đề tài đã chọn và thông báo kết quả. */
   public String deleteSelected(
       @PathVariable Long periodId,
       @RequestParam(name = "ids", required = false) List<Long> ids,
@@ -276,6 +286,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai/{topicId}/duyet")
+  /** Phê duyệt đề xuất đề tài và quay lại trang chi tiết của đề tài. */
   public String approve(
       @PathVariable Long periodId,
       @PathVariable Long topicId,
@@ -284,6 +295,7 @@ public class TopicPageController {
   }
 
   @PostMapping("/dot/{periodId}/de-tai/{topicId}/tu-choi")
+  /** Từ chối yêu cầu nghiệp vụ và lưu lý do. */
   public String reject(
       @PathVariable Long periodId,
       @PathVariable Long topicId,

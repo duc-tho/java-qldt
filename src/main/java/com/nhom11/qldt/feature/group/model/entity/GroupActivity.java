@@ -18,6 +18,7 @@ import lombok.Setter;
 @Table(name = "group_activities")
 @Getter
 @Setter
+/** Ghi lại một sự kiện nghiệp vụ trong lịch sử hoạt động của nhóm. */
 public class GroupActivity extends AuditableEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "student_group_id", nullable = false)

@@ -15,6 +15,7 @@ import lombok.Setter;
 @Table(name = "announcements")
 @Getter
 @Setter
+/** Biểu diễn một thông báo cùng trạng thái và nhóm vai trò được phép nhận. */
 public class Announcement extends AuditableEntity {
   @Column(nullable = false, length = 255)
   private String title;

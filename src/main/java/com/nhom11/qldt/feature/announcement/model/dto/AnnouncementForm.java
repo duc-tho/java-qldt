@@ -10,6 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận tiêu đề, nội dung và các vai trò được xem thông báo từ form. */
 public class AnnouncementForm implements CrudForm<Announcement> {
   private Long id;
 
@@ -22,6 +23,7 @@ public class AnnouncementForm implements CrudForm<Announcement> {
 
   private Set<Long> roleIds;
 
+  /** Chuyển dữ liệu biểu mẫu thành thực thể để tầng dịch vụ xử lý. */
   public Announcement toEntity() {
     Announcement item = new Announcement();
     item.setTitle(title);
@@ -30,6 +32,7 @@ public class AnnouncementForm implements CrudForm<Announcement> {
     return item;
   }
 
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(Announcement item) {
     id = item.getId();
     title = item.getTitle();

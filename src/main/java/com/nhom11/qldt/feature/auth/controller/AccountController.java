@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
 @RequestMapping("/tai-khoan")
+/** Điều phối các yêu cầu HTTP của chức năng tài khoản và người dùng. */
 public class AccountController {
 
   private final UserService userService;
@@ -31,6 +32,7 @@ public class AccountController {
   }
 
   @GetMapping
+  /** Hiển thị thông tin tài khoản và người dùng của người dùng hiện tại. */
   public String view(@AuthenticationPrincipal UserDetails principal, Model model) {
     if (principal == null) {
       return "redirect:/login";
@@ -43,6 +45,7 @@ public class AccountController {
   }
 
   @PostMapping
+  /** Kiểm tra biểu mẫu, cập nhật tài khoản và người dùng và trả về kết quả điều hướng. */
   public String update(
       @AuthenticationPrincipal UserDetails principal,
       @Valid @ModelAttribute("data") AccountForm form,
@@ -66,6 +69,7 @@ public class AccountController {
   }
 
   @PostMapping("/password")
+  /** Kiểm tra mật khẩu hiện tại rồi cập nhật mật khẩu mới cho tài khoản. */
   public String changePassword(
       @AuthenticationPrincipal UserDetails principal,
       @Valid @ModelAttribute("passwordData") PasswordChangeForm form,

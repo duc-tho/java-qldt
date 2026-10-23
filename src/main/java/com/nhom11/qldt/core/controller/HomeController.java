@@ -8,6 +8,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+/** Điều phối trang chủ và cung cấp dữ liệu bảng điều khiển theo người dùng đang đăng nhập. */
 public class HomeController {
   private final DashboardService dashboardService;
 
@@ -16,6 +17,7 @@ public class HomeController {
   }
 
   @GetMapping("/")
+  /** Hiển thị trang chủ cùng các số liệu và tác vụ phù hợp với tài khoản hiện tại. */
   public String index(Authentication authentication, Model model) {
     DashboardData dashboard = dashboardService.getDashboard(authentication.getName());
     model.addAttribute("dashboard", dashboard);

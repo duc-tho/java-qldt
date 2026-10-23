@@ -18,6 +18,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đề tài. */
 public class TopicApprovalWorkPageController {
   private final RegistrationPeriodService periodService;
   private final TopicService topicService;
@@ -33,6 +34,7 @@ public class TopicApprovalWorkPageController {
   }
 
   @GetMapping("/phe-duyet-de-tai")
+  /** Hiển thị danh sách đề tài mà người dùng được phép truy cập. */
   public String list(Model model) {
     LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll().stream()

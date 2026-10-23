@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng nhóm sinh viên và đăng ký đề tài. */
 public class GroupPageController {
   private final StudentGroupService groupService;
   private final RegistrationPeriodService periodService;
@@ -35,6 +36,7 @@ public class GroupPageController {
   }
 
   @GetMapping("/dot/{periodId}/nhom")
+  /** Hiển thị danh sách nhóm sinh viên và đăng ký đề tài mà người dùng được phép truy cập. */
   public String list(
       @PathVariable Long periodId,
       @RequestParam(name = "canDuyet", defaultValue = "false") boolean pendingOnly,

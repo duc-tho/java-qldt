@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 
+/** Gom toàn bộ dữ liệu và cấu hình cần thiết để Thymeleaf dựng bảng CRUD. */
 public record TableModel<T>(
     Page<T> data,
     String baseUrl,
@@ -20,10 +21,12 @@ public record TableModel<T>(
     boolean bulkDeleteEnabled,
     boolean canCreate) {
 
+  /** Lọc ra các cột tham gia tìm kiếm tự do. */
   public List<ColumnDef> searchableColumns() {
     return columns.stream().filter(column -> column.searchable).toList();
   }
 
+  /** Lọc ra các cột có bộ lọc riêng trên giao diện. */
   public List<ColumnDef> filterableColumns() {
     return columns.stream().filter(column -> column.filterable).toList();
   }

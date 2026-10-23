@@ -20,6 +20,7 @@ import lombok.Setter;
 @Table(name = "evaluations")
 @Getter
 @Setter
+/** Lưu phiếu đánh giá của thành viên hội đồng dành cho một đăng ký đề tài. */
 public class Evaluation extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "topic_registration_id", nullable = false)

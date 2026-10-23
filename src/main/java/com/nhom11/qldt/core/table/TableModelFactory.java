@@ -8,8 +8,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Chuyển dữ liệu phân trang và định nghĩa bảng thành model dùng cho giao diện. */
 public class TableModelFactory {
 
+  /** Chuẩn hóa tham số truy vấn rồi tạo model đầy đủ cho fragment bảng CRUD. */
   public <T> TableModel<T> create(
       Page<T> data, String baseUrl, TableQuery query, BaseTableDefinition<T> definition) {
     Pageable pageable = query.pageable(definition);

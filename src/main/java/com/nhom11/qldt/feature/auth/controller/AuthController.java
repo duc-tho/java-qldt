@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng tài khoản và người dùng. */
 public class AuthController {
   private final ClientValidationRuleRenderer clientValidationRuleRenderer;
 
@@ -19,11 +20,13 @@ public class AuthController {
   }
 
   @ModelAttribute("validationRules")
+  /** Cung cấp luật validation phía client cho biểu mẫu đăng nhập. */
   public Map<String, String> validationRules() {
     return clientValidationRuleRenderer.render(LoginForm.class);
   }
 
   @GetMapping("/login")
+  /** Hiển thị trang đăng nhập và phản hồi trạng thái đăng nhập trước đó. */
   public String loginView(
       @RequestParam(required = false) String error, HttpSession session, Model model) {
     LoginForm loginForm = new LoginForm();

@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/dot/{periodId}/phan-cong")
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class ReviewerAssignmentController {
   private final CouncilService councilService;
   private final RegistrationPeriodService periodService;
@@ -31,6 +32,7 @@ public class ReviewerAssignmentController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách hội đồng và kết quả đánh giá mà người dùng được phép truy cập. */
   public String list(@PathVariable Long periodId, Model model) {
     RegistrationPeriod period = periodService.findById(periodId);
     if (period == null || period.getPeriodType() != PeriodType.TLCN) {
@@ -47,6 +49,7 @@ public class ReviewerAssignmentController {
   }
 
   @PostMapping("/de-tai/{topicId}")
+  /** Phân công giảng viên phản biện cho đề tài. */
   public String assign(
       @PathVariable Long periodId,
       @PathVariable Long topicId,

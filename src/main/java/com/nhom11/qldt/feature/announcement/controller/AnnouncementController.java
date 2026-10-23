@@ -27,6 +27,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/thong-bao")
+/** Điều phối các yêu cầu HTTP của chức năng thông báo. */
 public class AnnouncementController {
   private final AnnouncementService service;
   private final AnnouncementTableDefinition table;
@@ -48,12 +49,15 @@ public class AnnouncementController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách thông báo mà người dùng được phép truy cập. */
   public String list(@ModelAttribute TableQuery query, Authentication authentication, Model model) {
     boolean staff = isStaff(authentication);
+
     model.addAttribute("pageTitle", "announcements.page.list.title");
     model.addAttribute("pageIcon", "bi:megaphone");
     model.addAttribute("isStaff", staff);
 
+    // Người dùng thông thường chỉ thấy thông báo đã công bố cho ít nhất một vai trò của họ.
     if (!staff) {
       model.addAttribute("announcements", service.findPublishedForRoles(roleNames(authentication)));
       return "page/announcement/list";
@@ -67,6 +71,7 @@ public class AnnouncementController {
   }
 
   @GetMapping("/new")
+  /** Hiển thị biểu mẫu tạo mới thông báo. */
   public String createForm(Model model) {
     form(model, new AnnouncementForm(), "/thong-bao", false, "announcements.page.create.title");
 
@@ -74,6 +79,7 @@ public class AnnouncementController {
   }
 
   @PostMapping
+  /** Kiểm tra biểu mẫu, tạo thông báo và trả về kết quả điều hướng. */
   public String create(
       @Valid @ModelAttribute("data") AnnouncementForm form, BindingResult errors, Model model) {
     validateAudience(form, errors);
@@ -90,8 +96,11 @@ public class AnnouncementController {
   }
 
   @GetMapping("/{id}")
+  /** Hiển thị thông tin chi tiết của thông báo được yêu cầu. */
   public String detail(@PathVariable Long id, Authentication authentication, Model model) {
     boolean staff = isStaff(authentication);
+
+    // Nhân viên được tra cứu trực tiếp; người dùng khác phải đi qua truy vấn có kiểm tra đối tượng nhận.
     Announcement item = staff
         ? service.findById(id)
         : service.findPublishedByIdForRoles(id, roleNames(authentication));
@@ -119,6 +128,7 @@ public class AnnouncementController {
   }
 
   @GetMapping("/{id}/edit")
+  /** Hiển thị biểu mẫu chỉnh sửa thông báo. */
   public String edit(@PathVariable Long id, Model model) {
     Announcement item = service.findById(id);
 
@@ -133,6 +143,7 @@ public class AnnouncementController {
   }
 
   @PostMapping("/{id}")
+  /** Kiểm tra biểu mẫu, cập nhật thông báo và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long id,
       @Valid @ModelAttribute("data") AnnouncementForm form,
@@ -156,6 +167,7 @@ public class AnnouncementController {
   }
 
   @PostMapping("/{id}/withdraw")
+  /** Thu hồi thông báo đã chọn khỏi danh sách công bố. */
   public String withdraw(@PathVariable Long id) {
     service.withdraw(id);
     return "redirect:/thong-bao";
@@ -191,6 +203,7 @@ public class AnnouncementController {
   }
 
   private Set<String> roleNames(Authentication authentication) {
+    // Bỏ tiền tố của Spring Security để khớp với tên vai trò được lưu trong cơ sở dữ liệu.
     return authentication.getAuthorities().stream()
         .map(authority -> authority.getAuthority())
         .filter(authority -> authority.startsWith("ROLE_"))

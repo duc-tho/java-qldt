@@ -18,6 +18,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/** Biểu diễn tài khoản người dùng cùng hồ sơ, vai trò và thông tin xác thực. */
 public final class User extends SoftDeleteEntity {
   @Column(nullable = false, unique = true, length = 50)
   String username;

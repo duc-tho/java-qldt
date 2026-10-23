@@ -24,6 +24,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/dot/{periodId}/danh-gia")
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class CouncilWorkspaceController {
   private final CouncilService councilService;
   private final ReportSubmissionService reportSubmissionService;
@@ -42,6 +43,7 @@ public class CouncilWorkspaceController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách hội đồng và kết quả đánh giá mà người dùng được phép truy cập. */
   public String list(@PathVariable Long periodId, @AuthenticationPrincipal UserDetails principal, Model model) {
     if (periodService.findById(periodId) == null) throw new ResponseStatusException(HttpStatus.NOT_FOUND);
     User member = user(principal);
@@ -55,6 +57,7 @@ public class CouncilWorkspaceController {
   }
 
   @GetMapping("/{registrationId}")
+  /** Hiển thị thông tin chi tiết của hội đồng và kết quả đánh giá được yêu cầu. */
   public String detail(
       @PathVariable Long periodId, @PathVariable Long registrationId,
       @AuthenticationPrincipal UserDetails principal, Model model) {

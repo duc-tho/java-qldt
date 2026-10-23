@@ -9,6 +9,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận họ tên và số điện thoại khi người dùng cập nhật thông tin cá nhân. */
 public class AccountForm {
 
   private String email;
@@ -23,6 +24,7 @@ public class AccountForm {
   @Size(max = 50, message = "{users.validation.full_name.max}")
   private String fullName;
 
+  /** Điền dữ liệu thực thể vào biểu mẫu để hiển thị hoặc chỉnh sửa. */
   public void fromEntity(User user) {
     email = user.getEmail();
     userCode = user.getUserCode();

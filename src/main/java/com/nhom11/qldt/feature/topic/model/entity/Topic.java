@@ -26,6 +26,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/** Biểu diễn đề tài, giảng viên hướng dẫn và trạng thái phê duyệt. */
 public class Topic extends SoftDeleteEntity {
 
   @ManyToOne(optional = false)

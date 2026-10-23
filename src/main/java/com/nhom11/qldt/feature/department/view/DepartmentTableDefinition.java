@@ -8,9 +8,11 @@ import java.util.List;
 import org.springframework.stereotype.Component;
 
 @Component
+/** Khai báo các cột, nút thao tác và quyền hiển thị trên bảng bộ môn. */
 public class DepartmentTableDefinition extends BaseTableDefinition<Department> {
 
   @Override
+  /** Khai báo các cột và khả năng tìm kiếm, lọc, sắp xếp của bảng. */
   public List<ColumnDef> columns() {
     return List.of(
         new ColumnDef(
@@ -37,6 +39,7 @@ public class DepartmentTableDefinition extends BaseTableDefinition<Department> {
   }
 
   @Override
+  /** Khai báo các thao tác hiển thị cho từng bản ghi trong bảng. */
   public List<ActionDef> actions(String baseUrl) {
     return List.of(
         new ActionDef.Link(

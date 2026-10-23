@@ -28,6 +28,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/nguoi-dung")
+/** Điều phối các yêu cầu HTTP của chức năng tài khoản và người dùng. */
 public class UserController {
 
   private static final String BASE_URL = "/nguoi-dung";
@@ -61,6 +62,7 @@ public class UserController {
   }
 
   @GetMapping
+  /** Hiển thị danh sách tài khoản và người dùng mà người dùng được phép truy cập. */
   public String list(@ModelAttribute TableQuery query, Model model) {
 
     Page<User> users = userService.findAll(query, userTableDefinition);
@@ -74,6 +76,7 @@ public class UserController {
   }
 
   @GetMapping("/new")
+  /** Hiển thị biểu mẫu tạo mới tài khoản và người dùng. */
   public String createForm(Model model) {
     model.addAttribute("pageTitle", "users.page.create.title");
     model.addAttribute("pageIcon", "bi:person-plus");
@@ -102,6 +105,7 @@ public class UserController {
   }
 
   @PostMapping
+  /** Kiểm tra biểu mẫu, tạo tài khoản và người dùng và trả về kết quả điều hướng. */
   public String create(
       @Valid @ModelAttribute("data") UserForm form, BindingResult bindingResult, Model model) {
 
@@ -151,6 +155,7 @@ public class UserController {
   }
 
   @GetMapping("/{id}")
+  /** Hiển thị thông tin chi tiết của tài khoản và người dùng được yêu cầu. */
   public String detail(@PathVariable Long id, Model model) {
     User user = userService.findById(id);
     if (user == null) {
@@ -178,6 +183,7 @@ public class UserController {
   }
 
   @GetMapping("/{id}/edit")
+  /** Hiển thị biểu mẫu chỉnh sửa tài khoản và người dùng. */
   public String editForm(@PathVariable Long id, Model model) {
     User user = userService.findById(id);
     if (user == null) {
@@ -205,6 +211,7 @@ public class UserController {
   }
 
   @PostMapping("/{id}")
+  /** Kiểm tra biểu mẫu, cập nhật tài khoản và người dùng và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long id,
       @Valid @ModelAttribute("data") UserForm form,
@@ -248,6 +255,7 @@ public class UserController {
   }
 
   @PostMapping("/{id}/delete")
+  /** Xóa tài khoản và người dùng được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(
       @PathVariable Long id,
       @RequestParam(defaultValue = "0") int force,
@@ -266,6 +274,7 @@ public class UserController {
   }
 
   @PostMapping("/delete")
+  /** Xóa các bản ghi tài khoản và người dùng đã chọn và thông báo kết quả. */
   public String batchDelete(
       @RequestParam("ids") List<Long> ids, RedirectAttributes attributes) {
     try {
@@ -278,11 +287,13 @@ public class UserController {
   }
 
   @ModelAttribute
+  /** Nạp dữ liệu lựa chọn dùng chung cho các biểu mẫu người dùng. */
   public void selectionData(Model model) {
     model.addAttribute("roles", roleRepository.findAll());
   }
 
   private void validateUniqueFields(UserForm form, Long excludedId, BindingResult bindingResult) {
+    // Khi chỉnh sửa, loại chính người dùng hiện tại khỏi phép kiểm tra trùng email.
     if (!bindingResult.hasFieldErrors("email")) {
       boolean emailExists =
           excludedId == null
@@ -293,6 +304,7 @@ public class UserController {
       }
     }
 
+    // Mã người dùng là tùy chọn; chỉ kiểm tra trùng khi trường có giá trị hợp lệ.
     if (form.getUserCode() == null
         || form.getUserCode().isBlank()
         || bindingResult.hasFieldErrors("userCode")) {

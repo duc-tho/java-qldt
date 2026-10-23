@@ -19,6 +19,7 @@ import lombok.Setter;
 @Table(name = "topic_registrations")
 @Getter
 @Setter
+/** Biểu diễn yêu cầu của nhóm đăng ký thực hiện một đề tài. */
 public class TopicRegistration extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "student_group_id", nullable = false)

@@ -20,6 +20,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 @Controller
 @RequestMapping("/dot/{periodId}/danh-gia")
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class CouncilEvaluationController {
   private final CouncilService councilService;
   private final UserService userService;
@@ -30,6 +31,7 @@ public class CouncilEvaluationController {
   }
 
   @PostMapping("/{registrationId}/luu-nhap")
+  /** Lưu phiếu đánh giá ở trạng thái bản nháp. */
   public String saveDraft(
       @PathVariable Long periodId,
       @PathVariable Long registrationId,
@@ -46,6 +48,7 @@ public class CouncilEvaluationController {
   }
 
   @PostMapping("/{registrationId}/nop")
+  /** Tiếp nhận và xử lý yêu cầu nộp hội đồng và kết quả đánh giá. */
   public String submit(@PathVariable Long periodId, @PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute EvaluationForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
     requirePeriod(periodId, registrationId, principal);
     if (errors.hasErrors()) {
@@ -56,6 +59,7 @@ public class CouncilEvaluationController {
   }
 
   @PostMapping("/{registrationId}/chot")
+  /** Chốt kết quả cuối cùng của đăng ký sau khi kiểm tra dữ liệu. */
   public String finalizeResult(@PathVariable Long periodId, @PathVariable Long registrationId, @AuthenticationPrincipal UserDetails principal, @Valid @ModelAttribute FinalResultForm form, BindingResult errors, org.springframework.web.servlet.mvc.support.RedirectAttributes attributes) {
     requirePeriod(periodId, registrationId, principal);
     if (errors.hasErrors()) {

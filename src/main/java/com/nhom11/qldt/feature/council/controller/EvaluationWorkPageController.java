@@ -19,6 +19,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class EvaluationWorkPageController {
   private final CouncilService councilService;
   private final UserService userService;
@@ -34,6 +35,7 @@ public class EvaluationWorkPageController {
   }
 
   @GetMapping("/cham-diem")
+  /** Hiển thị danh sách hội đồng và kết quả đánh giá mà người dùng được phép truy cập. */
   public String list(@AuthenticationPrincipal UserDetails principal, Model model) {
     User lecturer = userService.findByEmail(principal.getUsername()).orElseThrow();
     List<TopicRegistration> registrations = councilService.workspaceRegistrations(lecturer);

@@ -15,6 +15,7 @@ import org.hibernate.annotations.SQLRestriction;
 @AllArgsConstructor
 @MappedSuperclass
 @SQLRestriction("deleted_at IS NULL")
+/** Thêm trường {@code deleted_at}; Hibernate tự ẩn các record đã có thời điểm xóa. */
 public abstract class SoftDeleteEntity extends AuditableEntity {
   @Column(name = "deleted_at")
   private Instant deletedAt;

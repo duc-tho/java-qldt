@@ -17,6 +17,7 @@ import lombok.Setter;
 @Table(name = "registration_periods")
 @Getter
 @Setter
+/** Biểu diễn một đợt đăng ký cùng các mốc thời gian nghiệp vụ. */
 public class RegistrationPeriod extends SoftDeleteEntity {
   private String name;
 

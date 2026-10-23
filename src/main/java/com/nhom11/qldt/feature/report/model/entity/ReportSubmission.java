@@ -21,6 +21,7 @@ import lombok.Setter;
 @Table(name = "report_submissions")
 @Getter
 @Setter
+/** Biểu diễn một phiên bản báo cáo mà nhóm đã nộp. */
 public class ReportSubmission extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "topic_registration_id", nullable = false)

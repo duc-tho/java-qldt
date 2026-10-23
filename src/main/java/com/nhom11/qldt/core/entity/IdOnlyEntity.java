@@ -15,6 +15,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 @MappedSuperclass
+/** Lớp cơ sở cung cấp khóa chính tự tăng dùng chung cho các thực thể JPA. */
 public abstract class IdOnlyEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận mật khẩu hiện tại, mật khẩu mới và phần xác nhận từ form đổi mật khẩu. */
 public class PasswordChangeForm {
 
   @NotBlank(message = "{account.validation.current_password.required}")

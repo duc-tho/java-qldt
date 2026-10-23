@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/** Cung cấp nghiệp vụ quản lý nhóm sinh viên, thành viên và đăng ký đề tài. */
 public class StudentGroupService {
   public static final String DUPLICATE_NAME_ERROR = "student-groups.validation.name.duplicate";
 
@@ -62,7 +63,9 @@ public class StudentGroupService {
   }
 
   @Transactional
+  /** Tạo nhóm mới trong đợt đăng ký và đặt người tạo làm trưởng nhóm. */
   public StudentGroup createGroup(Long periodId, User leader, String name) {
+    // Chỉ sinh viên chưa thuộc nhóm nào trong đợt đang mở mới được tạo nhóm.
     RegistrationPeriod period = requirePeriod(periodId);
     requireOpenWindow(period);
     requireStudent(leader);
@@ -75,23 +78,29 @@ public class StudentGroupService {
       throw new IllegalArgumentException(DUPLICATE_NAME_ERROR);
     }
 
+    // Tạo nhóm trước để có khóa ngoại cho bản ghi trưởng nhóm.
     StudentGroup group = new StudentGroup();
     group.setRegistrationPeriod(period);
     group.setName(normalizedName);
     studentGroupRepository.save(group);
 
+    // Người tạo nhóm đồng thời là thành viên và trưởng nhóm đầu tiên.
     GroupMember member = new GroupMember();
     member.setStudentGroup(group);
     member.setRegistrationPeriod(period);
     member.setStudent(leader);
     member.setLeader(true);
     groupMemberRepository.save(member);
+
     groupActivityService.record(group, leader, null, GroupActivityType.CREATED, null);
+
     return group;
   }
 
   @Transactional
+  /** Thêm sinh viên vào nhóm và đưa đăng ký đề tài về trạng thái cần duyệt lại. */
   public void addMember(Long groupId, User leader, String studentCode) {
+    // Khóa mọi thay đổi thành viên khi đợt đóng hoặc đăng ký đã được duyệt.
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
@@ -101,6 +110,7 @@ public class StudentGroupService {
       throw new IllegalArgumentException("student-groups.error.member-limit");
     }
 
+    // Sinh viên phải tồn tại và chưa tham gia nhóm khác trong cùng đợt.
     User student =
         userRepository
             .findByUserCode(studentCode.trim())
@@ -119,12 +129,17 @@ public class StudentGroupService {
     member.setStudent(student);
     member.setLeader(false);
     groupMemberRepository.save(member);
+
     groupActivityService.record(group, leader, student, GroupActivityType.MEMBER_JOINED, null);
+
+    // Thành phần nhóm thay đổi làm kết quả xét duyệt trước đó không còn hợp lệ.
     resetRegistrationReview(groupId);
   }
 
   @Transactional
+  /** Xóa một thành viên thường khỏi nhóm và yêu cầu duyệt lại đăng ký đề tài. */
   public void removeMember(Long groupId, User leader, Long memberId) {
+    // Chỉ trưởng nhóm được sửa thành viên khi đăng ký vẫn còn khả năng chỉnh sửa.
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
@@ -138,13 +153,18 @@ public class StudentGroupService {
     if (member.isLeader()) {
       throw new IllegalArgumentException("student-groups.error.leader-removal");
     }
+
     groupMemberRepository.delete(member);
     groupActivityService.record(group, leader, member.getStudent(), GroupActivityType.MEMBER_LEFT, null);
+
+    // Thành phần nhóm thay đổi làm kết quả xét duyệt trước đó không còn hợp lệ.
     resetRegistrationReview(groupId);
   }
 
   @Transactional
+  /** Chuyển quyền trưởng nhóm cho thành viên khác trong cùng nhóm. */
   public void transferLeadership(Long groupId, User leader, Long memberId) {
+    // Xác thực người yêu cầu là trưởng nhóm hiện tại và đăng ký vẫn được chỉnh sửa.
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     GroupMember currentLeader = requireLeader(groupId, leader);
@@ -158,14 +178,20 @@ public class StudentGroupService {
     if (newLeader.isLeader()) {
       throw new IllegalArgumentException("student-groups.error.leader-already-assigned");
     }
+
+    // Đổi hai cờ trong cùng transaction để nhóm luôn chỉ có một trưởng nhóm.
     currentLeader.setLeader(false);
     newLeader.setLeader(true);
+
     groupActivityService.record(group, leader, newLeader.getStudent(), GroupActivityType.LEADER_CHANGED, null);
+
     resetRegistrationReview(groupId);
   }
 
   @Transactional
+  /** Chọn đề tài cho nhóm và tạo hoặc cập nhật bản đăng ký ở trạng thái nháp. */
   public void selectTopic(Long groupId, User leader, Long topicId) {
+    // Chỉ trưởng nhóm được chọn đề tài đã duyệt thuộc đúng đợt đăng ký.
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
@@ -177,6 +203,7 @@ public class StudentGroupService {
             .orElseThrow(
                 () -> new IllegalArgumentException("student-groups.error.topic-not-available"));
 
+    // Tái sử dụng bản nháp hiện có để không tạo nhiều đăng ký cho cùng một nhóm.
     TopicRegistration registration =
         topicRegistrationRepository
             .findByStudentGroupId(groupId)
@@ -187,18 +214,25 @@ public class StudentGroupService {
                   return value;
                 });
     registration.setTopic(topic);
+
+    // Đổi đề tài đưa đăng ký về bản nháp và xóa thông tin xét duyệt cũ.
     resetRegistrationReview(registration);
     topicRegistrationRepository.save(registration);
+
     groupActivityService.record(group, leader, null, GroupActivityType.TOPIC_SELECTED, topic.getTitle());
   }
 
   @Transactional
+  /** Duyệt đăng ký đề tài đang chờ với tư cách giảng viên hướng dẫn. */
   public void approveRegistration(Long registrationId, User lecturer) {
+    // Giảng viên phải là người hướng dẫn của đề tài và đăng ký đang chờ duyệt.
     requireGroup(registrationGroupId(registrationId, lecturer));
     TopicRegistration registration = requireAdviserRegistration(registrationId, lecturer);
     requireOpenWindow(registration.getStudentGroup().getRegistrationPeriod());
     requirePending(registration);
     requireValidMemberCount(registration.getStudentGroup().getId());
+
+    // Lưu người và thời điểm xét duyệt để phục vụ truy vết.
     registration.setStatus(TopicRegistrationStatus.APPROVED);
     registration.setReviewedBy(lecturer);
     registration.setReviewedAt(LocalDateTime.now());
@@ -206,7 +240,9 @@ public class StudentGroupService {
   }
 
   @Transactional
+  /** Gửi bản đăng ký nháp cho giảng viên hướng dẫn phê duyệt. */
   public void requestRegistrationApproval(Long groupId, User leader) {
+    // Bản nháp chỉ được gửi khi nhóm hợp lệ và người thao tác là trưởng nhóm.
     StudentGroup group = requireGroup(groupId);
     requireOpenWindow(group.getRegistrationPeriod());
     requireLeader(groupId, leader);
@@ -217,12 +253,15 @@ public class StudentGroupService {
                 () -> new IllegalArgumentException("topic-registrations.error.registration-required"));
     requireDraft(registration);
     requireValidMemberCount(groupId);
+
     registration.setStatus(TopicRegistrationStatus.PENDING);
     groupActivityService.record(group, leader, null, GroupActivityType.APPROVAL_REQUESTED, registration.getTopic().getTitle());
   }
 
   @Transactional
+  /** Từ chối đăng ký đang chờ duyệt và lưu lý do để nhóm chỉnh sửa. */
   public void rejectRegistration(Long registrationId, User lecturer, String reason) {
+    // Chỉ giảng viên hướng dẫn được từ chối đăng ký đang chờ trong thời gian mở.
     requireGroup(registrationGroupId(registrationId, lecturer));
     TopicRegistration registration = requireAdviserRegistration(registrationId, lecturer);
     requireOpenWindow(registration.getStudentGroup().getRegistrationPeriod());
@@ -230,6 +269,8 @@ public class StudentGroupService {
     if (reason == null || reason.isBlank()) {
       throw new IllegalArgumentException("topic-registrations.validation.reason.required");
     }
+
+    // Giữ lý do, người duyệt và thời điểm để nhóm biết nguyên nhân cần chỉnh sửa.
     registration.setStatus(TopicRegistrationStatus.REJECTED);
     registration.setRejectionReason(reason.trim());
     registration.setReviewedBy(lecturer);
@@ -237,6 +278,7 @@ public class StudentGroupService {
     groupActivityService.record(registration.getStudentGroup(), lecturer, null, GroupActivityType.REJECTED, reason.trim());
   }
 
+  /** Tìm nhóm mà sinh viên đang tham gia trong một đợt đăng ký. */
   public StudentGroup findCurrentGroup(Long periodId, User student) {
     return groupMemberRepository
         .findByStudentIdAndPeriodId(student.getId(), periodId)
@@ -244,15 +286,18 @@ public class StudentGroupService {
         .orElse(null);
   }
 
+  /** Lấy toàn bộ nhóm sinh viên đã và đang tham gia, nhóm mới nhất xếp trước. */
   public List<StudentGroup> groupsForStudent(User student) {
     return groupMemberRepository.findAllByStudentIdOrderByCreatedAtDesc(student.getId()).stream()
         .map(member -> member.getStudentGroup()).toList();
   }
 
+  /** Tìm nhóm theo ID và kiểm tra nhóm thuộc đúng đợt đăng ký. */
   public StudentGroup findGroup(Long groupId, Long periodId) {
     return studentGroupRepository.findByIdAndRegistrationPeriodId(groupId, periodId).orElse(null);
   }
 
+  /** Kiểm tra người dùng có quyền xem nhóm theo vai trò quản lý, thành viên hoặc giảng viên liên quan. */
   public boolean canViewGroup(StudentGroup group, User viewer) {
     if (viewer.getRoles().stream().anyMatch(role -> "HEAD_OF_FACULTY".equals(role.getName()) || "ADMIN".equals(role.getName()))) {
       return true;
@@ -270,42 +315,52 @@ public class StudentGroupService {
         .orElse(false);
   }
 
+  /** Lấy thành viên của nhóm, trưởng nhóm được xếp đầu danh sách. */
   public List<GroupMember> members(Long groupId) {
     return groupMemberRepository.findAllByStudentGroupIdOrderByIsLeaderDescIdAsc(groupId);
   }
 
+  /** Lấy đăng ký đề tài hiện tại của nhóm, hoặc trả về {@code null} nếu chưa đăng ký. */
   public TopicRegistration registration(Long groupId) {
     return topicRegistrationRepository.findByStudentGroupId(groupId).orElse(null);
   }
 
+  /** Lấy các đăng ký đề tài do giảng viên phụ trách hướng dẫn. */
   public List<TopicRegistration> adviserRegistrations(User lecturer) {
     return topicRegistrationRepository.findAllByAdviserId(lecturer.getId());
   }
 
+  /** Đếm số đăng ký đang chờ giảng viên hướng dẫn phê duyệt. */
   public long countPendingAdviserRegistrations(Long lecturerId) {
     return topicRegistrationRepository.countPendingByAdviserId(lecturerId);
   }
 
+  /** Đếm số bài giảng viên chưa hoàn tất đánh giá. */
   public long countPendingEvaluations(Long lecturerId) {
     return topicRegistrationRepository.countPendingEvaluations(lecturerId);
   }
 
+  /** Lấy toàn bộ đăng ký đề tài thuộc một đợt. */
   public List<TopicRegistration> registrations(Long periodId) {
     return topicRegistrationRepository.findAllByRegistrationPeriodId(periodId);
   }
 
+  /** Lấy các nhóm đã đăng ký một đề tài cụ thể. */
   public List<TopicRegistration> registrationsForTopic(Long topicId) {
     return topicRegistrationRepository.findAllByTopicId(topicId);
   }
 
+  /** Tổng hợp thông tin hiển thị của các nhóm trong một đợt đăng ký. */
   public List<GroupSummary> groupSummaries(Long periodId) {
     return summarizeGroups(studentGroupRepository.findAllByRegistrationPeriodIdOrderByName(periodId));
   }
 
+  /** Đếm tổng số nhóm được tạo trong một đợt đăng ký. */
   public long countByPeriod(Long periodId) {
     return studentGroupRepository.countByRegistrationPeriodId(periodId);
   }
 
+  /** Kiểm tra tên nhóm đã được sử dụng trong cùng đợt đăng ký hay chưa. */
   public boolean existsByName(Long periodId, String name) {
     if (name == null || name.isBlank()) return false;
 
@@ -313,19 +368,25 @@ public class StudentGroupService {
         periodId, name.trim());
   }
 
+  /** Tổng hợp thông tin các nhóm mà sinh viên đã hoặc đang tham gia. */
   public List<GroupSummary> groupSummariesForStudent(User student) {
     return summarizeGroups(groupsForStudent(student));
   }
 
+  /** Suy ra tiến độ hiện tại của nhóm từ đăng ký đề tài và báo cáo. */
   public StudentGroupProgress progress(
       StudentGroup group, Set<Long> publishedPeriodIds, LocalDateTime now) {
     RegistrationPeriod period = group.getRegistrationPeriod();
+
+    // Công bố kết quả có độ ưu tiên cao nhất, kể cả khi hạn báo cáo đã qua.
     if (publishedPeriodIds.contains(period.getId())) return StudentGroupProgress.PUBLISHED;
+
     if (now.isAfter(period.getReportDeadline())) return StudentGroupProgress.WAITING;
 
     return StudentGroupProgress.IN_PROGRESS;
   }
 
+  /** Tổng hợp các nhóm liên quan đến giảng viên; có thể chỉ lấy đăng ký đang chờ duyệt. */
   public List<GroupSummary> groupSummariesForLecturer(Long periodId, User lecturer, boolean pendingOnly) {
     List<StudentGroup> groups = pendingOnly
         ? studentGroupRepository.findAllPendingForAdviser(periodId, lecturer.getId())
@@ -336,12 +397,14 @@ public class StudentGroupService {
   private List<GroupSummary> summarizeGroups(List<StudentGroup> groups) {
     if (groups.isEmpty()) return List.of();
 
+    // Nạp thành viên và đăng ký theo lô để tránh truy vấn N+1 cho từng nhóm.
     var groupIds = groups.stream().map(group -> group.getId()).toList();
     Map<Long, List<GroupMember>> membersByGroup = groupMemberRepository.findAllByStudentGroupIdIn(groupIds)
         .stream().collect(Collectors.groupingBy(member -> member.getStudentGroup().getId()));
     Map<Long, TopicRegistration> registrationsByGroup = topicRegistrationRepository.findAllByStudentGroupIdIn(groupIds).stream()
         .collect(Collectors.toMap(registration -> registration.getStudentGroup().getId(), registration -> registration));
 
+    // Ghép dữ liệu đã lập chỉ mục thành model tóm tắt dùng cho giao diện.
     return groups.stream().map(group -> {
       var members = membersByGroup.getOrDefault(group.getId(), List.of());
       String leaderName = members.stream().filter(member -> member.isLeader())
@@ -354,12 +417,14 @@ public class StudentGroupService {
     }).toList();
   }
 
+  /** Tìm đăng ký đề tài theo ID và bảo đảm giảng viên là người hướng dẫn. */
   public TopicRegistration adviserRegistration(Long registrationId, User lecturer) {
     return topicRegistrationRepository
         .findByIdAndAdviserId(registrationId, lecturer.getId())
         .orElse(null);
   }
 
+  /** Kiểm tra thời gian đăng ký đề tài của sinh viên đang mở. */
   public boolean isOpen(RegistrationPeriod period) {
     LocalDateTime now = LocalDateTime.now();
     return !now.isBefore(period.getStudentRegistrationStart())

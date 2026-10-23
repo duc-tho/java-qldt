@@ -16,6 +16,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 @RequestMapping("/dot/{periodId}/ket-qua")
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class ResultPublicationController {
   private final CouncilService councilService;
   private final UserService userService;
@@ -26,6 +27,7 @@ public class ResultPublicationController {
   }
 
   @PostMapping("/cong-bo")
+  /** Công bố kết quả của đợt và ghi nhận người thực hiện. */
   public String publish(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,
@@ -39,6 +41,7 @@ public class ResultPublicationController {
   }
 
   @PostMapping("/thu-hoi")
+  /** Thu hồi kết quả đã công bố kèm lý do. */
   public String revoke(
       @PathVariable Long periodId,
       @AuthenticationPrincipal UserDetails principal,

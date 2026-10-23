@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đợt đăng ký. */
 public class RegistrationPeriodController {
   private final RegistrationPeriodService service;
   private final UserService users;
@@ -50,6 +51,7 @@ public class RegistrationPeriodController {
     this.groupService = groupService;
   }
 
+  /** Hiển thị biểu mẫu tạo mới đợt đăng ký. */
   public String newForm(Model model) {
     form(
         model,
@@ -61,6 +63,7 @@ public class RegistrationPeriodController {
     return "page/period/create";
   }
 
+  /** Kiểm tra biểu mẫu, tạo đợt đăng ký và trả về kết quả điều hướng. */
   public String create(
       @Valid @ModelAttribute("data") RegistrationPeriodForm form,
       BindingResult errors,
@@ -91,6 +94,7 @@ public class RegistrationPeriodController {
     return "redirect:/dot";
   }
 
+  /** Hiển thị thông tin chi tiết của đợt đăng ký được yêu cầu. */
   public String detail(@PathVariable Long id, Model model) {
 
     RegistrationPeriod item = service.findById(id);
@@ -121,6 +125,7 @@ public class RegistrationPeriodController {
     return "page/period/detail";
   }
 
+  /** Chuẩn bị model chỉ đọc để hiển thị chi tiết đợt đăng ký. */
   public void prepareReadonlyDetail(Model model, RegistrationPeriod item) {
     RegistrationPeriodForm form = new RegistrationPeriodForm();
     form.fromEntity(item);
@@ -133,6 +138,7 @@ public class RegistrationPeriodController {
     model.addAttribute("groupsSectionTitle", "student-groups.section.period-groups");
   }
 
+  /** Hiển thị biểu mẫu chỉnh sửa đợt đăng ký. */
   public String edit(@PathVariable Long id, Model model) {
     RegistrationPeriod item = service.findById(id);
 
@@ -146,6 +152,7 @@ public class RegistrationPeriodController {
     return "page/period/detail";
   }
 
+  /** Kiểm tra biểu mẫu, cập nhật đợt đăng ký và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long id,
       @Valid @ModelAttribute("data") RegistrationPeriodForm form,
@@ -186,6 +193,7 @@ public class RegistrationPeriodController {
     return "redirect:/dot/" + id;
   }
 
+  /** Xóa đợt đăng ký được yêu cầu và chuyển hướng kèm thông báo kết quả. */
   public String delete(@PathVariable Long id, RedirectAttributes attributes) {
     try {
       service.delete(id);

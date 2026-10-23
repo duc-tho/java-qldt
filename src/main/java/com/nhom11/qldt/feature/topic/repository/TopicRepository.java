@@ -12,9 +12,12 @@ import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+/** Truy cập và truy vấn dữ liệu của chức năng đề tài. */
 public interface TopicRepository extends BaseRepository<Topic, Long> {
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countByRegistrationPeriodId(Long registrationPeriodId);
 
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countByProposedById(Long proposedById);
 
   @Query(
@@ -24,9 +27,11 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
         and topic.registrationPeriod.lecturerRegistrationStart <= :now
         and topic.registrationPeriod.lecturerRegistrationEnd >= :now
       """)
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   long countPendingApprovals(@Param("now") java.time.LocalDateTime now);
 
   @Query("select topic.council.id, count(topic) from Topic topic where topic.registrationPeriod.id = :periodId and topic.council is not null group by topic.council.id")
+  /** Đếm số bản ghi thỏa các điều kiện được thể hiện bởi tham số truy vấn. */
   List<Object[]> countByCouncilInPeriod(@Param("periodId") Long periodId);
 
   @EntityGraph(attributePaths = "department")
@@ -47,6 +52,7 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
             or lower(adviser.userCode) like lower(concat('%', :adviserSearch, '%')))
         ))
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Page<Topic> findAllByRegistrationPeriodId(
       @Param("registrationPeriodId") Long registrationPeriodId,
       @Param("search") String search,
@@ -59,15 +65,19 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
       Pageable pageable);
 
   @Query("select distinct topic from Topic topic join fetch topic.department join fetch topic.registrationPeriod left join fetch topic.advisers left join fetch topic.proposedBy where topic.id in :ids")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<Topic> findAllWithAdvisersByIdIn(@Param("ids") List<Long> ids);
 
   @Query("select count(e) > 0 from Evaluation e where e.topicRegistration.topic.id = :topicId and e.status = com.nhom11.qldt.feature.council.model.enums.EvaluationStatus.SUBMITTED")
+  /** Kiểm tra sự tồn tại của bản ghi thỏa điều kiện nghiệp vụ được cung cấp. */
   boolean hasSubmittedEvaluation(@Param("topicId") Long topicId);
 
   @Query("select count(member) > 0 from CouncilMember member where member.council.id = :councilId and member.lecturer.id in :adviserIds")
+  /** Kiểm tra sự tồn tại của bản ghi thỏa điều kiện nghiệp vụ được cung cấp. */
   boolean hasCouncilMemberIn(@Param("councilId") Long councilId, @Param("adviserIds") java.util.Set<Long> adviserIds);
 
   @EntityGraph(attributePaths = {"department", "advisers", "registrationPeriod", "proposedBy"})
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   Optional<Topic> findByIdAndRegistrationPeriodId(Long id, Long registrationPeriodId);
 
   @Query(
@@ -79,23 +89,30 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
       where topic.registrationPeriod.id = :periodId
       order by topic.title
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<Topic> findAllWithDetailsByRegistrationPeriodId(@Param("periodId") Long periodId);
 
   @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds order by topic.title")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicProposalSummary> findProposalSummariesByPeriodIds(@Param("periodIds") List<Long> periodIds);
 
   @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds and (topic.status = com.nhom11.qldt.feature.topic.model.enums.TopicStatus.APPROVED or topic.proposedBy.id = :lecturerId) order by topic.title")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicProposalSummary> findVisibleProposalSummariesByPeriodIds(
       @Param("periodIds") List<Long> periodIds, @Param("lecturerId") Long lecturerId);
 
   @Query("select new com.nhom11.qldt.feature.topic.model.dto.TopicProposalSummary(topic.id, topic.registrationPeriod.id, topic.title, topic.status) from Topic topic where topic.registrationPeriod.id in :periodIds and topic.proposedBy.id = :lecturerId order by topic.title")
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<TopicProposalSummary> findProposalSummariesByPeriodIdsAndProposedById(
       @Param("periodIds") List<Long> periodIds, @Param("lecturerId") Long lecturerId);
 
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<Topic> findAllByIdInAndRegistrationPeriodId(List<Long> ids, Long registrationPeriodId);
 
+  /** Kiểm tra sự tồn tại của bản ghi thỏa điều kiện nghiệp vụ được cung cấp. */
   boolean existsByDepartmentId(Long departmentId);
 
+  /** Kiểm tra sự tồn tại của bản ghi thỏa điều kiện nghiệp vụ được cung cấp. */
   boolean existsByCouncilId(Long councilId);
 
   @Query(
@@ -109,6 +126,7 @@ public interface TopicRepository extends BaseRepository<Topic, Long> {
         and (:departmentId is null or topic.department.id = :departmentId)
       order by topic.title
       """)
+  /** Truy vấn các bản ghi phù hợp với phạm vi và điều kiện được cung cấp. */
   List<Topic> findAllByRegistrationPeriodIdAndStatus(
       @Param("periodId") Long periodId,
       @Param("status") TopicStatus status,

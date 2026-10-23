@@ -13,6 +13,7 @@ import lombok.Setter;
 @Getter
 @Setter
 @NoArgsConstructor
+/** Record bộ môn được dùng để phân loại giảng viên và đề tài. */
 public class Department extends SoftDeleteEntity {
 
   @Column(nullable = false, unique = true, length = 30)

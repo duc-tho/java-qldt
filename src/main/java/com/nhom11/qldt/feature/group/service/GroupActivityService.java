@@ -10,6 +10,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 @Service
+/** Ghi nhận và truy vấn lịch sử hoạt động của nhóm sinh viên. */
 public class GroupActivityService {
   private final GroupActivityRepository repository;
 
@@ -17,6 +18,7 @@ public class GroupActivityService {
     this.repository = repository;
   }
 
+  /** Ghi một sự kiện vào lịch sử hoạt động của nhóm cùng người thực hiện và nội dung chi tiết. */
   public void record(
       StudentGroup group, User actor, User subject, GroupActivityType type, String detail) {
     GroupActivity activity = new GroupActivity();
@@ -29,6 +31,7 @@ public class GroupActivityService {
     repository.save(activity);
   }
 
+  /** Lấy lịch sử hoạt động của nhóm, sắp xếp sự kiện mới nhất lên trước. */
   public List<GroupActivity> history(Long groupId) {
     return repository.findAllByStudentGroupIdOrderByOccurredAtDescIdDesc(groupId);
   }

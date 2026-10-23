@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
+/** Dựng truy vấn Criteria có tìm kiếm, lọc, sắp xếp và phân trang cho một kiểu thực thể. */
 public class FilterQueryBuilder<T> {
   private final Class<T> entityType;
   private final EntityManager entityManager;
@@ -26,12 +27,14 @@ public class FilterQueryBuilder<T> {
     this.entityManager = entityManager;
   }
 
+  /** Thực thi truy vấn dữ liệu và truy vấn đếm tương ứng để tạo kết quả phân trang. */
   public Page<T> findAll(
       Pageable pageable,
       String search,
       List<String> searchableFields,
       Map<String, String> filters) {
 
+    // Truy vấn chính lấy dữ liệu sau khi ghép điều kiện tìm kiếm và bộ lọc.
     CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
     CriteriaQuery<T> selectQuery = criteriaBuilder.createQuery(entityType);
 
@@ -42,14 +45,15 @@ public class FilterQueryBuilder<T> {
 
     applySort(criteriaBuilder, selectQuery, selectRoot, pageable.getSort());
 
+    // Chỉ lấy lát dữ liệu thuộc trang hiện tại thay vì tải toàn bộ kết quả.
     TypedQuery<T> typedQuery = entityManager.createQuery(selectQuery);
     typedQuery.setFirstResult(Math.toIntExact(pageable.getOffset()));
     typedQuery.setMaxResults(pageable.getPageSize());
 
+    // Truy vấn đếm riêng giúp Spring tính đúng tổng số trang.
     CriteriaQuery<Long> countQuery = criteriaBuilder.createQuery(Long.class);
     Root<T> countRoot = countQuery.from(entityType);
-    // Build these conditions again for the count query because it uses a different
-    // root.
+    // Dựng lại điều kiện vì truy vấn đếm sử dụng một root Criteria khác truy vấn dữ liệu.
     countQuery
         .select(criteriaBuilder.count(countRoot))
         .where(buildConditions(criteriaBuilder, countRoot, search, searchableFields, filters));
@@ -59,6 +63,7 @@ public class FilterQueryBuilder<T> {
     return new PageImpl<>(typedQuery.getResultList(), pageable, total);
   }
 
+  /** Kết hợp điều kiện tìm kiếm tự do và các bộ lọc trường bằng phép AND. */
   private Predicate buildConditions(
       CriteriaBuilder criteriaBuilder,
       Root<T> root,
@@ -77,6 +82,7 @@ public class FilterQueryBuilder<T> {
     return criteriaBuilder.and(conditions.toArray(Predicate[]::new));
   }
 
+  /** Thêm điều kiện OR tìm chuỗi trên toàn bộ các trường được phép tìm kiếm. */
   private void addSearchCondition(
       CriteriaBuilder criteriaBuilder,
       Root<T> root,
@@ -94,9 +100,11 @@ public class FilterQueryBuilder<T> {
                 .map(field -> containsText(criteriaBuilder, root, field, search))
                 .toArray(Predicate[]::new));
 
+    // Từ khóa chỉ cần xuất hiện ở một trong các trường được phép tìm kiếm.
     conditions.add(searchCondition);
   }
 
+  /** Thêm điều kiện lọc chứa chuỗi cho từng trường có giá trị hợp lệ. */
   private void addFilterConditions(
       CriteriaBuilder criteriaBuilder,
       Root<T> root,
@@ -116,6 +124,7 @@ public class FilterQueryBuilder<T> {
     }
   }
 
+  /** Tạo điều kiện so khớp chuỗi không phân biệt hoa thường cho một trường văn bản. */
   private Predicate containsText(
       CriteriaBuilder criteriaBuilder, Root<T> root, String field, String value) {
     Path<?> fieldPath = root.get(field);
@@ -124,11 +133,13 @@ public class FilterQueryBuilder<T> {
       throw new IllegalStateException("Search/filter field must be a String: " + field);
     }
 
+    // Chuẩn hóa cả dữ liệu và từ khóa để so khớp không phân biệt hoa thường.
     String pattern = "%" + value.trim().toLowerCase(Locale.ROOT) + "%";
 
     return criteriaBuilder.like(criteriaBuilder.lower(root.<String>get(field)), pattern);
   }
 
+  /** Áp dụng toàn bộ tiêu chí sắp xếp từ yêu cầu phân trang lên truy vấn. */
   private void applySort(
       CriteriaBuilder criteriaBuilder, CriteriaQuery<T> query, Root<T> root, Sort sort) {
     if (sort.isUnsorted()) {
@@ -140,6 +151,7 @@ public class FilterQueryBuilder<T> {
     query.orderBy(ordering);
   }
 
+  /** Chuyển một tiêu chí sắp xếp của Spring thành biểu thức sắp xếp Criteria. */
   private Order createOrder(CriteriaBuilder criteriaBuilder, Root<T> root, Sort.Order order) {
     Path<?> field = root.get(order.getProperty());
 

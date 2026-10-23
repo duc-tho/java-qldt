@@ -23,6 +23,7 @@ import tools.jackson.core.JacksonException;
 import tools.jackson.databind.ObjectMapper;
 
 @Component
+/** Chuyển constraint Jakarta Validation trên DTO thành luật kiểm tra dành cho trình duyệt. */
 public class ClientValidationRuleRenderer {
   private final ObjectMapper objectMapper;
   private final MessageSource messageSource;
@@ -32,14 +33,17 @@ public class ClientValidationRuleRenderer {
     this.messageSource = messageSource;
   }
 
+  /** Kết xuất luật validation của biểu mẫu mà không bổ sung luật tùy chỉnh. */
   public Map<String, String> render(Class<?> formType) {
     return render(formType, Map.of());
   }
 
+  /** Kết xuất luật validation theo từng trường và hợp nhất với các luật bổ sung. */
   public Map<String, String> render(
       Class<?> formType, Map<String, List<Map<String, Object>>> extraRules) {
     Map<String, String> validationRules = new LinkedHashMap<>();
 
+    // Luật tùy chỉnh được đặt trước, sau đó mới ghép các constraint khai báo trên DTO.
     for (Field field : formType.getDeclaredFields()) {
       List<Map<String, Object>> rules =
           new ArrayList<>(extraRules.getOrDefault(field.getName(), List.of()));
@@ -50,6 +54,7 @@ public class ClientValidationRuleRenderer {
     return validationRules;
   }
 
+  /** Tạo luật bắt buộc nhập mật khẩu với thông báo được cung cấp. */
   public static List<Map<String, Object>> createPasswordRule(String message) {
     List<Map<String, Object>> rules = new ArrayList<>();
     rules.add(rule("required", message));
@@ -57,6 +62,7 @@ public class ClientValidationRuleRenderer {
     return rules;
   }
 
+  /** Dịch message template dạng mã i18n theo locale hiện tại. */
   private String resolveMessage(String messageTemplate) {
     if (!messageTemplate.startsWith("{") || !messageTemplate.endsWith("}")) {
       return messageTemplate;
@@ -67,6 +73,7 @@ public class ClientValidationRuleRenderer {
         messageCode, null, messageTemplate, LocaleContextHolder.getLocale());
   }
 
+  /** Tuần tự hóa danh sách luật thành JSON để nhúng vào thuộc tính HTML. */
   private String serializeRules(List<Map<String, Object>> rules) {
     try {
       return objectMapper.writeValueAsString(rules);
@@ -75,9 +82,11 @@ public class ClientValidationRuleRenderer {
     }
   }
 
+  /** Ánh xạ các constraint được hỗ trợ của một trường sang luật phía client. */
   private List<Map<String, Object>> createRules(Field field) {
     List<Map<String, Object>> rules = new ArrayList<>();
 
+    // Chỉ ánh xạ những constraint mà thư viện validation phía trình duyệt hỗ trợ.
     for (Annotation annotation : field.getAnnotations()) {
       switch (annotation) {
         case NotBlank c -> rules.add(rule("required", resolveMessage(c.message())));

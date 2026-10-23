@@ -17,6 +17,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng hội đồng, đánh giá và công bố kết quả. */
 public class CouncilWorkPageController {
   private final RegistrationPeriodService periodService;
   private final CouncilService councilService;
@@ -32,6 +33,7 @@ public class CouncilWorkPageController {
   }
 
   @GetMapping("/hoi-dong")
+  /** Hiển thị trang công việc quản lý hội đồng. */
   public String councils(Model model) {
     LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll().stream()
@@ -68,6 +70,7 @@ public class CouncilWorkPageController {
   }
 
   @GetMapping("/cong-bo-diem")
+  /** Hiển thị trang công việc công bố kết quả. */
   public String publications(Model model) {
     LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll().stream()

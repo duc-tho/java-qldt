@@ -1,5 +1,6 @@
 package com.nhom11.qldt.feature.group.model.enums;
 
+/** Các loại sự kiện được ghi vào lịch sử hoạt động nhóm. */
 public enum GroupActivityType {
   CREATED,
   MEMBER_JOINED,

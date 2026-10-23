@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+/** Tổng hợp số liệu, công việc cần xử lý và thông báo trên dashboard theo từng vai trò. */
 public class DashboardService {
   private final UserService userService;
   private final DepartmentService departmentService;
@@ -56,11 +57,14 @@ public class DashboardService {
   @Transactional(readOnly = true)
   public DashboardData getDashboard(String email) {
     User user = userService.findByEmail(email).orElseThrow();
+
+    // Gom vai trò thành tập để một tài khoản có thể nhận hành động từ nhiều nhóm quyền.
     Set<String> roleNames = user.getRoles().stream()
         .map(role -> role.getName())
         .collect(Collectors.toSet());
     Map<DashboardActionType, DashboardAction> actions = new LinkedHashMap<>();
 
+    // LinkedHashMap vừa giữ thứ tự hiển thị vừa loại bỏ hành động trùng giữa các vai trò.
     if (roleNames.contains("ADMIN")) addAdminActions(actions);
     if (roleNames.contains("HEAD_OF_FACULTY")) addHeadOfFacultyActions(actions);
     if (roleNames.contains("LECTURER")) addLecturerActions(actions, user);
@@ -82,12 +86,16 @@ public class DashboardService {
   private void addHeadOfFacultyActions(Map<DashboardActionType, DashboardAction> actions) {
     LocalDateTime now = LocalDateTime.now();
     List<RegistrationPeriod> periods = periodService.findAll();
+
+    // Chỉ các đợt đã qua hạn báo cáo mới có khả năng đủ điều kiện công bố kết quả.
     List<RegistrationPeriod> publicationPeriods = periods.stream()
         .filter(period -> period.getReportDeadline() != null)
         .filter(period -> !now.isBefore(period.getReportDeadline()))
         .toList();
     List<Long> publicationPeriodIds = ids(publicationPeriods);
     Set<Long> publishedIds = councilService.publishedPeriodIds(publicationPeriodIds);
+
+    // Loại các đợt đã công bố khỏi số lượng công việc đang chờ xử lý.
     long readyToPublish = councilService.publishablePeriodIds(publicationPeriodIds).stream()
         .filter(periodId -> !publishedIds.contains(periodId))
         .count();
@@ -115,11 +123,15 @@ public class DashboardService {
 
   private void addStudentActions(Map<DashboardActionType, DashboardAction> actions, User student) {
     var groups = groupService.groupsForStudent(student);
+
+    // Nạp trạng thái công bố theo lô để không truy vấn lại cho từng nhóm.
     Set<Long> publishedPeriodIds = councilService.publishedPeriodIds(groups.stream()
         .map(group -> group.getRegistrationPeriod().getId())
         .distinct()
         .toList());
     LocalDateTime now = LocalDateTime.now();
+
+    // Phân nhóm một lần rồi dùng lại số lượng cho ba thẻ tiến độ.
     Map<StudentGroupProgress, Long> counts = groups.stream().collect(Collectors.groupingBy(
         group -> groupService.progress(group, publishedPeriodIds, now), Collectors.counting()));
 

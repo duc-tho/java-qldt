@@ -19,6 +19,7 @@ import lombok.Setter;
 @Table(name = "result_publications")
 @Getter
 @Setter
+/** Ghi nhận lịch sử công bố hoặc thu hồi kết quả của một đợt. */
 public class ResultPublication extends SoftDeleteEntity {
   @ManyToOne(optional = false)
   @JoinColumn(name = "registration_period_id", nullable = false)

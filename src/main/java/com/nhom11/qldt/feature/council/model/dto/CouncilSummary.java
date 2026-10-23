@@ -2,6 +2,7 @@ package com.nhom11.qldt.feature.council.model.dto;
 
 import com.nhom11.qldt.feature.council.model.entity.Council;
 
+/** Dữ liệu tóm tắt phục vụ hiển thị chức năng hội đồng, đánh giá và công bố kết quả. */
 public record CouncilSummary(
     Council council,
     String chairpersonName,

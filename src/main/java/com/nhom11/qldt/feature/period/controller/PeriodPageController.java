@@ -28,6 +28,7 @@ import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
+/** Điều phối các yêu cầu HTTP của chức năng đợt đăng ký. */
 public class PeriodPageController {
   private final RegistrationPeriodService periodService;
   private final RegistrationPeriodTableDefinition table;
@@ -58,6 +59,7 @@ public class PeriodPageController {
   }
 
   @GetMapping("/dot/{id:\\d+}")
+  /** Hiển thị thông tin chi tiết của đợt đăng ký được yêu cầu. */
   public String detail(@PathVariable Long id, Authentication authentication, Model model) {
     if (hasRole(authentication, "ROLE_ADMIN") || hasRole(authentication, "ROLE_HEAD_OF_FACULTY")) {
       return staffPages.detail(id, model);
@@ -138,16 +140,19 @@ public class PeriodPageController {
   }
 
   @GetMapping("/dot/tao")
+  /** Hiển thị biểu mẫu tạo mới đợt đăng ký. */
   public String createForm(Model model) {
     return staffPages.newForm(model);
   }
 
   @GetMapping("/dot/{id}/sua")
+  /** Hiển thị biểu mẫu chỉnh sửa đợt đăng ký. */
   public String editForm(@PathVariable Long id, Model model) {
     return staffPages.edit(id, model);
   }
 
   @PostMapping("/dot")
+  /** Kiểm tra biểu mẫu, tạo đợt đăng ký và trả về kết quả điều hướng. */
   public String create(
       @Valid @ModelAttribute("data") RegistrationPeriodForm form,
       BindingResult errors,
@@ -156,6 +161,7 @@ public class PeriodPageController {
   }
 
   @PostMapping("/dot/{id}")
+  /** Kiểm tra biểu mẫu, cập nhật đợt đăng ký và trả về kết quả điều hướng. */
   public String update(
       @PathVariable Long id,
       @Valid @ModelAttribute("data") RegistrationPeriodForm form,
@@ -165,12 +171,14 @@ public class PeriodPageController {
   }
 
   @PostMapping("/dot/{id}/xoa")
+  /** Xóa đợt đăng ký từ URL chuẩn và chuyển hướng kèm thông báo kết quả. */
   public String deleteCanonical(@PathVariable Long id, RedirectAttributes attributes) {
     staffPages.delete(id, attributes);
     return "redirect:/dot";
   }
 
   @GetMapping("/dot")
+  /** Hiển thị danh sách đợt đăng ký mà người dùng được phép truy cập. */
   public String list(
       @ModelAttribute TableQuery query,
       Authentication authentication,

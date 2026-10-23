@@ -10,6 +10,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận tên hội đồng, danh sách thành viên, chủ tịch và thư ký từ form. */
 public class CouncilForm {
   @NotBlank(message = "{councils.validation.name.required}")
   @Size(max = 150, message = "{councils.validation.name.max}")

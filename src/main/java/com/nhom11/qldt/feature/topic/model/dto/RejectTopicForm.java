@@ -7,6 +7,7 @@ import lombok.Setter;
 
 @Getter
 @Setter
+/** Nhận và kiểm tra lý do trưởng khoa từ chối đề xuất đề tài. */
 public class RejectTopicForm {
 
   @NotBlank(message = "{topics.validation.rejection-reason.required}")
